@@ -57,7 +57,6 @@ function toggleTheme() {
   if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
 }
 
-// Применяем тему сразу чтобы не было мигания
 initTheme();
 
 /* ============================================================
@@ -70,14 +69,7 @@ function getUnreadCount() {
 }
 
 function addNotification(text, icon = '💬', link = 'chat.html') {
-  const notif = {
-    id: Date.now(),
-    text,
-    icon,
-    link,
-    read: false,
-    time: new Date().toISOString()
-  };
+  const notif = { id: Date.now(), text, icon, link, read: false, time: new Date().toISOString() };
   notifications.unshift(notif);
   if (notifications.length > 20) notifications = notifications.slice(0, 20);
   localStorage.setItem('notifications', JSON.stringify(notifications));
@@ -125,8 +117,7 @@ function renderNotifList() {
         <div class="notif-text">${n.text}</div>
         <div class="notif-time">${formatRelativeTime(n.time)}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function openNotif(id, link) {
@@ -141,10 +132,7 @@ function toggleNotifDropdown() {
   const dropdown = document.getElementById('notifDropdown');
   if (!dropdown) return;
   const isOpen = dropdown.classList.contains('open');
-  if (!isOpen) {
-    renderNotifList();
-    markAllRead();
-  }
+  if (!isOpen) { renderNotifList(); markAllRead(); }
   dropdown.classList.toggle('open');
 }
 
@@ -187,6 +175,7 @@ function updateNavForAuth() {
         </div>
       </div>
       <a href="chat.html" class="btn btn-ghost btn-sm">💬</a>
+      ${user.role === 'admin' ? `<a href="admin.html" class="btn btn-ghost btn-sm" title="Админ панель">⚙️</a>` : ''}
       <a href="dashboard.html" class="btn btn-ghost btn-sm">
         <span class="avatar" style="width:28px;height:28px;font-size:0.8rem;background:linear-gradient(135deg,var(--blue),var(--purple));">
           ${user.avatar ? `<img src="${user.avatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">` : user.name.charAt(0)}
@@ -194,7 +183,6 @@ function updateNavForAuth() {
         ${user.name.split(' ')[0]}
       </a>`;
 
-    // Закрывать dropdown при клике вне
     document.addEventListener('click', e => {
       const wrapper = document.querySelector('.notif-wrapper');
       if (wrapper && !wrapper.contains(e.target)) {
@@ -234,8 +222,7 @@ function skeletonTaskCards(count = 6) {
         </div>
         <div class="skeleton skeleton-line w-1-3 h-sm"></div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function skeletonFreelancerCards(count = 4) {
@@ -244,8 +231,7 @@ function skeletonFreelancerCards(count = 4) {
       <div class="skeleton skeleton-avatar" style="width:56px;height:56px;margin-bottom:0.5rem;"></div>
       <div class="skeleton skeleton-line w-3-4 h-lg" style="margin-bottom:0.4rem;"></div>
       <div class="skeleton skeleton-line w-1-2 h-sm"></div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 /* ============================================================
@@ -276,12 +262,27 @@ function closeModal(id) {
 
 /* ============================================================
    RENDER TASK CARD
+   Используется на index.html (без избранного)
+   На tasks.html своя версия с кнопкой ❤️
    ============================================================ */
 function renderTaskCard(task) {
   const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
   const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
+
+  // Проверяем есть ли глобальный Set избранных (tasks.html его создаёт)
+  const isFav = typeof favTaskIds !== 'undefined' && favTaskIds.has(task._id);
+  const user = getCurrentUser();
+  const favBtn = user ? `
+    <button class="fav-btn ${isFav ? 'active' : ''}"
+      onclick="typeof toggleFavorite === 'function' ? toggleFavorite('${task._id}', this, event) : event.stopPropagation()"
+      title="${isFav ? 'Убрать из избранного' : 'В избранное'}"
+      style="position:absolute;top:.85rem;right:.85rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;font-size:.9rem;z-index:2;">
+      ${isFav ? '❤️' : '🤍'}
+    </button>` : '';
+
   return `
-    <div class="task-card" onclick="window.location.href='task-detail.html?id=${task._id}'">
+    <div class="task-card" style="position:relative;" onclick="window.location.href='task-detail.html?id=${task._id}'">
+      ${favBtn}
       <div class="task-card-header">
         <h3>${task.title}</h3>
         <div class="task-budget">₽${task.budget.toLocaleString()}</div>
@@ -320,4 +321,16 @@ function formatDate(date) {
   const today = new Date();
   if (d.toDateString() === today.toDateString()) return 'Сегодня';
   return d.toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
+}
+
+/* ============================================================
+   FILTER CONVERSATIONS (chat.html)
+   ============================================================ */
+function filterConversations(val) {
+  const items = document.querySelectorAll('.conversation-item');
+  const q = val.toLowerCase();
+  items.forEach(item => {
+    const name = item.querySelector('.conv-name')?.textContent?.toLowerCase() || '';
+    item.style.display = name.includes(q) ? '' : 'none';
+  });
 }
