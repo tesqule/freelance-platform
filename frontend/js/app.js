@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'freelance-platform-production-2360.up.railway.app';
 
 async function api(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
