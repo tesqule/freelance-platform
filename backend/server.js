@@ -18,19 +18,21 @@ const io = new Server(server, {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-app.use(express.static(path.join(__dirname, '../frontend')));
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// Routes
+// Routes ПЕРВЫМИ
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/users', require('./routes/users'));
+
+// Статика ПОСЛЕ роутов
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Socket.IO for real-time chat
 const Message = require('./models/Message');
@@ -65,7 +67,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Serve frontend
+// Catch-all ПОСЛЕДНИМ
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
