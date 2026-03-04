@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Задание — FreeLanceHub</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">⚡ FreeLanceHub</a>
+    <ul class="nav-links">
+      <li><a href="tasks.html">Задания</a></li>
+      <li><a href="dashboard.html">Дашборд</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+  </nav>
+
+  <div class="page">
+    <div class="container" style="padding-bottom:4rem; max-width:900px;">
+      <a href="tasks.html" class="btn btn-ghost btn-sm mt-2 mb-3" style="display:inline-flex;">← Назад к заданиям</a>
+      <div id="taskDetail">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPOSAL MODAL -->
+  <div class="modal-overlay" id="proposalModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Отклик на задание</h3>
+        <button class="modal-close" onclick="closeModal('proposalModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Сопроводительное письмо *</label>
+        <textarea class="form-control" id="coverLetter" placeholder="Расскажите почему вы подходите для этого задания..." style="min-height:140px;"></textarea>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Ваша цена (₽) *</label>
+          <input type="number" class="form-control" id="proposalPrice" placeholder="3000" />
+        </div>
+        <div class="form-group">
+          <label>Срок выполнения (дней) *</label>
+          <input type="number" class="form-control" id="deliveryDays" placeholder="7" min="1" />
+        </div>
+      </div>
+      <button class="btn btn-primary w-full" onclick="submitProposal()">Отправить отклик</button>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    let currentTask = null;
+    const taskId = new URLSearchParams(window.location.search).get('id');
+
+    async function loadTask() {
+      if (!taskId) { window.location.href = 'tasks.html'; return; }
+      try {
+        currentTask = await api(`/tasks/${taskId}`);
+        renderDetail();
+      } catch(e) {
+        document.getElementById('taskDetail').innerHTML = '<p class="text-muted">Задание не найдено</p>';
+      }
+    }
+
+    function renderDetail() {
+      const task = currentTask;
+      const user = getCurrentUser();
+      const isOwner = user && user.id === task.client._id;
+      const isFreelancer = user && user.role === 'freelancer';
+
+      // Проверяем, откликнулся ли уже этот фрилансер
+      const alreadyApplied = user && task.proposals?.some(p =>
+        p.freelancer && (p.freelancer._id === user.id || p.freelancer === user.id)
+      );
+
+      const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
+      const created = new Date(task.createdAt).toLocaleDateString('ru-RU');
+      const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
+
+      document.title = `${task.title} — FreeLanceHub`;
+
+      document.getElementById('taskDetail').innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 320px; gap: 1.5rem; align-items:start;">
+
+          <!-- MAIN -->
+          <div>
+            <div class="card mb-2">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="badge badge-${task.category}">${catEmojis[task.category] || '🔧'} ${task.category}</span>
+                <span class="badge badge-${task.status}">${statusLabel(task.status)}</span>
+              </div>
+              <h1 style="font-size:1.75rem; margin-bottom:1rem;">${task.title}</h1>
+              <div class="flex gap-3 text-sm text-muted mb-3" style="flex-wrap:wrap;">
+                <span>📅 Опубликовано: ${created}</span>
+                <span>⏰ Дедлайн: ${deadline}</span>
+                <span>💬 Откликов: ${task.proposals?.length || 0}</span>
+              </div>
+              <p style="color:var(--text2); line-height:1.8; white-space:pre-wrap;">${task.description}</p>
+              ${task.skills?.length ? `
+                <div class="task-skills mt-2">
+                  ${task.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                </div>` : ''}
+            </div>
+
+            <!-- PROPOSALS -->
+            <div class="card">
+              <h3 style="margin-bottom:1.25rem;">Отклики (${task.proposals?.length || 0})</h3>
+              ${renderProposals(task, user, isOwner)}
+            </div>
+          </div>
+
+          <!-- SIDEBAR -->
+          <div style="position:sticky; top:80px;">
+            <!-- BUDGET -->
+            <div class="card mb-2">
+              <div style="font-size:0.85rem; color:var(--text3); margin-bottom:0.5rem;">Бюджет задания</div>
+              <div style="font-family:'Syne',sans-serif; font-size:2.2rem; font-weight:800; color:var(--accent3);">
+                ₽${task.budget.toLocaleString()}
+              </div>
+
+              ${isFreelancer && task.status === 'open' && !alreadyApplied ? `
+                <button class="btn btn-primary w-full mt-2" onclick="openModal('proposalModal')">
+                  Откликнуться 🚀
+                </button>` : ''}
+
+              ${isFreelancer && alreadyApplied ? `
+                <div class="btn w-full mt-2" style="background:rgba(67,233,123,0.1);color:var(--accent3);border:1px solid rgba(67,233,123,0.3);border-radius:99px;padding:0.6rem;text-align:center;font-size:0.9rem;">
+                  ✅ Вы уже откликнулись
+                </div>` : ''}
+
+              ${isOwner && task.status === 'open' ? `
+                <div style="font-size:0.8rem; color:var(--text3); margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+                  💡 Примите отклик исполнителя чтобы начать работу
+                </div>` : ''}
+
+              ${isOwner && task.status === 'in_progress' ? `
+                <button class="btn btn-success w-full mt-2" onclick="completeTask()">
+                  ✅ Отметить как выполненное
+                </button>` : ''}
+
+              ${isOwner && task.status === 'completed' ? `
+                <div class="btn w-full mt-2" style="background:rgba(67,233,123,0.1);color:var(--accent3);border:1px solid rgba(67,233,123,0.3);border-radius:99px;padding:0.6rem;text-align:center;font-size:0.9rem;">
+                  🎉 Задание выполнено
+                </div>` : ''}
+
+              ${!user ? `
+                <button class="btn btn-outline w-full mt-2" onclick="window.location.href='index.html'">
+                  Войдите чтобы откликнуться
+                </button>` : ''}
+            </div>
+
+            <!-- CLIENT -->
+            <div class="card">
+              <div style="font-size:0.85rem; color:var(--text3); margin-bottom:1rem;">Заказчик</div>
+              <div class="flex items-center gap-2 mb-2">
+                <div class="avatar" style="width:48px;height:48px;font-size:1.2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));">
+                  ${task.client.avatar
+                    ? `<img src="${task.client.avatar}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">`
+                    : task.client.name.charAt(0)}
+                </div>
+                <div>
+                  <div style="font-weight:600;">${task.client.name}</div>
+                  <div class="stars">★ <span class="text-sm text-muted">${task.client.rating.toFixed(1)}</span></div>
+                </div>
+              </div>
+              ${task.client.bio ? `<p class="text-sm text-muted mt-1">${task.client.bio}</p>` : ''}
+              <div class="text-sm text-muted mt-1">✅ Выполнено заданий: ${task.client.completedTasks || 0}</div>
+              ${user && user.id !== task.client._id ? `
+                <a href="chat.html?user=${task.client._id}" class="btn btn-ghost w-full mt-2">💬 Написать</a>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderProposals(task, user, isOwner) {
+      if (!task.proposals?.length) {
+        return `<div class="empty-state" style="padding:2rem 0;"><div class="emoji">📭</div><p>Откликов пока нет. Будьте первым!</p></div>`;
+      }
+
+      return task.proposals.map(p => {
+        const freelancer = p.freelancer || {};
+        const statusColors = {
+          accepted: 'var(--accent3)',
+          rejected: 'var(--accent2)',
+          pending: 'var(--border)'
+        };
+
+        return `
+        <div class="card mb-2" style="border-left: 3px solid ${statusColors[p.status] || 'var(--border)'};">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <div class="avatar" style="width:40px;height:40px;font-size:1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));">
+                ${freelancer.avatar
+                  ? `<img src="${freelancer.avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
+                  : (freelancer.name || '?').charAt(0)}
+              </div>
+              <div>
+                <div style="font-weight:600; font-size:0.9rem;">${freelancer.name || 'Фрилансер'}</div>
+                <div class="text-xs text-muted">★ ${(freelancer.rating || 0).toFixed(1)} · ${freelancer.completedTasks || 0} задан выполнено</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:700; color:var(--accent3);">₽${p.price.toLocaleString()}</div>
+              <div class="text-xs text-muted">${p.deliveryDays} дн.</div>
+            </div>
+          </div>
+
+          ${freelancer.skills?.length ? `
+            <div class="task-skills mb-2">
+              ${freelancer.skills.slice(0,4).map(s => `<span class="skill-tag">${s}</span>`).join('')}
+            </div>` : ''}
+
+          <p style="font-size:0.875rem; color:var(--text2); line-height:1.6;">${p.coverLetter}</p>
+
+          <div class="flex gap-2 mt-2 items-center" style="flex-wrap:wrap;">
+            ${p.status !== 'pending' ? `
+              <span class="badge ${p.status === 'accepted' ? 'badge-open' : 'badge-cancelled'}">
+                ${p.status === 'accepted' ? '✓ Принят' : '✗ Отклонён'}
+              </span>` : ''}
+
+            ${isOwner && p.status === 'pending' && task.status === 'open' ? `
+              <button class="btn btn-success btn-sm" onclick="acceptProposal('${p._id}')">✓ Принять</button>
+              <button class="btn btn-danger btn-sm" onclick="rejectProposal('${p._id}')">✗ Отклонить</button>` : ''}
+
+            ${user && user.id !== (freelancer._id || '') ? `
+              <a href="chat.html?user=${freelancer._id}" class="btn btn-ghost btn-sm">💬 Написать</a>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function statusLabel(s) {
+      const map = { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' };
+      return map[s] || s;
+    }
+
+    async function submitProposal() {
+      const user = getCurrentUser();
+      if (!user) { showToast('Войдите в аккаунт', 'error'); return; }
+
+      const data = {
+        coverLetter: document.getElementById('coverLetter').value.trim(),
+        price: Number(document.getElementById('proposalPrice').value),
+        deliveryDays: Number(document.getElementById('deliveryDays').value)
+      };
+
+      if (!data.coverLetter || !data.price || !data.deliveryDays) {
+        showToast('Заполните все поля', 'error'); return;
+      }
+
+      try {
+        await apiAuth(`/tasks/${taskId}/proposals`, {
+          method: 'POST',
+          body: JSON.stringify(data)
+        });
+        showToast('Отклик отправлен! 🎉', 'success');
+        closeModal('proposalModal');
+        await loadTask();
+      } catch(e) {
+        showToast(e.message || 'Ошибка', 'error');
+      }
+    }
+
+    async function acceptProposal(proposalId) {
+      if (!confirm('Принять этого исполнителя?')) return;
+      try {
+        await apiAuth(`/tasks/${taskId}/proposals/${proposalId}/accept`, { method: 'PATCH' });
+        showToast('Исполнитель выбран! ✅', 'success');
+        await loadTask();
+      } catch(e) {
+        showToast(e.message || 'Ошибка', 'error');
+      }
+    }
+
+    async function rejectProposal(proposalId) {
+      try {
+        // Просто помечаем как отклонённый через прямой запрос
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/tasks/${taskId}/proposals/${proposalId}/reject`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          showToast('Отклик отклонён', 'info');
+          await loadTask();
+        }
+      } catch(e) {}
+    }
+
+    async function completeTask() {
+      if (!confirm('Отметить задание как выполненное? Это действие нельзя отменить.')) return;
+      try {
+        await apiAuth(`/tasks/${taskId}/complete`, { method: 'PATCH' });
+        showToast('Задание выполнено! 🎊', 'success');
+        await loadTask();
+      } catch(e) {
+        showToast(e.message || 'Ошибка', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavForAuth();
+      loadTask();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Дашборд — FreeLanceHub</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">⚡ FreeLanceHub</a>
+    <ul class="nav-links">
+      <li><a href="tasks.html">Задания</a></li>
+      <li><a href="dashboard.html" class="active">Дашборд</a></li>
+      <li><a href="chat.html">Сообщения</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+  </nav>
+
+  <div class="page">
+    <div class="container" style="padding-bottom:4rem;">
+      <div class="dashboard-grid mt-3">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+          <div class="card mb-2" id="sidebarProfile">
+            <div style="text-align:center; padding:0.5rem 0;">
+              <div class="avatar" id="sidebarAvatar" style="width:72px;height:72px;font-size:1.8rem;margin:0 auto 0.75rem;"></div>
+              <div style="font-weight:700;" id="sidebarName">Загрузка...</div>
+              <div class="text-sm text-muted" id="sidebarEmail"></div>
+              <div id="sidebarRole" style="margin-top:0.4rem;"></div>
+              <div style="font-size:0.85rem; margin-top:0.75rem;">
+                <span class="text-muted">Баланс: </span>
+                <span style="color:var(--accent3); font-weight:700;" id="sidebarBalance">₽0</span>
+              </div>
+            </div>
+          </div>
+
+          <nav class="card">
+            <ul class="sidebar-nav">
+              <li><a href="#overview" class="active" onclick="showTab('overview', this)"><span class="icon">🏠</span> Обзор</a></li>
+              <li><a href="#tasks" onclick="showTab('tasks', this)"><span class="icon">📋</span> Мои задания</a></li>
+              <li><a href="chat.html"><span class="icon">💬</span> Сообщения</a></li>
+              <li><a href="profile.html"><span class="icon">👤</span> Профиль</a></li>
+              <li><a href="tasks.html"><span class="icon">🔍</span> Найти задания</a></li>
+              <li style="border-top:1px solid var(--border); padding-top:0.5rem; margin-top:0.25rem;">
+                <a href="#" onclick="logout()" style="color:var(--accent2) !important;"><span class="icon">🚪</span> Выйти</a>
+              </li>
+            </ul>
+          </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main>
+          <!-- OVERVIEW TAB -->
+          <div id="tab-overview">
+            <div class="grid-3 mb-3" id="statsCards"></div>
+            <div class="section-header">
+              <h3>Последняя активность</h3>
+            </div>
+            <div id="recentActivity"></div>
+          </div>
+
+          <!-- TASKS TAB -->
+          <div id="tab-tasks" class="hidden">
+            <div class="section-header">
+              <h3 id="tasksTabTitle">Мои задания</h3>
+              <button class="btn btn-primary btn-sm" id="addTaskBtn" onclick="window.location.href='tasks.html'" style="display:none;">
+                + Разместить задание
+              </button>
+            </div>
+            <div id="myTasksList"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    let currentTab = 'overview';
+
+    function showTab(tab, el) {
+      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+      if (el) el.classList.add('active');
+      document.getElementById('tab-overview').classList.toggle('hidden', tab !== 'overview');
+      document.getElementById('tab-tasks').classList.toggle('hidden', tab !== 'tasks');
+      currentTab = tab;
+      if (tab === 'tasks') loadMyTasks();
+    }
+
+    async function loadDashboard() {
+      const user = getCurrentUser();
+      if (!user) { window.location.href = 'index.html'; return; }
+
+      // Sidebar
+      const av = document.getElementById('sidebarAvatar');
+      av.innerHTML = user.avatar ? `<img src="${user.avatar}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;">` : user.name.charAt(0);
+      document.getElementById('sidebarName').textContent = user.name;
+      document.getElementById('sidebarEmail').textContent = user.email || '';
+      document.getElementById('sidebarBalance').textContent = `₽${(user.balance||0).toLocaleString()}`;
+      document.getElementById('sidebarRole').innerHTML = `<span class="profile-role">${user.role === 'client' ? '📋 Заказчик' : '💼 Фрилансер'}</span>`;
+
+      if (user.role === 'client') {
+        document.getElementById('addTaskBtn').style.display = 'flex';
+      }
+
+      // Stats
+      try {
+        const tasks = await apiAuth('/tasks/my/tasks');
+        const open = tasks.filter(t => t.status === 'open').length;
+        const inProgress = tasks.filter(t => t.status === 'in_progress').length;
+        const completed = tasks.filter(t => t.status === 'completed').length;
+
+        document.getElementById('statsCards').innerHTML = `
+          <div class="card" style="text-align:center;">
+            <div style="font-size:2rem;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent3);">${open}</div>
+            <div class="text-muted text-sm mt-1">${user.role === 'client' ? 'Открытых заданий' : 'Доступных заданий'}</div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div style="font-size:2rem;font-weight:800;font-family:'Syne',sans-serif;color:#ffc107;">${inProgress}</div>
+            <div class="text-muted text-sm mt-1">В работе</div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div style="font-size:2rem;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent);">${completed}</div>
+            <div class="text-muted text-sm mt-1">Выполнено</div>
+          </div>`;
+
+        // Recent
+        const recent = [...tasks].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+        document.getElementById('recentActivity').innerHTML = recent.length
+          ? recent.map(t => `
+            <div class="card mb-1 flex justify-between items-center" style="padding:1rem 1.25rem; cursor:pointer;" onclick="window.location.href='task-detail.html?id=${t._id}'">
+              <div>
+                <div style="font-weight:600;">${t.title}</div>
+                <div class="text-sm text-muted">₽${t.budget.toLocaleString()}</div>
+              </div>
+              <span class="badge badge-${t.status}">${statusLabel(t.status)}</span>
+            </div>`).join('')
+          : '<div class="empty-state"><div class="emoji">📭</div><h3>Заданий пока нет</h3></div>';
+      } catch(e) {}
+    }
+
+    async function loadMyTasks() {
+      try {
+        const tasks = await apiAuth('/tasks/my/tasks');
+        const user = getCurrentUser();
+        document.getElementById('myTasksList').innerHTML = tasks.length
+          ? tasks.map(t => `
+            <div class="task-card mb-2" onclick="window.location.href='task-detail.html?id=${t._id}'">
+              <div class="task-card-header">
+                <h3>${t.title}</h3>
+                <span class="task-budget">₽${t.budget.toLocaleString()}</span>
+              </div>
+              <p class="task-desc">${t.description}</p>
+              <div class="flex gap-2 mt-2">
+                <span class="badge badge-${t.status}">${statusLabel(t.status)}</span>
+                <span class="badge badge-${t.category}">${t.category}</span>
+              </div>
+              ${t.assignedTo ? `<div class="text-sm text-muted mt-1">👤 Исполнитель: ${t.assignedTo.name}</div>` : ''}
+              ${t.client ? `<div class="text-sm text-muted mt-1">📋 Заказчик: ${t.client.name}</div>` : ''}
+            </div>`).join('')
+          : '<div class="empty-state"><div class="emoji">📋</div><h3>Заданий пока нет</h3><a href="tasks.html" class="btn btn-primary mt-2">Найти задание</a></div>';
+      } catch(e) {}
+    }
+
+    function statusLabel(s) {
+      return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s] || s;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavForAuth();
+      loadDashboard();
+    });
+  </script>
+</body>
+</html>

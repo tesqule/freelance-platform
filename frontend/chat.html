@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Чат — FreeLanceHub</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">⚡ FreeLanceHub</a>
+    <ul class="nav-links">
+      <li><a href="tasks.html">Задания</a></li>
+      <li><a href="dashboard.html">Дашборд</a></li>
+      <li><a href="chat.html" class="active">Сообщения</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+  </nav>
+
+  <div class="chat-layout">
+    <!-- SIDEBAR -->
+    <div class="chat-sidebar">
+      <div class="chat-sidebar-header">💬 Сообщения</div>
+      <div id="conversationsList">
+        <div style="padding:2rem; text-align:center; color:var(--text3);">Загрузка...</div>
+      </div>
+    </div>
+
+    <!-- MAIN CHAT -->
+    <div class="chat-main" id="chatMain">
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text3); gap:1rem;">
+        <div style="font-size:3rem;">💬</div>
+        <p>Выберите собеседника</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/chat.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      if (!user) { window.location.href = 'index.html'; return; }
+      updateNavForAuth();
+      initChat();
+
+      // Open chat with specific user from URL
+      const targetUser = new URLSearchParams(window.location.search).get('user');
+      if (targetUser) {
+        openChatWith(targetUser);
+      }
+    });
+  </script>
+</body>
+</html>

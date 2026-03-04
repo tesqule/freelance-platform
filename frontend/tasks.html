@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Задания — FreeLanceHub</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">⚡ FreeLanceHub</a>
+    <ul class="nav-links">
+      <li><a href="tasks.html" class="active">Задания</a></li>
+      <li><a href="dashboard.html">Дашборд</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+  </nav>
+
+  <div class="page" style="padding-bottom: 4rem;">
+    <div class="container mt-3">
+      <div class="section-header">
+        <h2>Все задания</h2>
+        <button class="btn btn-primary" id="createTaskBtn" onclick="openCreateTask()" style="display:none;">
+          + Разместить задание
+        </button>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="filters-bar">
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Поиск заданий..." oninput="filterTasks()" />
+        </div>
+        <button class="filter-btn active" onclick="setCategoryFilter('', this)">Все</button>
+        <button class="filter-btn" onclick="setCategoryFilter('development', this)">💻 Разработка</button>
+        <button class="filter-btn" onclick="setCategoryFilter('design', this)">🎨 Дизайн</button>
+        <button class="filter-btn" onclick="setCategoryFilter('writing', this)">✍️ Тексты</button>
+        <button class="filter-btn" onclick="setCategoryFilter('marketing', this)">📣 Маркетинг</button>
+        <button class="filter-btn" onclick="setCategoryFilter('video', this)">🎬 Видео</button>
+        <button class="filter-btn" onclick="setCategoryFilter('other', this)">🔧 Другое</button>
+      </div>
+
+      <!-- BUDGET FILTER -->
+      <div class="flex gap-2 mb-2" style="align-items:center; flex-wrap:wrap;">
+        <span class="text-muted text-sm">Бюджет:</span>
+        <input type="number" class="form-control" id="minBudget" placeholder="От ₽" style="width:100px;" oninput="filterTasks()" />
+        <input type="number" class="form-control" id="maxBudget" placeholder="До ₽" style="width:100px;" oninput="filterTasks()" />
+        <select class="form-control" id="sortSelect" style="width:180px;" onchange="filterTasks()">
+          <option value="newest">Сначала новые</option>
+          <option value="budget_high">Бюджет: по убыванию</option>
+          <option value="budget_low">Бюджет: по возрастанию</option>
+        </select>
+      </div>
+
+      <div class="tasks-grid" id="tasksGrid">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE TASK MODAL -->
+  <div class="modal-overlay" id="createTaskModal">
+    <div class="modal" style="max-width:640px;">
+      <div class="modal-header">
+        <h3>Новое задание</h3>
+        <button class="modal-close" onclick="closeModal('createTaskModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Название задания *</label>
+        <input type="text" class="form-control" id="taskTitle" placeholder="Например: Разработка лендинга на React" />
+      </div>
+      <div class="form-group">
+        <label>Категория *</label>
+        <select class="form-control" id="taskCategory">
+          <option value="">Выберите категорию</option>
+          <option value="development">💻 Разработка</option>
+          <option value="design">🎨 Дизайн</option>
+          <option value="writing">✍️ Копирайтинг</option>
+          <option value="marketing">📣 Маркетинг</option>
+          <option value="video">🎬 Видео</option>
+          <option value="music">🎵 Музыка</option>
+          <option value="other">🔧 Другое</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Описание задания *</label>
+        <textarea class="form-control" id="taskDesc" placeholder="Подробно опишите что нужно сделать..." style="min-height:140px;"></textarea>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Бюджет (₽) *</label>
+          <input type="number" class="form-control" id="taskBudget" placeholder="5000" />
+        </div>
+        <div class="form-group">
+          <label>Дедлайн *</label>
+          <input type="date" class="form-control" id="taskDeadline" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Навыки (через запятую)</label>
+        <input type="text" class="form-control" id="taskSkills" placeholder="React, Node.js, MongoDB" />
+      </div>
+      <button class="btn btn-primary w-full" onclick="createTask()">Разместить задание 🚀</button>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/tasks.js"></script>
+  <script>
+    let allTasks = [];
+    let currentCategory = '';
+
+    function setCategoryFilter(cat, btn) {
+      currentCategory = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterTasks();
+    }
+
+    function filterTasks() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const minB = Number(document.getElementById('minBudget').value) || 0;
+      const maxB = Number(document.getElementById('maxBudget').value) || Infinity;
+      const sort = document.getElementById('sortSelect').value;
+
+      let filtered = allTasks.filter(t => {
+        const matchCat = !currentCategory || t.category === currentCategory;
+        const matchSearch = !search || t.title.toLowerCase().includes(search) || t.description.toLowerCase().includes(search);
+        const matchBudget = t.budget >= minB && t.budget <= maxB;
+        return matchCat && matchSearch && matchBudget;
+      });
+
+      if (sort === 'budget_high') filtered.sort((a,b) => b.budget - a.budget);
+      else if (sort === 'budget_low') filtered.sort((a,b) => a.budget - b.budget);
+      else filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      renderTasks(filtered);
+    }
+
+    function renderTasks(tasks) {
+      const grid = document.getElementById('tasksGrid');
+      if (!tasks.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="emoji">🔍</div><h3>Заданий не найдено</h3><p>Попробуйте изменить фильтры</p></div>`;
+        return;
+      }
+      grid.innerHTML = tasks.map(renderTaskCard).join('');
+    }
+
+    function openCreateTask() {
+      const user = getCurrentUser();
+      if (!user) { showToast('Войдите в аккаунт', 'error'); return; }
+      if (user.role !== 'client') { showToast('Только заказчики могут размещать задания', 'error'); return; }
+      openModal('createTaskModal');
+    }
+
+    async function loadTasks() {
+      try {
+        allTasks = await api('/tasks');
+        const urlCat = new URLSearchParams(window.location.search).get('category');
+        if (urlCat) {
+          currentCategory = urlCat;
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            if (b.textContent.toLowerCase().includes(urlCat)) b.classList.add('active');
+            else b.classList.remove('active');
+          });
+        }
+        filterTasks();
+      } catch(e) {
+        document.getElementById('tasksGrid').innerHTML = '<p class="text-muted">Ошибка загрузки</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavForAuth();
+      loadTasks();
+
+      const user = getCurrentUser();
+      if (user?.role === 'client') {
+        document.getElementById('createTaskBtn').style.display = 'flex';
+      }
+
+      const minDate = new Date().toISOString().split('T')[0];
+      document.getElementById('taskDeadline').min = minDate;
+    });
+  </script>
+</body>
+</html>
