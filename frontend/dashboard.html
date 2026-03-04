@@ -172,6 +172,10 @@
       return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s] || s;
     }
 
+    function openAuthModal(type) {
+  window.location.href = 'index.html';
+}
+
     document.addEventListener('DOMContentLoaded', () => {
       updateNavForAuth();
       loadDashboard();
