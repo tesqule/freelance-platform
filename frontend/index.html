@@ -1,121 +1,202 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FreeLanceHub — Платформа для фриланса</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-  <!-- ЖИВОЙ ФОН -->
-  <div class="bg-orbs">
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
-    <div class="bg-orb bg-orb-3"></div>
+  <!-- NOISE TEXTURE -->
+  <div class="noise-overlay"></div>
+
+  <!-- BACKGROUND -->
+  <div class="bg-canvas">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-grid"></div>
   </div>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <!-- ══════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════ -->
+  <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
-      <div class="logo-icon">⚡</div>
-      FreeLanceHub
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <span class="logo-text">FreeLanceHub</span>
     </a>
-    <ul class="nav-links">
-      <li><a href="tasks.html">Задания</a></li>
-      <li><a href="#freelancers">Специалисты</a></li>
-      <li><a href="#how">Как работает</a></li>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="tasks.html" class="nav-link">Задания</a></li>
+      <li><a href="#freelancers" class="nav-link">Специалисты</a></li>
+      <li><a href="#how" class="nav-link">Как работает</a></li>
+      <li><a href="#reviews" class="nav-link">Отзывы</a></li>
     </ul>
+
     <div class="nav-actions" id="navActions">
       <a href="#" class="btn btn-outline btn-sm" onclick="openAuthModal('login')">Войти</a>
-      <a href="#" class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Начать бесплатно</a>
+      <a href="#" class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Начать →</a>
     </div>
+
+    <button class="burger" id="burger" onclick="toggleMobileMenu()" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero page">
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
+      <a href="#freelancers" onclick="closeMobileMenu()">Специалисты</a>
+      <a href="#how" onclick="closeMobileMenu()">Как работает</a>
+      <a href="#reviews" onclick="closeMobileMenu()">Отзывы</a>
+      <div class="mobile-menu-btns">
+        <a href="#" class="btn btn-outline" onclick="openAuthModal('login');closeMobileMenu()">Войти</a>
+        <a href="#" class="btn btn-primary" onclick="openAuthModal('register');closeMobileMenu()">Начать →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       HERO
+  ══════════════════════════════════════ -->
+  <section class="hero">
     <div class="container">
+
       <div class="hero-badge">
-        <span class="dot"></span>
+        <span class="live-dot"></span>
         Платформа работает · Регистрация открыта
       </div>
 
-      <h1>
-        Фриланс без<br/>
-        <em>лишних сложностей</em>
+      <h1 class="hero-title">
+        Фриланс без<br>
+        <span class="gradient-text">лишних сложностей</span>
       </h1>
 
       <p class="hero-sub">
-        Находи крутые проекты или идеальных исполнителей. Общайся напрямую, плати за результат.
+        Находи крутые проекты или идеальных исполнителей.<br class="desk-only">
+        Общайся напрямую, плати за результат.
       </p>
 
-      <div class="hero-cta">
-        <a href="tasks.html" class="btn btn-primary btn-xl">Найти задание →</a>
-        <a href="#" class="btn btn-outline btn-xl" onclick="openAuthModal('register')">Разместить заказ</a>
+      <!-- LIVE SEARCH -->
+      <div class="hero-search-wrap">
+        <div class="hero-search">
+          <span class="search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </span>
+          <input type="text" id="heroSearch" placeholder="Найди задание: React, дизайн логотипа, SEO..." autocomplete="off" oninput="handleHeroSearch(this.value)" />
+          <a href="tasks.html" class="search-btn">Найти</a>
+        </div>
+        <div class="search-suggestions" id="searchSuggestions"></div>
+        <div class="search-tags">
+          <span class="stag" onclick="quickSearch('разработка')">💻 Разработка</span>
+          <span class="stag" onclick="quickSearch('дизайн')">🎨 Дизайн</span>
+          <span class="stag" onclick="quickSearch('копирайтинг')">✍️ Копирайтинг</span>
+          <span class="stag" onclick="quickSearch('маркетинг')">📣 Маркетинг</span>
+          <span class="stag" onclick="quickSearch('видео')">🎬 Видео</span>
+        </div>
       </div>
 
+      <div class="hero-cta">
+        <a href="tasks.html" class="btn btn-primary btn-xl">Найти задание</a>
+        <a href="#" class="btn btn-glass btn-xl" onclick="openAuthModal('register')">Разместить заказ</a>
+      </div>
+
+      <!-- STATS -->
       <div class="stats-bar">
         <div class="stat-item">
-          <div class="stat-number" id="statTasks">—</div>
-          <div class="stat-label">Открытых заданий</div>
+          <div class="stat-num" id="statTasks">—</div>
+          <div class="stat-lbl">Заданий</div>
         </div>
+        <div class="stat-sep"></div>
         <div class="stat-item">
-          <div class="stat-number" id="statFreelancers">—</div>
-          <div class="stat-label">Фрилансеров</div>
+          <div class="stat-num" id="statFreelancers">—</div>
+          <div class="stat-lbl">Фрилансеров</div>
         </div>
+        <div class="stat-sep"></div>
         <div class="stat-item">
-          <div class="stat-number" id="statCompleted">—</div>
-          <div class="stat-label">Выполнено работ</div>
+          <div class="stat-num" id="statCompleted">—</div>
+          <div class="stat-lbl">Выполнено</div>
         </div>
+        <div class="stat-sep"></div>
         <div class="stat-item">
-          <div class="stat-number">4.9 ★</div>
-          <div class="stat-label">Средняя оценка</div>
+          <div class="stat-num">4.9 ★</div>
+          <div class="stat-lbl">Рейтинг</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       CATEGORIES
+  ══════════════════════════════════════ -->
+  <section class="section" id="categories">
+    <div class="container">
+      <div class="section-eyebrow">Категории</div>
+      <div class="section-row">
+        <h2 class="section-title">Что тебе нужно?</h2>
+        <a href="tasks.html" class="link-arrow">Все задания →</a>
+      </div>
+      <div class="cats-grid">
+        <div class="cat-card" onclick="goCategory('development')">
+          <div class="cat-icon">💻</div>
+          <div class="cat-name">Разработка</div>
+          <div class="cat-hint">Сайты, приложения, боты</div>
+        </div>
+        <div class="cat-card" onclick="goCategory('design')">
+          <div class="cat-icon">🎨</div>
+          <div class="cat-name">Дизайн</div>
+          <div class="cat-hint">UI/UX, логотипы, графика</div>
+        </div>
+        <div class="cat-card" onclick="goCategory('writing')">
+          <div class="cat-icon">✍️</div>
+          <div class="cat-name">Копирайтинг</div>
+          <div class="cat-hint">Тексты, переводы, статьи</div>
+        </div>
+        <div class="cat-card" onclick="goCategory('marketing')">
+          <div class="cat-icon">📣</div>
+          <div class="cat-name">Маркетинг</div>
+          <div class="cat-hint">SMM, реклама, SEO</div>
+        </div>
+        <div class="cat-card" onclick="goCategory('video')">
+          <div class="cat-icon">🎬</div>
+          <div class="cat-name">Видео</div>
+          <div class="cat-hint">Монтаж, анимация, моушн</div>
+        </div>
+        <div class="cat-card" onclick="goCategory('music')">
+          <div class="cat-icon">🎵</div>
+          <div class="cat-name">Музыка</div>
+          <div class="cat-hint">Джинглы, озвучка, сведение</div>
+        </div>
+        <div class="cat-card" onclick="goCategory('other')">
+          <div class="cat-icon">🔧</div>
+          <div class="cat-name">Другое</div>
+          <div class="cat-hint">Любые задачи</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CATEGORIES -->
-  <section style="padding: 4rem 0 3rem;">
+  <!-- ══════════════════════════════════════
+       RECENT TASKS
+  ══════════════════════════════════════ -->
+  <section class="section">
     <div class="container">
-      <div class="section-label">Категории</div>
-      <div class="section-header">
-        <h2>Что ищешь?</h2>
-        <a href="tasks.html" class="btn btn-ghost btn-sm">Все задания →</a>
-      </div>
-      <div class="categories-grid">
-        <div class="category-card" onclick="goCategory('development')">
-          <span class="category-icon">💻</span><h4>Разработка</h4>
-        </div>
-        <div class="category-card" onclick="goCategory('design')">
-          <span class="category-icon">🎨</span><h4>Дизайн</h4>
-        </div>
-        <div class="category-card" onclick="goCategory('writing')">
-          <span class="category-icon">✍️</span><h4>Копирайтинг</h4>
-        </div>
-        <div class="category-card" onclick="goCategory('marketing')">
-          <span class="category-icon">📣</span><h4>Маркетинг</h4>
-        </div>
-        <div class="category-card" onclick="goCategory('video')">
-          <span class="category-icon">🎬</span><h4>Видео</h4>
-        </div>
-        <div class="category-card" onclick="goCategory('music')">
-          <span class="category-icon">🎵</span><h4>Музыка</h4>
-        </div>
-        <div class="category-card" onclick="goCategory('other')">
-          <span class="category-icon">🔧</span><h4>Другое</h4>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- RECENT TASKS -->
-  <section style="padding: 2rem 0 4rem;">
-    <div class="container">
-      <div class="section-label">Актуально</div>
-      <div class="section-header">
-        <h2>Свежие задания</h2>
-        <a href="tasks.html" class="btn btn-ghost btn-sm">Смотреть все →</a>
+      <div class="section-eyebrow">Актуально</div>
+      <div class="section-row">
+        <h2 class="section-title">Свежие задания</h2>
+        <a href="tasks.html" class="link-arrow">Смотреть все →</a>
       </div>
       <div class="tasks-grid" id="recentTasks">
         <div class="spinner"></div>
@@ -123,47 +204,39 @@
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="divider-line"></div>
 
-  <!-- HOW IT WORKS -->
-  <section id="how" style="padding: 4rem 0;">
+  <!-- ══════════════════════════════════════
+       HOW IT WORKS — for CLIENTS
+  ══════════════════════════════════════ -->
+  <section class="section" id="how">
     <div class="container">
-      <div class="section-label" style="justify-content:center;">Процесс</div>
-      <h2 style="text-align:center; font-size:2rem; margin-bottom:0.75rem; letter-spacing:-0.035em;">
-        Три шага до результата
-      </h2>
-      <p style="text-align:center; color:var(--text2); max-width:420px; margin: 0 auto 3rem; font-size:0.9rem;">
-        Мы сделали процесс максимально простым — от размещения до оплаты
-      </p>
-      <div class="grid-3">
-        <div class="how-step">
-          <div class="step-num">01</div>
-          <h3>Опиши задачу</h3>
-          <p>Расскажи что нужно сделать, укажи бюджет и сроки. Займёт меньше двух минут.</p>
-        </div>
-        <div class="how-step">
-          <div class="step-num">02</div>
-          <h3>Выбери исполнителя</h3>
-          <p>Получи отклики, изучи портфолио и рейтинг, пообщайся в чате прямо здесь.</p>
-        </div>
-        <div class="how-step">
-          <div class="step-num">03</div>
-          <h3>Прими работу</h3>
-          <p>Проверь результат, оставь отзыв. Оплачивай только после того как доволен.</p>
-        </div>
+      <div class="section-eyebrow" style="justify-content:center">Процесс</div>
+      <h2 class="section-title text-center">Три шага до результата</h2>
+      <p class="section-sub text-center">Мы сделали процесс максимально простым — от размещения до оплаты</p>
+
+      <div class="how-tabs">
+        <button class="how-tab active" onclick="switchHowTab('client', this)">Я заказчик</button>
+        <button class="how-tab" onclick="switchHowTab('freelancer', this)">Я фрилансер</button>
+      </div>
+
+      <div class="how-steps" id="howSteps">
+        <!-- будет рендериться JS -->
       </div>
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="divider-line"></div>
 
-  <!-- TOP FREELANCERS -->
-  <section id="freelancers" style="padding: 4rem 0;">
+  <!-- ══════════════════════════════════════
+       TOP FREELANCERS
+  ══════════════════════════════════════ -->
+  <section class="section" id="freelancers">
     <div class="container">
-      <div class="section-label">Специалисты</div>
-      <div class="section-header">
-        <h2>Топ фрилансеров</h2>
-        <a href="tasks.html" class="btn btn-ghost btn-sm">Найти специалиста →</a>
+      <div class="section-eyebrow">Специалисты</div>
+      <div class="section-row">
+        <h2 class="section-title">Топ фрилансеров</h2>
+        <a href="tasks.html" class="link-arrow">Найти специалиста →</a>
       </div>
       <div class="freelancers-grid" id="topFreelancers">
         <div class="spinner"></div>
@@ -171,55 +244,66 @@
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="divider-line"></div>
 
-  <!-- BOTTOM CTA -->
-  <section style="padding: 5rem 0 6rem;">
+  <!-- ══════════════════════════════════════
+       REVIEWS (NEW FEATURE)
+  ══════════════════════════════════════ -->
+  <section class="section" id="reviews">
     <div class="container">
-      <div style="
-        background: linear-gradient(135deg, rgba(79,110,247,0.08) 0%, rgba(139,92,246,0.06) 100%);
-        border: 1px solid rgba(79,110,247,0.18);
-        border-radius: 24px;
-        padding: 4rem 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      ">
-        <div style="
-          position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
-          width: 500px; height: 400px;
-          background: radial-gradient(ellipse, rgba(79,110,247,0.09), transparent 70%);
-          pointer-events: none;
-        "></div>
+      <div class="section-eyebrow" style="justify-content:center">Отзывы</div>
+      <h2 class="section-title text-center">Что говорят пользователи</h2>
+      <p class="section-sub text-center">Реальные истории от заказчиков и фрилансеров платформы</p>
 
-        <div class="hero-badge" style="margin-bottom:1.5rem;">
-          <span class="dot"></span> Присоединяйся прямо сейчас
+      <div class="reviews-carousel" id="reviewsCarousel">
+        <div class="reviews-track" id="reviewsTrack">
+          <!-- рендерится JS -->
         </div>
+      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </section>
 
-        <h2 style="font-size:2.2rem; margin-bottom:1rem; letter-spacing:-0.04em;">
-          Готов начать зарабатывать?
-        </h2>
-        <p style="color:var(--text2); max-width:420px; margin:0 auto 2.5rem; line-height:1.7; font-size:0.95rem;">
-          Регистрация бесплатна и занимает одну минуту. Тысячи заданий уже ждут тебя.
-        </p>
-        <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
-          <a href="#" class="btn btn-primary btn-xl" onclick="openAuthModal('register')">
-            Создать аккаунт →
-          </a>
-          <a href="tasks.html" class="btn btn-outline btn-xl">
-            Смотреть задания
-          </a>
+  <div class="divider-line"></div>
+
+  <!-- ══════════════════════════════════════
+       CTA BOTTOM
+  ══════════════════════════════════════ -->
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-box">
+        <div class="cta-glow"></div>
+        <div class="cta-inner">
+          <div class="hero-badge" style="margin-bottom:1.5rem">
+            <span class="live-dot"></span> Присоединяйся прямо сейчас
+          </div>
+          <h2 class="cta-title">Готов начать зарабатывать?</h2>
+          <p class="cta-sub">Регистрация бесплатна и занимает одну минуту.<br>Тысячи заданий уже ждут тебя.</p>
+          <div class="cta-btns">
+            <a href="#" class="btn btn-primary btn-xl" onclick="openAuthModal('register')">Создать аккаунт →</a>
+            <a href="tasks.html" class="btn btn-glass btn-xl">Смотреть задания</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- AUTH MODAL -->
+  <!-- MOBILE FLOATING CTA -->
+  <a href="#" class="mobile-fab" onclick="openAuthModal('register')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Разместить заказ
+  </a>
+
+  <!-- ══════════════════════════════════════
+       AUTH MODAL
+  ══════════════════════════════════════ -->
   <div class="modal-overlay" id="authModal">
     <div class="modal">
       <div class="modal-header">
         <h3 id="authTitle">Вход</h3>
-        <button class="modal-close" onclick="closeAuthModal()">✕</button>
+        <button class="modal-close" onclick="closeAuthModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
       <div id="loginForm">
@@ -231,11 +315,8 @@
           <label>Пароль</label>
           <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" />
         </div>
-        <button class="btn btn-primary w-full" style="margin-top:0.5rem;" onclick="handleLogin()">Войти →</button>
-        <p style="text-align:center; margin-top:1.25rem; font-size:0.85rem; color:var(--text2);">
-          Нет аккаунта?
-          <a href="#" style="color:var(--blue-light); font-weight:600;" onclick="switchAuth('register')">Зарегистрироваться</a>
-        </p>
+        <button class="btn btn-primary w-full mt-2" onclick="handleLogin()">Войти →</button>
+        <p class="auth-switch">Нет аккаунта? <a href="#" onclick="switchAuth('register')">Зарегистрироваться</a></p>
       </div>
 
       <div id="registerForm" class="hidden">
@@ -253,69 +334,161 @@
         </div>
         <div class="form-group">
           <label>Я хочу</label>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem; margin-top:0.4rem;">
+          <div class="role-grid">
             <div class="role-card" id="roleCardClient" onclick="selectRole('client')">
-              <div style="font-size:1.4rem; margin-bottom:0.35rem;">📋</div>
-              <div style="font-weight:700; font-size:0.875rem;">Заказывать</div>
-              <div style="font-size:0.73rem; color:var(--text3); margin-top:0.15rem;">Размещаю задания</div>
+              <div class="role-icon">📋</div>
+              <div class="role-name">Заказывать</div>
+              <div class="role-hint">Размещаю задания</div>
             </div>
             <div class="role-card" id="roleCardFreelancer" onclick="selectRole('freelancer')">
-              <div style="font-size:1.4rem; margin-bottom:0.35rem;">💼</div>
-              <div style="font-weight:700; font-size:0.875rem;">Выполнять</div>
-              <div style="font-size:0.73rem; color:var(--text3); margin-top:0.15rem;">Зарабатываю здесь</div>
+              <div class="role-icon">💼</div>
+              <div class="role-name">Выполнять</div>
+              <div class="role-hint">Зарабатываю здесь</div>
             </div>
           </div>
         </div>
-        <button class="btn btn-primary w-full" style="margin-top:0.5rem;" onclick="handleRegister()">Создать аккаунт →</button>
-        <p style="text-align:center; margin-top:1.25rem; font-size:0.85rem; color:var(--text2);">
-          Уже есть аккаунт?
-          <a href="#" style="color:var(--blue-light); font-weight:600;" onclick="switchAuth('login')">Войти</a>
-        </p>
+        <button class="btn btn-primary w-full mt-2" onclick="handleRegister()">Создать аккаунт →</button>
+        <p class="auth-switch">Уже есть аккаунт? <a href="#" onclick="switchAuth('login')">Войти</a></p>
       </div>
     </div>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <style>
-    .role-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius-sm);
-      padding: 1rem 0.75rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.16s;
-    }
-    .role-card:hover { border-color: var(--border3); background: rgba(255,255,255,0.05); }
-    .role-card.selected {
-      border-color: var(--blue);
-      background: rgba(79,110,247,0.1);
-    }
-  </style>
-
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script>
     let selectedRole = 'client';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      updateNavForAuth();
-      loadStats();
-      loadRecentTasks();
-      loadTopFreelancers();
-      selectRole('client');
-      document.getElementById('authModal').addEventListener('click', e => {
-        if (e.target.id === 'authModal') closeAuthModal();
-      });
-    });
+    // ── HOW IT WORKS DATA ──
+    const howData = {
+      client: [
+        { num:'01', icon:'📝', title:'Опиши задачу', desc:'Расскажи что нужно сделать, укажи бюджет и сроки. Займёт меньше двух минут.' },
+        { num:'02', icon:'🤝', title:'Выбери исполнителя', desc:'Получи отклики, изучи портфолио и рейтинг, пообщайся в чате прямо здесь.' },
+        { num:'03', icon:'✅', title:'Прими работу', desc:'Проверь результат, оставь отзыв. Оплачивай только после того как доволен.' },
+      ],
+      freelancer: [
+        { num:'01', icon:'🔍', title:'Найди задание', desc:'Просматривай актуальные заказы по своей специализации и фильтруй по бюджету.' },
+        { num:'02', icon:'💬', title:'Откликнись', desc:'Напиши заказчику напрямую, покажи портфолио и договорись об условиях работы.' },
+        { num:'03', icon:'💰', title:'Получи оплату', desc:'Выполни работу, получи одобрение и деньги. Быстро и без посредников.' },
+      ]
+    };
 
-    function selectRole(role) {
-      selectedRole = role;
-      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-      document.getElementById(role === 'client' ? 'roleCardClient' : 'roleCardFreelancer')?.classList.add('selected');
+    function switchHowTab(type, btn) {
+      document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderHowSteps(type);
     }
 
+    function renderHowSteps(type) {
+      const steps = howData[type];
+      const el = document.getElementById('howSteps');
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(10px)';
+      setTimeout(() => {
+        el.innerHTML = steps.map(s => `
+          <div class="how-step">
+            <div class="how-step-num">${s.num}</div>
+            <div class="how-step-icon">${s.icon}</div>
+            <h3>${s.title}</h3>
+            <p>${s.desc}</p>
+          </div>`).join('');
+        el.style.transition = 'all 0.35s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, 150);
+    }
+
+    // ── REVIEWS DATA ──
+    const reviewsData = [
+      { name:'Артём К.', role:'Заказчик', avatar:'А', rating:5, text:'Нашёл разработчика за 2 часа. Парень сделал мне лендинг точно в срок, ещё и с правками помог. Буду возвращаться!' },
+      { name:'Мария Л.', role:'Фрилансер', avatar:'М', rating:5, text:'Уже третий месяц работаю здесь. Заказы стабильные, платят честно. Всё понятно и без лишней бюрократии.' },
+      { name:'Дмитрий Ш.', role:'Заказчик', avatar:'Д', rating:5, text:'Удобный чат, быстрые отклики. Дизайнер оказался топовым — сделал брендинг лучше чем я ожидал.' },
+      { name:'Алина В.', role:'Фрилансер', avatar:'А', rating:5, text:'Первый фриланс-заказ получила здесь. Очень удобно что можно посмотреть профиль заказчика перед откликом.' },
+      { name:'Сергей П.', role:'Заказчик', avatar:'С', rating:4, text:'Платформа молодая но уже рабочая. Нашёл копирайтера под нишевую тему, доволен результатом.' },
+      { name:'Кристина Т.', role:'Фрилансер', avatar:'К', rating:5, text:'Чат работает мгновенно, задания появляются каждый день. Рекомендую всем кто ищет удалённую работу.' },
+    ];
+
+    let currentSlide = 0;
+    const slidesPerView = () => window.innerWidth < 700 ? 1 : window.innerWidth < 1100 ? 2 : 3;
+
+    function renderReviews() {
+      const track = document.getElementById('reviewsTrack');
+      const dots = document.getElementById('carouselDots');
+      track.innerHTML = reviewsData.map((r, i) => `
+        <div class="review-card" style="animation-delay:${i*0.07}s">
+          <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+          <p class="review-text">"${r.text}"</p>
+          <div class="review-author">
+            <div class="review-avatar">${r.avatar}</div>
+            <div>
+              <div class="review-name">${r.name}</div>
+              <div class="review-role">${r.role}</div>
+            </div>
+          </div>
+        </div>`).join('');
+
+      const totalSlides = Math.ceil(reviewsData.length / slidesPerView());
+      dots.innerHTML = Array.from({length: totalSlides}, (_, i) => `
+        <span class="dot ${i===0?'active':''}" onclick="goSlide(${i})"></span>`).join('');
+    }
+
+    function goSlide(n) {
+      currentSlide = n;
+      const spv = slidesPerView();
+      const track = document.getElementById('reviewsTrack');
+      const cardW = track.querySelector('.review-card')?.offsetWidth || 0;
+      const gap = 16;
+      track.style.transform = `translateX(-${n * spv * (cardW + gap)}px)`;
+      document.querySelectorAll('#carouselDots .dot').forEach((d, i) => d.classList.toggle('active', i === n));
+    }
+
+    // ── HERO SEARCH ──
+    const searchTips = [
+      'React разработчик', 'Дизайн логотипа', 'SEO оптимизация',
+      'Монтаж видео', 'Копирайтинг', 'Telegram бот', 'Motion design',
+      'Создание сайта', 'Настройка рекламы', 'Озвучка'
+    ];
+
+    function handleHeroSearch(val) {
+      const box = document.getElementById('searchSuggestions');
+      if (!val.trim()) { box.innerHTML = ''; box.classList.remove('open'); return; }
+      const filtered = searchTips.filter(t => t.toLowerCase().includes(val.toLowerCase())).slice(0, 5);
+      if (!filtered.length) { box.innerHTML = ''; box.classList.remove('open'); return; }
+      box.innerHTML = filtered.map(t => `
+        <div class="suggestion-item" onclick="applySuggestion('${t}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.4"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          ${t}
+        </div>`).join('');
+      box.classList.add('open');
+    }
+
+    function applySuggestion(val) {
+      document.getElementById('heroSearch').value = val;
+      document.getElementById('searchSuggestions').classList.remove('open');
+      window.location.href = `tasks.html?search=${encodeURIComponent(val)}`;
+    }
+
+    function quickSearch(q) {
+      window.location.href = `tasks.html?search=${encodeURIComponent(q)}`;
+    }
+
+    // ── MOBILE MENU ──
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const burger = document.getElementById('burger');
+      menu.classList.toggle('open');
+      burger.classList.toggle('open');
+      document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+    }
+
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+      document.getElementById('burger').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // ── AUTH ──
     function openAuthModal(type) {
       if (getCurrentUser()) { window.location.href = 'dashboard.html'; return; }
       document.getElementById('authModal').classList.add('open');
@@ -333,6 +506,12 @@
       document.getElementById('authTitle').textContent = login ? 'Вход' : 'Регистрация';
     }
 
+    function selectRole(role) {
+      selectedRole = role;
+      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById(role === 'client' ? 'roleCardClient' : 'roleCardFreelancer')?.classList.add('selected');
+    }
+
     function goCategory(cat) {
       window.location.href = `tasks.html?category=${cat}`;
     }
@@ -341,20 +520,18 @@
       const el = document.getElementById(id);
       if (!el || !target) { if(el) el.textContent = '0'; return; }
       let n = 0;
-      const step = Math.max(1, Math.ceil(target / 25));
+      const step = Math.max(1, Math.ceil(target / 30));
       const t = setInterval(() => {
         n = Math.min(n + step, target);
         el.textContent = n.toLocaleString('ru');
         if (n >= target) clearInterval(t);
-      }, 35);
+      }, 30);
     }
 
     async function loadStats() {
       try {
         const [open, users, done] = await Promise.all([
-          api('/tasks'),
-          api('/users?role=freelancer'),
-          api('/tasks?status=completed')
+          api('/tasks'), api('/users?role=freelancer'), api('/tasks?status=completed')
         ]);
         animateNum('statTasks', open.length);
         animateNum('statFreelancers', users.length);
@@ -373,7 +550,7 @@
         const c = document.getElementById('recentTasks');
         if (!tasks.length) {
           c.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-            <div class="emoji">📭</div>
+            <div class="empty-icon">📭</div>
             <h3>Заданий пока нет</h3>
             <p>Стань первым кто разместит задание</p>
             <button class="btn btn-primary mt-2" onclick="openAuthModal('register')">Разместить →</button>
@@ -383,7 +560,7 @@
         c.innerHTML = tasks.slice(0, 6).map(renderTaskCard).join('');
       } catch(e) {
         document.getElementById('recentTasks').innerHTML =
-          '<p class="text-muted" style="grid-column:1/-1;text-align:center;padding:2rem">Ошибка загрузки</p>';
+          '<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">Не удалось загрузить задания</p>';
       }
     }
 
@@ -392,32 +569,58 @@
         const users = await api('/users?role=freelancer');
         const c = document.getElementById('topFreelancers');
         if (!users.length) {
-          c.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-            <div class="emoji">👥</div><p>Фрилансеров пока нет</p>
-          </div>`;
+          c.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">👥</div><p>Фрилансеров пока нет</p></div>`;
           return;
         }
         c.innerHTML = users.slice(0, 8).map(u => `
-          <div class="freelancer-card">
-            <div class="avatar" style="width:56px;height:56px;font-size:1.3rem;margin:0 auto 0.8rem;">
-              ${u.avatar
-                ? `<img src="${u.avatar}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;">`
-                : u.name.charAt(0)}
+          <div class="freelancer-card" onclick="window.location.href='profile.html?id=${u._id}'">
+            <div class="fl-avatar">
+              ${u.avatar ? `<img src="${u.avatar}" alt="${u.name}">` : `<span>${u.name.charAt(0)}</span>`}
+              <div class="fl-online"></div>
             </div>
-            <h4>${u.name}</h4>
-            <div class="stars" style="font-size:0.78rem;margin:0.25rem 0;">
-              ★ ${(u.rating || 0).toFixed(1)}
-            </div>
-            <div style="font-size:0.73rem;color:var(--text3);margin-bottom:0.7rem;">
-              ${u.completedTasks || 0} задан выполнено
-            </div>
+            <h4 class="fl-name">${u.name}</h4>
+            <div class="fl-rating">★ ${(u.rating || 0).toFixed(1)} <span class="fl-count">(${u.completedTasks || 0})</span></div>
             ${u.skills?.length ? `
-              <div style="display:flex;flex-wrap:wrap;gap:0.3rem;justify-content:center;">
+              <div class="fl-skills">
                 ${u.skills.slice(0,3).map(s => `<span class="skill-tag">${s}</span>`).join('')}
               </div>` : ''}
+            <a href="#" class="btn btn-glass btn-sm fl-btn" onclick="event.stopPropagation()">Написать</a>
           </div>`).join('');
       } catch(e) {}
     }
+
+    // ── INIT ──
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavForAuth();
+      loadStats();
+      loadRecentTasks();
+      loadTopFreelancers();
+      renderHowSteps('client');
+      renderReviews();
+      selectRole('client');
+
+      document.getElementById('authModal').addEventListener('click', e => {
+        if (e.target.id === 'authModal') closeAuthModal();
+      });
+
+      // Close search on outside click
+      document.addEventListener('click', e => {
+        if (!e.target.closest('.hero-search-wrap')) {
+          document.getElementById('searchSuggestions').classList.remove('open');
+        }
+      });
+
+      // Navbar scroll effect
+      window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+      });
+
+      // Mobile FAB: hide on desktop
+      window.addEventListener('resize', () => {
+        document.querySelector('.mobile-fab').style.display = window.innerWidth > 700 ? 'none' : '';
+      });
+      if (window.innerWidth > 700) document.querySelector('.mobile-fab').style.display = 'none';
+    });
   </script>
 </body>
 </html>
