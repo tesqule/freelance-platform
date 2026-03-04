@@ -1,3 +1,5 @@
+const SOCKET_URL = 'https://freelance-platform-production-2360.up.railway.app';
+
 let socket = null;
 let currentRoom = null;
 let currentChatUser = null;
@@ -5,12 +7,17 @@ const loadedUsers = {};
 
 function initChat() {
   const user = getCurrentUser();
-  socket = io('http://localhost:5000');
+  socket = io(SOCKET_URL);
 
   socket.on('receive_message', (msg) => {
     if (msg.room === currentRoom) {
       appendMessage(msg, user.id);
       scrollToBottom();
+    } else {
+      const senderName = msg.sender?.name || 'Кто-то';
+      const preview = msg.text?.length > 40 ? msg.text.slice(0, 40) + '…' : msg.text;
+      addNotification(`💬 ${senderName}: ${preview}`, '💬', 'chat.html');
+      showToast(`Новое сообщение от ${senderName}`, 'info');
     }
   });
 
@@ -28,7 +35,6 @@ async function loadConversations() {
       return;
     }
 
-    // Get user data for each room
     const items = await Promise.all(convs.map(async (conv) => {
       const parts = conv._id.split('_');
       const otherId = parts.find(p => p !== user.id);
@@ -42,7 +48,7 @@ async function loadConversations() {
 
     container.innerHTML = items.filter(Boolean).map(item => `
       <div class="conversation-item" id="conv-${item.other._id}" onclick="openChatWith('${item.other._id}')">
-        <div class="avatar" style="width:42px;height:42px;font-size:1rem;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));">
+        <div class="avatar" style="width:42px;height:42px;font-size:1rem;flex-shrink:0;background:linear-gradient(135deg,var(--blue),var(--purple));">
           ${item.other.avatar ? `<img src="${item.other.avatar}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">` : item.other.name.charAt(0)}
         </div>
         <div class="conv-info">
@@ -57,24 +63,20 @@ async function openChatWith(userId) {
   const user = getCurrentUser();
   if (!userId || userId === user.id) return;
 
-  // Mark active
   document.querySelectorAll('.conversation-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`conv-${userId}`)?.classList.add('active');
 
-  // Load other user
   try {
     const other = loadedUsers[userId] || await api(`/users/${userId}`);
     loadedUsers[userId] = other;
     currentChatUser = other;
 
-    // Create room ID (sorted for consistency)
     const ids = [user.id, userId].sort();
     currentRoom = ids.join('_');
 
-    // Render chat UI
     document.getElementById('chatMain').innerHTML = `
       <div class="chat-header">
-        <div class="avatar" style="width:40px;height:40px;font-size:1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));">
+        <div class="avatar" style="width:40px;height:40px;font-size:1rem;background:linear-gradient(135deg,var(--blue),var(--purple));">
           ${other.avatar ? `<img src="${other.avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">` : other.name.charAt(0)}
         </div>
         <div>
@@ -92,7 +94,6 @@ async function openChatWith(userId) {
     socket.emit('join_room', currentRoom);
     loadMessages();
 
-    // Add to sidebar if not there
     if (!document.getElementById(`conv-${userId}`)) {
       const container = document.getElementById('conversationsList');
       const div = document.createElement('div');
@@ -100,7 +101,7 @@ async function openChatWith(userId) {
       div.className = 'conversation-item active';
       div.onclick = () => openChatWith(userId);
       div.innerHTML = `
-        <div class="avatar" style="width:42px;height:42px;font-size:1rem;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));">
+        <div class="avatar" style="width:42px;height:42px;font-size:1rem;flex-shrink:0;background:linear-gradient(135deg,var(--blue),var(--purple));">
           ${other.avatar ? `<img src="${other.avatar}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">` : other.name.charAt(0)}
         </div>
         <div class="conv-info">
@@ -115,11 +116,21 @@ async function openChatWith(userId) {
 }
 
 async function loadMessages() {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:0.65rem;">
+      ${Array.from({length:4}, (_, i) => `
+        <div style="display:flex;flex-direction:column;align-items:${i%2===0?'flex-start':'flex-end'};gap:0.2rem;">
+          <div class="skeleton" style="height:40px;width:${150+Math.random()*100|0}px;border-radius:16px;"></div>
+        </div>
+      `).join('')}
+    </div>`;
+
   try {
     const messages = await apiAuth(`/chat/${currentRoom}`);
     const user = getCurrentUser();
-    const container = document.getElementById('chatMessages');
-    if (!container) return;
 
     if (!messages.length) {
       container.innerHTML = `<div style="text-align:center; color:var(--text3); font-size:0.85rem; margin:auto;">Начните общение 👋</div>`;
@@ -172,7 +183,6 @@ function handleMsgKey(e) {
     e.preventDefault();
     sendMessage();
   }
-  // Auto-resize
   const ta = e.target;
   ta.style.height = 'auto';
   ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
