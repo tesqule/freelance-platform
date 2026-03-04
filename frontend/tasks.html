@@ -8,21 +8,27 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .fav-btn {
+      position:absolute; top:.85rem; right:.85rem; width:32px; height:32px;
+      border-radius:50%; background:rgba(0,0,0,.4); backdrop-filter:blur(6px);
+      border:1px solid rgba(255,255,255,.08); display:flex; align-items:center;
+      justify-content:center; cursor:pointer; transition:all .18s; font-size:.9rem; z-index:2;
+    }
+    .fav-btn:hover  { background:rgba(239,68,68,.2); border-color:rgba(239,68,68,.3); transform:scale(1.1); }
+    .fav-btn.active { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.35); }
+    .task-card { position:relative; }
+    .view-btn { padding:.4rem .9rem; border-radius:99px; font-size:.8rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text2); transition:all .16s; font-family:var(--font-body); }
+    .view-btn.active { background:rgba(79,110,247,.12); border-color:rgba(79,110,247,.3); color:var(--blue-light); }
+  </style>
 </head>
 <body>
-
   <div class="noise-overlay"></div>
-  <div class="bg-canvas">
-    <div class="bg-blob b1"></div>
-    <div class="bg-blob b2"></div>
-    <div class="bg-grid"></div>
-  </div>
+  <div class="bg-canvas"><div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-grid"></div></div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
-      <div class="logo-mark">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg>
-      </div>
+      <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg></div>
       <span class="logo-text">FreeLanceHub</span>
     </a>
     <ul class="nav-links">
@@ -33,7 +39,6 @@
     <div class="nav-actions" id="navActions"></div>
     <button class="burger" id="burger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
   </nav>
-
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
@@ -44,20 +49,21 @@
 
   <div class="page" style="padding-bottom:4rem;">
     <div class="container mt-3">
-
-      <!-- PAGE HEADER -->
       <div style="margin-bottom:2rem;">
         <div class="section-eyebrow">Биржа</div>
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;">
           <h2 style="font-size:1.8rem;letter-spacing:-.04em;">Все задания</h2>
-          <button class="btn btn-primary" id="createTaskBtn" onclick="openCreateTask()" style="display:none;">
-            + Разместить задание
-          </button>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+            <div style="display:none;gap:.3rem;" id="viewToggle">
+              <button class="view-btn active" onclick="setView('all',this)">Все</button>
+              <button class="view-btn" onclick="setView('favorites',this)">❤️ Избранные</button>
+            </div>
+            <button class="btn btn-primary" id="createTaskBtn" onclick="openCreateTask()" style="display:none;">+ Разместить</button>
+          </div>
         </div>
       </div>
 
-      <!-- FILTERS -->
-      <div class="filters-bar" style="flex-wrap:wrap;gap:.6rem;">
+      <div class="filters-bar" id="filtersBar" style="flex-wrap:wrap;gap:.6rem;">
         <div class="search-bar" style="min-width:220px;">
           <input type="text" id="searchInput" placeholder="Поиск заданий..." oninput="filterTasks()" />
         </div>
@@ -72,8 +78,7 @@
         </div>
       </div>
 
-      <!-- BUDGET + SORT ROW -->
-      <div style="display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
+      <div style="display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;" id="budgetBar">
         <div style="display:flex;align-items:center;gap:.5rem;">
           <span style="font-size:.8rem;color:var(--text3);white-space:nowrap;">Бюджет:</span>
           <input type="number" class="form-control" id="minBudget" placeholder="От ₽" style="width:88px;padding:.45rem .75rem;font-size:.82rem;" oninput="filterTasks()" />
@@ -88,9 +93,7 @@
         <div style="margin-left:auto;font-size:.8rem;color:var(--text3);" id="resultsCount"></div>
       </div>
 
-      <div class="tasks-grid" id="tasksGrid">
-        <div class="spinner"></div>
-      </div>
+      <div class="tasks-grid" id="tasksGrid"><div class="spinner"></div></div>
     </div>
   </div>
 
@@ -99,14 +102,9 @@
     <div class="modal" style="max-width:600px;">
       <div class="modal-header">
         <h3>Новое задание</h3>
-        <button class="modal-close" onclick="closeModal('createTaskModal')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="modal-close" onclick="closeModal('createTaskModal')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="form-group">
-        <label>Название задания *</label>
-        <input type="text" class="form-control" id="taskTitle" placeholder="Например: Разработка лендинга на React" />
-      </div>
+      <div class="form-group"><label>Название задания *</label><input type="text" class="form-control" id="taskTitle" placeholder="Разработка лендинга на React" /></div>
       <div class="form-group">
         <label>Категория *</label>
         <select class="form-control" id="taskCategory">
@@ -120,44 +118,63 @@
           <option value="other">🔧 Другое</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Описание задания *</label>
-        <textarea class="form-control" id="taskDesc" placeholder="Подробно опишите что нужно сделать..." style="min-height:130px;"></textarea>
-      </div>
+      <div class="form-group"><label>Описание *</label><textarea class="form-control" id="taskDesc" style="min-height:130px;" placeholder="Подробно опишите что нужно сделать..."></textarea></div>
       <div class="grid-2">
-        <div class="form-group">
-          <label>Бюджет (₽) *</label>
-          <input type="number" class="form-control" id="taskBudget" placeholder="5000" />
-        </div>
-        <div class="form-group">
-          <label>Дедлайн *</label>
-          <input type="date" class="form-control" id="taskDeadline" />
-        </div>
+        <div class="form-group"><label>Бюджет (₽) *</label><input type="number" class="form-control" id="taskBudget" placeholder="5000" /></div>
+        <div class="form-group"><label>Дедлайн *</label><input type="date" class="form-control" id="taskDeadline" /></div>
       </div>
-      <div class="form-group">
-        <label>Навыки (через запятую)</label>
-        <input type="text" class="form-control" id="taskSkills" placeholder="React, Node.js, MongoDB" />
-      </div>
+      <div class="form-group"><label>Навыки (через запятую)</label><input type="text" class="form-control" id="taskSkills" placeholder="React, Node.js" /></div>
       <button class="btn btn-primary w-full" onclick="createTask()">Разместить задание 🚀</button>
     </div>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
-
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/tasks.js"></script>
   <script>
-    let allTasks = [];
-    let currentCategory = '';
+    let allTasks = [], favTaskIds = new Set(), currentCategory = '', currentView = 'all';
 
-    function toggleMobileMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
-      document.getElementById('burger').classList.toggle('open');
+    function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
+    function closeMobileMenu()  { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
+
+    async function loadFavoriteIds() {
+      try {
+        if (!getCurrentUser()) return;
+        const favs = await apiAuth('/favorites');
+        favTaskIds = new Set(favs.map(t => t._id));
+      } catch(e) {}
     }
-    function closeMobileMenu() {
-      document.getElementById('mobileMenu').classList.remove('open');
-      document.getElementById('burger').classList.remove('open');
+
+    async function toggleFavorite(taskId, btn, e) {
+      e.stopPropagation();
+      if (!getCurrentUser()) { showToast('Войдите чтобы сохранять', 'info'); return; }
+      try {
+        if (favTaskIds.has(taskId)) {
+          await apiAuth(`/favorites/${taskId}`, { method:'DELETE' });
+          favTaskIds.delete(taskId);
+          btn.classList.remove('active');
+          btn.innerHTML = '🤍';
+          if (currentView === 'favorites') filterTasks();
+          showToast('Убрано из избранного', 'info');
+        } else {
+          await apiAuth(`/favorites/${taskId}`, { method:'POST' });
+          favTaskIds.add(taskId);
+          btn.classList.add('active');
+          btn.innerHTML = '❤️';
+          showToast('Добавлено в избранное ❤️', 'success');
+        }
+      } catch(e) { showToast('Ошибка', 'error'); }
+    }
+
+    function setView(view, btn) {
+      currentView = view;
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const show = view === 'all';
+      document.getElementById('filtersBar').style.display = show ? 'flex' : 'none';
+      document.getElementById('budgetBar').style.display  = show ? 'flex' : 'none';
+      filterTasks();
     }
 
     function setCategoryFilter(cat, btn) {
@@ -168,39 +185,67 @@
     }
 
     function filterTasks() {
+      let tasks = allTasks;
+      if (currentView === 'favorites') {
+        tasks = allTasks.filter(t => favTaskIds.has(t._id));
+        document.getElementById('resultsCount').textContent = `Избранных: ${tasks.length}`;
+        renderTasks(tasks);
+        return;
+      }
       const search = document.getElementById('searchInput').value.toLowerCase();
       const minB = Number(document.getElementById('minBudget').value) || 0;
       const maxB = Number(document.getElementById('maxBudget').value) || Infinity;
       const sort = document.getElementById('sortSelect').value;
-
-      let filtered = allTasks.filter(t => {
-        const matchCat = !currentCategory || t.category === currentCategory;
-        const matchSearch = !search || t.title.toLowerCase().includes(search) || t.description.toLowerCase().includes(search);
-        const matchBudget = t.budget >= minB && t.budget <= maxB;
-        return matchCat && matchSearch && matchBudget;
-      });
-
+      let filtered = tasks.filter(t =>
+        (!currentCategory || t.category === currentCategory) &&
+        (!search || t.title.toLowerCase().includes(search) || t.description.toLowerCase().includes(search)) &&
+        t.budget >= minB && t.budget <= maxB
+      );
       if (sort === 'budget_high') filtered.sort((a,b) => b.budget - a.budget);
       else if (sort === 'budget_low') filtered.sort((a,b) => a.budget - b.budget);
       else filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-      const countEl = document.getElementById('resultsCount');
-      if (countEl) countEl.textContent = `Найдено: ${filtered.length}`;
-
+      document.getElementById('resultsCount').textContent = `Найдено: ${filtered.length}`;
       renderTasks(filtered);
     }
 
     function renderTasks(tasks) {
       const grid = document.getElementById('tasksGrid');
       if (!tasks.length) {
+        const isFav = currentView === 'favorites';
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-          <div class="empty-icon">🔍</div>
-          <h3>Заданий не найдено</h3>
-          <p>Попробуйте изменить фильтры или поисковый запрос</p>
+          <div class="empty-icon">${isFav ? '❤️' : '🔍'}</div>
+          <h3>${isFav ? 'Избранных нет' : 'Заданий не найдено'}</h3>
+          <p>${isFav ? 'Нажми 🤍 на карточке задания чтобы сохранить' : 'Попробуйте изменить фильтры'}</p>
         </div>`;
         return;
       }
-      grid.innerHTML = tasks.map(renderTaskCard).join('');
+      const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
+      grid.innerHTML = tasks.map(t => {
+        const isFav = favTaskIds.has(t._id);
+        const deadline = new Date(t.deadline).toLocaleDateString('ru-RU');
+        return `
+          <div class="task-card" onclick="window.location.href='task-detail.html?id=${t._id}'">
+            <button class="fav-btn ${isFav?'active':''}" onclick="toggleFavorite('${t._id}',this,event)" title="${isFav?'Убрать из избранного':'В избранное'}">${isFav?'❤️':'🤍'}</button>
+            <div class="task-card-header">
+              <h3>${t.title}</h3>
+              <span class="task-budget">₽${t.budget.toLocaleString()}</span>
+            </div>
+            <p class="task-desc">${t.description}</p>
+            <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.75rem;">
+              <span class="badge badge-${t.category}">${catEmojis[t.category]||'🔧'} ${t.category}</span>
+              ${t.skills?.slice(0,2).map(s=>`<span class="skill-tag">${s}</span>`).join('')||''}
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <div class="avatar" style="width:22px;height:22px;font-size:.55rem;">
+                  ${t.client?.avatar?`<img src="${t.client.avatar}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">`:(t.client?.name||'?').charAt(0)}
+                </div>
+                <span style="font-size:.78rem;color:var(--text3);">${t.client?.name||'Аноним'}</span>
+              </div>
+              <span style="font-size:.75rem;color:var(--text3);">⏰ ${deadline}</span>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     function openCreateTask() {
@@ -213,36 +258,28 @@
     async function loadTasks() {
       try {
         allTasks = await api('/tasks');
+        await loadFavoriteIds();
         const params = new URLSearchParams(window.location.search);
-        const urlCat = params.get('category');
-        const urlSearch = params.get('search');
-
-        if (urlCat) {
-          currentCategory = urlCat;
-          document.querySelectorAll('.filter-btn').forEach(b => {
-            if (b.onclick?.toString().includes(urlCat)) b.classList.add('active');
-            else b.classList.remove('active');
-          });
-        }
-        if (urlSearch) {
-          document.getElementById('searchInput').value = urlSearch;
-        }
+        if (params.get('category')) currentCategory = params.get('category');
+        if (params.get('search')) document.getElementById('searchInput').value = params.get('search');
         filterTasks();
       } catch(e) {
-        document.getElementById('tasksGrid').innerHTML =
-          '<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">Ошибка загрузки</p>';
+        document.getElementById('tasksGrid').innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">Ошибка загрузки</p>';
       }
     }
+
+    function openAuthModal() { window.location.href = 'index.html'; }
 
     document.addEventListener('DOMContentLoaded', () => {
       updateNavForAuth();
       loadTasks();
       const user = getCurrentUser();
-      if (user?.role === 'client') document.getElementById('createTaskBtn').style.display = 'flex';
+      if (user) {
+        document.getElementById('viewToggle').style.display = 'flex';
+        if (user.role === 'client') document.getElementById('createTaskBtn').style.display = 'flex';
+      }
       document.getElementById('taskDeadline').min = new Date().toISOString().split('T')[0];
-      window.addEventListener('scroll', () => {
-        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
-      });
+      window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20));
     });
   </script>
 </body>

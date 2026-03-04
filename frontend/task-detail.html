@@ -8,21 +8,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .task-detail-grid { display:grid; grid-template-columns:1fr 300px; gap:1.5rem; align-items:start; }
+    .task-detail-sidebar { position:sticky; top:80px; }
+    .star-picker { display:flex; gap:.3rem; font-size:1.6rem; cursor:pointer; margin:.5rem 0; }
+    .star-picker span { color:var(--text3); transition:color .12s; }
+    .star-picker span.active { color:var(--amber); }
+    @media (max-width:760px) {
+      .task-detail-grid { grid-template-columns:1fr; }
+      .task-detail-sidebar { position:static; }
+    }
+  </style>
 </head>
 <body>
-
   <div class="noise-overlay"></div>
-  <div class="bg-canvas">
-    <div class="bg-blob b1"></div>
-    <div class="bg-blob b2"></div>
-    <div class="bg-grid"></div>
-  </div>
+  <div class="bg-canvas"><div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-grid"></div></div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
-      <div class="logo-mark">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg>
-      </div>
+      <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg></div>
       <span class="logo-text">FreeLanceHub</span>
     </a>
     <ul class="nav-links">
@@ -32,7 +36,6 @@
     <div class="nav-actions" id="navActions"></div>
     <button class="burger" id="burger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
   </nav>
-
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
@@ -46,9 +49,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Назад к заданиям
       </a>
-      <div id="taskDetail">
-        <div class="spinner"></div>
-      </div>
+      <div id="taskDetail"><div class="spinner"></div></div>
     </div>
   </div>
 
@@ -57,25 +58,37 @@
     <div class="modal">
       <div class="modal-header">
         <h3>Отклик на задание</h3>
-        <button class="modal-close" onclick="closeModal('proposalModal')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="modal-close" onclick="closeModal('proposalModal')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="form-group">
-        <label>Сопроводительное письмо *</label>
-        <textarea class="form-control" id="coverLetter" placeholder="Расскажите почему вы подходите для этого задания..." style="min-height:140px;"></textarea>
-      </div>
+      <div class="form-group"><label>Сопроводительное письмо *</label><textarea class="form-control" id="coverLetter" placeholder="Расскажите почему вы подходите..." style="min-height:130px;"></textarea></div>
       <div class="grid-2">
-        <div class="form-group">
-          <label>Ваша цена (₽) *</label>
-          <input type="number" class="form-control" id="proposalPrice" placeholder="3000" />
-        </div>
-        <div class="form-group">
-          <label>Срок выполнения (дней) *</label>
-          <input type="number" class="form-control" id="deliveryDays" placeholder="7" min="1" />
-        </div>
+        <div class="form-group"><label>Ваша цена (₽) *</label><input type="number" class="form-control" id="proposalPrice" placeholder="3000" /></div>
+        <div class="form-group"><label>Срок (дней) *</label><input type="number" class="form-control" id="deliveryDays" placeholder="7" min="1" /></div>
       </div>
       <button class="btn btn-primary w-full" onclick="submitProposal()">Отправить отклик 🚀</button>
+    </div>
+  </div>
+
+  <!-- REVIEW MODAL -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal" style="max-width:460px;">
+      <div class="modal-header">
+        <h3>Оставить отзыв</h3>
+        <button class="modal-close" onclick="closeModal('reviewModal')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <p style="font-size:.875rem;color:var(--text2);margin-bottom:1rem;">Оцените <strong id="revieweeName"></strong></p>
+      <input type="hidden" id="revieweeId" />
+      <div class="form-group">
+        <label>Оценка *</label>
+        <div class="star-picker" id="starPicker" onclick="handleStarClick(event)">
+          <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Комментарий</label>
+        <textarea class="form-control" id="reviewComment" placeholder="Поделитесь впечатлениями от работы..." style="min-height:100px;"></textarea>
+      </div>
+      <button class="btn btn-primary w-full mt-3" onclick="submitReview()">Отправить отзыв ⭐</button>
     </div>
   </div>
 
@@ -85,16 +98,11 @@
   <script src="js/auth.js"></script>
   <script>
     let currentTask = null;
+    let selectedRating = 0;
     const taskId = new URLSearchParams(window.location.search).get('id');
 
-    function toggleMobileMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
-      document.getElementById('burger').classList.toggle('open');
-    }
-    function closeMobileMenu() {
-      document.getElementById('mobileMenu').classList.remove('open');
-      document.getElementById('burger').classList.remove('open');
-    }
+    function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
+    function closeMobileMenu()  { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
 
     async function loadTask() {
       if (!taskId) { window.location.href = 'tasks.html'; return; }
@@ -110,43 +118,51 @@
     function renderDetail() {
       const task = currentTask;
       const user = getCurrentUser();
-      const isOwner = user && user.id === task.client._id;
+      const isOwner      = user && user.id === task.client._id;
       const isFreelancer = user && user.role === 'freelancer';
       const alreadyApplied = user && task.proposals?.some(p =>
         p.freelancer && (p.freelancer._id === user.id || p.freelancer === user.id)
       );
-      const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
-      const created = new Date(task.createdAt).toLocaleDateString('ru-RU');
+      const isAssigned = user && task.assignedTo?._id === user.id || task.assignedTo === user?.id;
       const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
-
+      const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
+      const created  = new Date(task.createdAt).toLocaleDateString('ru-RU');
       document.title = `${task.title} — FreeLanceHub`;
 
       document.getElementById('taskDetail').innerHTML = `
         <div class="task-detail-grid">
-
-          <!-- MAIN COLUMN -->
+          <!-- MAIN -->
           <div>
-            <!-- Task Info Card -->
-            <div class="card mb-2" style="border-radius:var(--radius-lg);padding:1.75rem;">
-              <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+            <div class="card mb-2" style="padding:1.75rem;">
+              <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.25rem;">
                 <span class="badge badge-${task.category}">${catEmojis[task.category]||'🔧'} ${task.category}</span>
                 <span class="badge badge-${task.status}">${statusLabel(task.status)}</span>
               </div>
-              <h1 style="font-size:1.65rem;margin-bottom:1rem;letter-spacing:-.03em;">${task.title}</h1>
+              <h1 style="font-size:1.6rem;margin-bottom:1rem;letter-spacing:-.03em;">${task.title}</h1>
               <div style="display:flex;gap:1.25rem;flex-wrap:wrap;font-size:.8rem;color:var(--text3);margin-bottom:1.5rem;">
-                <span>📅 Опубликовано: ${created}</span>
-                <span>⏰ Дедлайн: ${deadline}</span>
-                <span>💬 Откликов: ${task.proposals?.length||0}</span>
+                <span>📅 ${created}</span><span>⏰ ${deadline}</span><span>💬 ${task.proposals?.length||0} откликов</span>
               </div>
               <p style="color:var(--text2);line-height:1.85;white-space:pre-wrap;font-size:.925rem;">${task.description}</p>
-              ${task.skills?.length ? `
-                <div class="task-skills mt-3">
-                  ${task.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
-                </div>` : ''}
+              ${task.skills?.length ? `<div class="task-skills mt-3">${task.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
             </div>
 
-            <!-- Proposals Card -->
-            <div class="card" style="border-radius:var(--radius-lg);padding:1.75rem;">
+            <!-- REVIEW FORM (только если задание выполнено и ты участник) -->
+            ${task.status === 'completed' && user && (isOwner || isAssigned) ? `
+            <div class="card mb-2" style="padding:1.5rem;border-color:rgba(245,158,11,.15);" id="reviewFormCard">
+              <h3 style="font-size:1rem;margin-bottom:.5rem;">⭐ Оставить отзыв</h3>
+              <p style="font-size:.82rem;color:var(--text3);margin-bottom:1rem;">Задание выполнено — поделитесь впечатлениями</p>
+              ${isOwner && task.assignedTo ? `
+                <button class="btn btn-primary btn-sm" onclick="openReviewModal('${task.assignedTo._id||task.assignedTo}','${task.assignedTo.name||'Фрилансер'}')">
+                  Оценить фрилансера
+                </button>` : ''}
+              ${isAssigned ? `
+                <button class="btn btn-outline btn-sm" onclick="openReviewModal('${task.client._id}','${task.client.name}')">
+                  Оценить заказчика
+                </button>` : ''}
+            </div>` : ''}
+
+            <!-- PROPOSALS -->
+            <div class="card" style="padding:1.75rem;">
               <h3 style="font-size:1.05rem;margin-bottom:1.5rem;letter-spacing:-.02em;">
                 Отклики <span style="font-size:.85rem;color:var(--text3);font-weight:400;">(${task.proposals?.length||0})</span>
               </h3>
@@ -154,65 +170,41 @@
             </div>
           </div>
 
-          <!-- SIDEBAR COLUMN -->
+          <!-- SIDEBAR -->
           <div class="task-detail-sidebar">
-
-            <!-- Budget & Action -->
-            <div class="card mb-2" style="border-radius:var(--radius-lg);padding:1.5rem;">
-              <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.5rem;">Бюджет задания</div>
+            <div class="card mb-2" style="padding:1.5rem;">
+              <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.5rem;">Бюджет</div>
               <div style="font-family:var(--font-display);font-size:2.4rem;font-weight:800;color:var(--green);letter-spacing:-.04em;line-height:1;">
                 ₽${task.budget.toLocaleString()}
               </div>
 
               ${isFreelancer && task.status === 'open' && !alreadyApplied ? `
-                <button class="btn btn-primary w-full mt-3" onclick="openModal('proposalModal')" style="font-size:.95rem;">
-                  Откликнуться 🚀
-                </button>` : ''}
-
+                <button class="btn btn-primary w-full mt-3" onclick="openModal('proposalModal')">Откликнуться 🚀</button>` : ''}
               ${isFreelancer && alreadyApplied ? `
-                <div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">
-                  ✅ Вы уже откликнулись
-                </div>` : ''}
-
+                <div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">✅ Вы уже откликнулись</div>` : ''}
               ${isOwner && task.status === 'open' ? `
-                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text3);line-height:1.6;">
-                  💡 Примите отклик исполнителя чтобы начать работу
-                </div>` : ''}
-
+                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text3);">💡 Примите отклик чтобы начать работу</div>` : ''}
               ${isOwner && task.status === 'in_progress' ? `
-                <button class="btn btn-success w-full mt-3" onclick="completeTask()">
-                  ✅ Отметить как выполненное
-                </button>` : ''}
-
+                <button class="btn btn-success w-full mt-3" onclick="completeTask()">✅ Отметить выполненным</button>` : ''}
               ${isOwner && task.status === 'completed' ? `
-                <div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">
-                  🎉 Задание выполнено
-                </div>` : ''}
-
-              ${!user ? `
-                <button class="btn btn-outline w-full mt-3" onclick="window.location.href='index.html'">
-                  Войдите чтобы откликнуться
-                </button>` : ''}
+                <div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">🎉 Задание выполнено</div>` : ''}
+              ${!user ? `<button class="btn btn-outline w-full mt-3" onclick="window.location.href='index.html'">Войдите чтобы откликнуться</button>` : ''}
             </div>
 
-            <!-- Client Card -->
-            <div class="card" style="border-radius:var(--radius-lg);padding:1.5rem;">
+            <div class="card" style="padding:1.5rem;">
               <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:1rem;">Заказчик</div>
-              <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1rem;">
-                <div class="avatar" style="width:50px;height:50px;font-size:1.2rem;flex-shrink:0;">
-                  ${task.client.avatar
-                    ? `<img src="${task.client.avatar}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;">`
-                    : task.client.name.charAt(0)}
+              <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:.85rem;">
+                <div class="avatar" style="width:46px;height:46px;font-size:1.1rem;flex-shrink:0;">
+                  ${task.client.avatar ? `<img src="${task.client.avatar}" style="width:46px;height:46px;border-radius:50%;object-fit:cover;">` : task.client.name.charAt(0)}
                 </div>
                 <div>
                   <div style="font-weight:700;font-size:.95rem;">${task.client.name}</div>
-                  <div class="stars" style="font-size:.8rem;margin-top:.15rem;">★ ${task.client.rating.toFixed(1)}</div>
+                  <div style="color:var(--amber);font-size:.8rem;margin-top:.1rem;">★ ${task.client.rating.toFixed(1)}</div>
                 </div>
               </div>
               ${task.client.bio ? `<p style="font-size:.82rem;color:var(--text2);line-height:1.65;margin-bottom:.75rem;">${task.client.bio}</p>` : ''}
               <div style="font-size:.78rem;color:var(--text3);margin-bottom:.75rem;">✅ Выполнено: ${task.client.completedTasks||0}</div>
-              ${user && user.id !== task.client._id ? `
-                <a href="chat.html?user=${task.client._id}" class="btn btn-glass w-full btn-sm">💬 Написать</a>` : ''}
+              ${user && user.id !== task.client._id ? `<a href="chat.html?user=${task.client._id}" class="btn btn-glass w-full btn-sm">💬 Написать</a>` : ''}
             </div>
           </div>
         </div>`;
@@ -220,66 +212,93 @@
 
     function renderProposals(task, user, isOwner) {
       if (!task.proposals?.length) {
-        return `<div class="empty-state" style="padding:2rem 0;">
-          <div class="empty-icon">📭</div>
-          <p>Откликов пока нет. Будьте первым!</p>
-        </div>`;
+        return `<div class="empty-state" style="padding:2rem 0;"><div class="empty-icon">📭</div><p>Откликов пока нет. Будьте первым!</p></div>`;
       }
       const statusBorder = { accepted:'var(--green)', rejected:'var(--red)', pending:'var(--border2)' };
       return task.proposals.map(p => {
         const fr = p.freelancer || {};
         return `
-        <div style="background:var(--bg2);border:1px solid ${statusBorder[p.status]||'var(--border2)'};border-radius:var(--radius);padding:1.25rem;margin-bottom:.85rem;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.85rem;flex-wrap:wrap;">
-            <div style="display:flex;align-items:center;gap:.75rem;">
-              <div class="avatar" style="width:42px;height:42px;font-size:1rem;flex-shrink:0;">
-                ${fr.avatar ? `<img src="${fr.avatar}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">` : (fr.name||'?').charAt(0)}
+          <div style="background:var(--bg2);border:1px solid ${statusBorder[p.status]||'var(--border2)'};border-radius:var(--radius);padding:1.25rem;margin-bottom:.85rem;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.85rem;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <div class="avatar" style="width:40px;height:40px;font-size:.95rem;flex-shrink:0;">
+                  ${fr.avatar ? `<img src="${fr.avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">` : (fr.name||'?').charAt(0)}
+                </div>
+                <div>
+                  <div style="font-weight:700;font-size:.9rem;">${fr.name||'Фрилансер'}</div>
+                  <div style="font-size:.75rem;color:var(--text3);">★ ${(fr.rating||0).toFixed(1)} · ${fr.completedTasks||0} задан</div>
+                </div>
               </div>
-              <div>
-                <div style="font-weight:700;font-size:.9rem;">${fr.name||'Фрилансер'}</div>
-                <div style="font-size:.75rem;color:var(--text3);margin-top:.1rem;">★ ${(fr.rating||0).toFixed(1)} · ${fr.completedTasks||0} задан</div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:var(--green);">₽${p.price.toLocaleString()}</div>
+                <div style="font-size:.75rem;color:var(--text3);">${p.deliveryDays} дн.</div>
               </div>
             </div>
-            <div style="text-align:right;flex-shrink:0;">
-              <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:var(--green);">₽${p.price.toLocaleString()}</div>
-              <div style="font-size:.75rem;color:var(--text3);margin-top:.1rem;">${p.deliveryDays} дн.</div>
+            ${fr.skills?.length ? `<div class="task-skills mb-2">${fr.skills.slice(0,4).map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
+            <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">${p.coverLetter}</p>
+            <div style="display:flex;gap:.5rem;margin-top:.85rem;flex-wrap:wrap;align-items:center;">
+              ${p.status !== 'pending' ? `<span class="badge ${p.status==='accepted'?'badge-open':'badge-cancelled'}">${p.status==='accepted'?'✓ Принят':'✗ Отклонён'}</span>` : ''}
+              ${isOwner && p.status === 'pending' && task.status === 'open' ? `
+                <button class="btn btn-success btn-sm" onclick="acceptProposal('${p._id}')">✓ Принять</button>
+                <button class="btn btn-danger btn-sm" onclick="rejectProposal('${p._id}')">✗ Отклонить</button>` : ''}
+              ${user && user.id !== (fr._id||'') ? `<a href="chat.html?user=${fr._id}" class="btn btn-glass btn-sm">💬 Написать</a>` : ''}
             </div>
-          </div>
-          ${fr.skills?.length ? `
-            <div class="task-skills mb-2">
-              ${fr.skills.slice(0,4).map(s=>`<span class="skill-tag">${s}</span>`).join('')}
-            </div>` : ''}
-          <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">${p.coverLetter}</p>
-          <div style="display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap;align-items:center;">
-            ${p.status !== 'pending' ? `
-              <span class="badge ${p.status==='accepted'?'badge-open':'badge-cancelled'}">
-                ${p.status==='accepted'?'✓ Принят':'✗ Отклонён'}
-              </span>` : ''}
-            ${isOwner && p.status === 'pending' && task.status === 'open' ? `
-              <button class="btn btn-success btn-sm" onclick="acceptProposal('${p._id}')">✓ Принять</button>
-              <button class="btn btn-danger btn-sm" onclick="rejectProposal('${p._id}')">✗ Отклонить</button>` : ''}
-            ${user && user.id !== (fr._id||'') ? `
-              <a href="chat.html?user=${fr._id}" class="btn btn-glass btn-sm">💬 Написать</a>` : ''}
-          </div>
-        </div>`;
+          </div>`;
       }).join('');
     }
 
+    // ── REVIEW ─────────────────────────────────────────
+    function openReviewModal(revieweeId, revieweeName) {
+      selectedRating = 0;
+      document.getElementById('revieweeId').value = revieweeId;
+      document.getElementById('revieweeName').textContent = revieweeName;
+      document.getElementById('reviewComment').value = '';
+      updateStars(0);
+      openModal('reviewModal');
+    }
+
+    function handleStarClick(e) {
+      const star = e.target.closest('span[data-v]');
+      if (!star) return;
+      selectedRating = Number(star.dataset.v);
+      updateStars(selectedRating);
+    }
+
+    function updateStars(n) {
+      document.querySelectorAll('#starPicker span').forEach((s, i) => {
+        s.classList.toggle('active', i < n);
+      });
+    }
+
+    async function submitReview() {
+      if (!selectedRating) { showToast('Выберите оценку', 'error'); return; }
+      const revieweeId = document.getElementById('revieweeId').value;
+      const comment    = document.getElementById('reviewComment').value.trim();
+      try {
+        await apiAuth('/reviews', {
+          method: 'POST',
+          body: JSON.stringify({ taskId, revieweeId, rating: selectedRating, comment })
+        });
+        showToast('Отзыв отправлен! ⭐', 'success');
+        closeModal('reviewModal');
+        // Скрыть кнопку после отправки
+        const card = document.getElementById('reviewFormCard');
+        if (card) card.style.display = 'none';
+      } catch(e) { showToast(e.message||'Ошибка', 'error'); }
+    }
+
+    // ── TASK ACTIONS ───────────────────────────────────
     function statusLabel(s) {
       return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s]||s;
     }
 
     async function submitProposal() {
-      const user = getCurrentUser();
-      if (!user) { showToast('Войдите в аккаунт', 'error'); return; }
       const data = {
         coverLetter: document.getElementById('coverLetter').value.trim(),
-        price: Number(document.getElementById('proposalPrice').value),
-        deliveryDays: Number(document.getElementById('deliveryDays').value)
+        price:       Number(document.getElementById('proposalPrice').value),
+        deliveryDays:Number(document.getElementById('deliveryDays').value)
       };
-      if (!data.coverLetter || !data.price || !data.deliveryDays) {
-        showToast('Заполните все поля', 'error'); return;
-      }
+      if (!data.coverLetter || !data.price || !data.deliveryDays) { showToast('Заполните все поля', 'error'); return; }
       try {
         await apiAuth(`/tasks/${taskId}/proposals`, { method:'POST', body:JSON.stringify(data) });
         showToast('Отклик отправлен! 🎉', 'success');
@@ -303,12 +322,12 @@
         const res = await fetch(`/api/tasks/${taskId}/proposals/${proposalId}/reject`, {
           method:'PATCH', headers:{'Authorization':`Bearer ${token}`}
         });
-        if (res.ok) { showToast('Отклик отклонён', 'info'); await loadTask(); }
+        if (res.ok) { showToast('Отклонён', 'info'); await loadTask(); }
       } catch(e) {}
     }
 
     async function completeTask() {
-      if (!confirm('Отметить задание как выполненное? Это действие нельзя отменить.')) return;
+      if (!confirm('Отметить задание как выполненное? Это нельзя отменить.')) return;
       try {
         await apiAuth(`/tasks/${taskId}/complete`, { method:'PATCH' });
         showToast('Задание выполнено! 🎊', 'success');
@@ -321,24 +340,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       updateNavForAuth();
       loadTask();
-      window.addEventListener('scroll', () => {
-        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
-      });
+      window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20));
     });
   </script>
-
-  <style>
-    .task-detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 300px;
-      gap: 1.5rem;
-      align-items: start;
-    }
-    .task-detail-sidebar { position: sticky; top: 80px; }
-    @media (max-width: 760px) {
-      .task-detail-grid { grid-template-columns: 1fr; }
-      .task-detail-sidebar { position: static; }
-    }
-  </style>
 </body>
 </html>
