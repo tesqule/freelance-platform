@@ -3,8 +3,10 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Task = require('../models/Task');
 const Proposal = require('../models/Proposal');
+const User = require('../models/User');
+const notify = require('../utils/notify');
 
-// ⚠️ ВАЖНО: /my/tasks должен быть ПЕРВЫМ, до /:id
+// ⚠️ /my/tasks — ПЕРВЫМ
 router.get('/my/tasks', auth, async (req, res) => {
   try {
     let tasks;
@@ -14,14 +16,10 @@ router.get('/my/tasks', auth, async (req, res) => {
         .populate('proposals')
         .sort({ createdAt: -1 });
     } else {
-      // Для фрилансера — задания где он исполнитель ИЛИ где он откликнулся
       const myProposals = await Proposal.find({ freelancer: req.user._id }).select('task');
       const taskIds = myProposals.map(p => p.task);
       tasks = await Task.find({
-        $or: [
-          { assignedTo: req.user._id },
-          { _id: { $in: taskIds } }
-        ]
+        $or: [{ assignedTo: req.user._id }, { _id: { $in: taskIds } }]
       })
         .populate('client', 'name avatar rating')
         .sort({ createdAt: -1 });
@@ -32,18 +30,13 @@ router.get('/my/tasks', auth, async (req, res) => {
   }
 });
 
-// Get all tasks (with filters)
+// Get all tasks
 router.get('/', async (req, res) => {
   try {
     const { category, minBudget, maxBudget, status, search } = req.query;
     let query = {};
-
     if (category) query.category = category;
-    if (status) {
-      query.status = status;
-    } else {
-      query.status = 'open';
-    }
+    query.status = status || 'open';
     if (minBudget || maxBudget) {
       query.budget = {};
       if (minBudget) query.budget.$gte = Number(minBudget);
@@ -55,12 +48,10 @@ router.get('/', async (req, res) => {
         { description: { $regex: search, $options: 'i' } }
       ];
     }
-
     const tasks = await Task.find(query)
       .populate('client', 'name avatar rating')
       .populate('proposals')
       .sort({ createdAt: -1 });
-
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -76,7 +67,6 @@ router.get('/:id', async (req, res) => {
         path: 'proposals',
         populate: { path: 'freelancer', select: 'name avatar rating completedTasks skills' }
       });
-
     if (!task) return res.status(404).json({ message: 'Task not found' });
     res.json(task);
   } catch (err) {
@@ -84,21 +74,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create task (clients only)
+// Create task
 router.post('/', auth, async (req, res) => {
   try {
     if (req.user.role !== 'client') {
       return res.status(403).json({ message: 'Only clients can create tasks' });
     }
-
     const { title, description, category, budget, deadline, skills } = req.body;
-
     const task = new Task({
       title, description, category, budget, deadline,
       skills: skills || [],
       client: req.user._id
     });
-
     await task.save();
     const populated = await Task.findById(task._id).populate('client', 'name avatar rating');
     res.status(201).json(populated);
@@ -107,14 +94,13 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Submit proposal (freelancers only)
+// Submit proposal — с уведомлением заказчику
 router.post('/:id/proposals', auth, async (req, res) => {
   try {
     if (req.user.role !== 'freelancer') {
       return res.status(403).json({ message: 'Only freelancers can submit proposals' });
     }
-
-    const task = await Task.findById(req.params.id);
+    const task = await Task.findById(req.params.id).populate('client');
     if (!task) return res.status(404).json({ message: 'Task not found' });
     if (task.status !== 'open') return res.status(400).json({ message: 'Task is not open' });
 
@@ -122,26 +108,26 @@ router.post('/:id/proposals', auth, async (req, res) => {
     if (existing) return res.status(400).json({ message: 'You already submitted a proposal' });
 
     const { coverLetter, price, deliveryDays } = req.body;
-    const proposal = new Proposal({
-      task: task._id,
-      freelancer: req.user._id,
-      coverLetter, price, deliveryDays
-    });
+    const proposal = new Proposal({ task: task._id, freelancer: req.user._id, coverLetter, price, deliveryDays });
     await proposal.save();
-
     task.proposals.push(proposal._id);
     await task.save();
 
+    // 🔔 Уведомление заказчику
+    const client = await User.findById(task.client._id || task.client);
+    if (client) {
+      notify.notifyNewProposal(client, task, req.user).catch(console.error);
+    }
+
     const populated = await Proposal.findById(proposal._id)
       .populate('freelancer', 'name avatar rating completedTasks skills');
-
     res.status(201).json(populated);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// Accept proposal
+// Accept proposal — с уведомлением фрилансеру
 router.patch('/:taskId/proposals/:proposalId/accept', auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId);
@@ -149,21 +135,24 @@ router.patch('/:taskId/proposals/:proposalId/accept', auth, async (req, res) => 
     if (task.client.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized' });
     }
-
     const proposal = await Proposal.findById(req.params.proposalId);
     if (!proposal) return res.status(404).json({ message: 'Proposal not found' });
 
     proposal.status = 'accepted';
     await proposal.save();
-
     task.status = 'in_progress';
     task.assignedTo = proposal.freelancer;
     await task.save();
-
     await Proposal.updateMany(
       { task: task._id, _id: { $ne: proposal._id } },
       { status: 'rejected' }
     );
+
+    // 🔔 Уведомление фрилансеру
+    const freelancer = await User.findById(proposal.freelancer);
+    if (freelancer) {
+      notify.notifyProposalAccepted(freelancer, task).catch(console.error);
+    }
 
     res.json({ message: 'Proposal accepted', task, proposal });
   } catch (err) {
@@ -189,7 +178,7 @@ router.patch('/:taskId/proposals/:proposalId/reject', auth, async (req, res) => 
   }
 });
 
-// Complete task
+// Complete task — с уведомлением фрилансеру
 router.patch('/:id/complete', auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -197,15 +186,17 @@ router.patch('/:id/complete', auth, async (req, res) => {
     if (task.client.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized' });
     }
-
     task.status = 'completed';
     await task.save();
 
     if (task.assignedTo) {
-      const User = require('../models/User');
       await User.findByIdAndUpdate(task.assignedTo, { $inc: { completedTasks: 1 } });
+      // 🔔 Уведомление фрилансеру
+      const freelancer = await User.findById(task.assignedTo);
+      if (freelancer) {
+        notify.notifyTaskCompleted(freelancer, task).catch(console.error);
+      }
     }
-
     res.json({ message: 'Task completed', task });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
