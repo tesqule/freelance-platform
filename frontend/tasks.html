@@ -124,14 +124,13 @@
         <div class="form-group"><label>Дедлайн *</label><input type="date" class="form-control" id="taskDeadline" /></div>
       </div>
       <div class="form-group"><label>Навыки (через запятую)</label><input type="text" class="form-control" id="taskSkills" placeholder="React, Node.js" /></div>
-      <button class="btn btn-primary w-full" onclick="createTask()">Разместить задание 🚀</button>
+      <button class="btn btn-primary w-full" id="createTaskSubmitBtn" onclick="createTask()">Разместить задание 🚀</button>
     </div>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/tasks.js"></script>
   <script>
     let allTasks = [], favTaskIds = new Set(), currentCategory = '', currentView = 'all';
 
@@ -253,6 +252,42 @@
       if (!user) { showToast('Войдите в аккаунт', 'error'); return; }
       if (user.role !== 'client') { showToast('Только заказчики могут размещать задания', 'error'); return; }
       openModal('createTaskModal');
+    }
+
+    async function createTask() {
+      const title    = document.getElementById('taskTitle').value.trim();
+      const category = document.getElementById('taskCategory').value;
+      const desc     = document.getElementById('taskDesc').value.trim();
+      const budget   = Number(document.getElementById('taskBudget').value);
+      const deadline = document.getElementById('taskDeadline').value;
+      const skills   = document.getElementById('taskSkills').value
+                         .split(',').map(s => s.trim()).filter(Boolean);
+
+      if (!title)    { showToast('Введите название задания', 'error'); return; }
+      if (!category) { showToast('Выберите категорию', 'error'); return; }
+      if (!desc)     { showToast('Введите описание', 'error'); return; }
+      if (!budget || budget <= 0) { showToast('Введите корректный бюджет', 'error'); return; }
+      if (!deadline) { showToast('Укажите дедлайн', 'error'); return; }
+
+      const btn = document.getElementById('createTaskSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Размещаем...';
+
+      try {
+        const task = await apiAuth('/tasks', {
+          method: 'POST',
+          body: JSON.stringify({ title, category, description: desc, budget, deadline, skills })
+        });
+        closeModal('createTaskModal');
+        showToast('Задание размещено! 🚀', 'success');
+        allTasks.unshift(task);
+        filterTasks();
+      } catch(e) {
+        showToast(e.message || 'Ошибка при создании задания', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Разместить задание 🚀';
+      }
     }
 
     async function loadTasks() {
