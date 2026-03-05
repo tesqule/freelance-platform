@@ -17,16 +17,16 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-app.use('/api/auth',      require('./routes/auth'));
-app.use('/api/tasks',     require('./routes/tasks'));
-app.use('/api/chat',      require('./routes/chat'));
-app.use('/api/users',     require('./routes/users'));
-app.use('/api/reviews',   require('./routes/reviews'));
-app.use('/api/portfolio', require('./routes/portfolio'));
-app.use('/api/favorites', require('./routes/favorites'));
-app.use('/api/admin',     require('./routes/admin'));
+app.use('/api/auth',          require('./routes/auth'));
+app.use('/api/tasks',         require('./routes/tasks'));
+app.use('/api/chat',          require('./routes/chat'));
+app.use('/api/users',         require('./routes/users'));
+app.use('/api/reviews',       require('./routes/reviews'));
+app.use('/api/portfolio',     require('./routes/portfolio'));
+app.use('/api/favorites',     require('./routes/favorites'));
+app.use('/api/admin',         require('./routes/admin'));
 app.use('/api/notifications', require('./routes/notifications'));
-
+app.use('/api/services',      require('./routes/services')); // ← новый роут
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -51,3 +51,49 @@ app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../frontend/index.
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
