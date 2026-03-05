@@ -56,71 +56,76 @@ function toggleTheme() {
 
 initTheme();
 
-/* NOTIFICATIONS */
-let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+/* ── NOTIFICATIONS (MongoDB) ─────────────────────────── */
 
-function getUnreadCount() { return notifications.filter(n => !n.read).length; }
-
-function addNotification(text, icon = '💬', link = 'chat.html') {
-  const notif = { id: Date.now(), text, icon, link, read: false, time: new Date().toISOString() };
-  notifications.unshift(notif);
-  if (notifications.length > 20) notifications = notifications.slice(0, 20);
-  localStorage.setItem('notifications', JSON.stringify(notifications));
-  updateNotifBadge();
-  return notif;
+async function loadNotifCount() {
+  try {
+    const data = await apiAuth('/notifications/unread/count');
+    const badge = document.getElementById('notifBadge');
+    if (!badge) return;
+    if (data.count > 0) {
+      badge.textContent = data.count > 9 ? '9+' : data.count;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch(e) {}
 }
 
-function markAllRead() {
-  notifications = notifications.map(n => ({ ...n, read: true }));
-  localStorage.setItem('notifications', JSON.stringify(notifications));
-  updateNotifBadge();
-  renderNotifList();
-}
-
-function clearNotifications() {
-  notifications = [];
-  localStorage.setItem('notifications', JSON.stringify(notifications));
-  updateNotifBadge();
-  renderNotifList();
-}
-
-function updateNotifBadge() {
-  const badge = document.getElementById('notifBadge');
-  const count = getUnreadCount();
-  if (!badge) return;
-  if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
-  else badge.style.display = 'none';
-}
-
-function renderNotifList() {
+async function renderNotifList() {
   const list = document.getElementById('notifList');
   if (!list) return;
-  if (!notifications.length) { list.innerHTML = '<div class="notif-empty">🔔 Уведомлений нет</div>'; return; }
-  list.innerHTML = notifications.map(n => `
-    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="openNotif('${n.id}', '${n.link}')">
-      <div class="notif-icon">${n.icon}</div>
-      <div>
-        <div class="notif-text">${n.text}</div>
-        <div class="notif-time">${formatRelativeTime(n.time)}</div>
-      </div>
-    </div>`).join('');
+  list.innerHTML = '<div class="notif-empty" style="padding:1rem;text-align:center;color:var(--text3);">Загрузка...</div>';
+  try {
+    const notifs = await apiAuth('/notifications');
+    if (!notifs.length) {
+      list.innerHTML = '<div class="notif-empty">🔔 Уведомлений нет</div>';
+      return;
+    }
+    list.innerHTML = notifs.map(n => `
+      <div class="notif-item ${n.read ? '' : 'unread'}" onclick="openNotif('${n._id}','${n.link}')">
+        <div class="notif-icon">${n.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="notif-text">${n.text}</div>
+          <div class="notif-time">${formatRelativeTime(n.createdAt)}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="notif-empty">Ошибка загрузки</div>';
+  }
 }
 
-function openNotif(id, link) {
-  const notif = notifications.find(n => n.id == id);
-  if (notif) notif.read = true;
-  localStorage.setItem('notifications', JSON.stringify(notifications));
-  updateNotifBadge();
+async function openNotif(id, link) {
+  try { await apiAuth('/notifications/read/all', { method: 'PATCH' }); } catch(e) {}
   if (link) window.location.href = link;
 }
 
-function toggleNotifDropdown() {
+async function toggleNotifDropdown() {
   const dropdown = document.getElementById('notifDropdown');
   if (!dropdown) return;
   const isOpen = dropdown.classList.contains('open');
-  if (!isOpen) { renderNotifList(); markAllRead(); }
   dropdown.classList.toggle('open');
+  if (!isOpen) {
+    await renderNotifList();
+    try {
+      await apiAuth('/notifications/read/all', { method: 'PATCH' });
+      const badge = document.getElementById('notifBadge');
+      if (badge) badge.style.display = 'none';
+    } catch(e) {}
+  }
 }
+
+async function clearNotifications() {
+  try {
+    await apiAuth('/notifications/all', { method: 'DELETE' });
+    const list = document.getElementById('notifList');
+    if (list) list.innerHTML = '<div class="notif-empty">🔔 Уведомлений нет</div>';
+    const badge = document.getElementById('notifBadge');
+    if (badge) badge.style.display = 'none';
+  } catch(e) {}
+}
+
+function updateNotifBadge() { loadNotifCount(); }
 
 function formatRelativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -132,7 +137,7 @@ function formatRelativeTime(iso) {
   return `${Math.floor(hours / 24)} д назад`;
 }
 
-/* NAV */
+/* ── NAV ─────────────────────────────────────────────── */
 function updateNavForAuth() {
   const user = getCurrentUser();
   const el = document.getElementById('navActions');
@@ -169,13 +174,16 @@ function updateNavForAuth() {
         </span>
         ${user.name.split(' ')[0]}
       </a>`;
+
     document.addEventListener('click', e => {
       const wrapper = document.querySelector('.notif-wrapper');
       if (wrapper && !wrapper.contains(e.target)) document.getElementById('notifDropdown')?.classList.remove('open');
     });
-    updateNotifBadge();
-    // Загружаем непрочитанные сообщения для бейджа на чате
+
+    loadNotifCount();
     loadChatUnreadBadge();
+    setInterval(loadNotifCount, 30000);
+    setInterval(loadChatUnreadBadge, 30000);
   } else {
     el.innerHTML = `
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">${themeIcon}</button>
@@ -184,24 +192,21 @@ function updateNavForAuth() {
   }
 }
 
-// Загружает общее кол-во непрочитанных сообщений и показывает бейдж на иконке чата
 async function loadChatUnreadBadge() {
   try {
     const counts = await apiAuth('/chat/unread/counts');
     if (counts && typeof counts === 'object') {
       const total = Object.values(counts).reduce((a, b) => a + b, 0);
       const badge = document.getElementById('chatNavBadge');
-      if (badge && total > 0) {
-        badge.textContent = total > 9 ? '9+' : total;
-        badge.style.display = 'flex';
+      if (badge) {
+        if (total > 0) { badge.textContent = total > 9 ? '9+' : total; badge.style.display = 'flex'; }
+        else badge.style.display = 'none';
       }
     }
-  } catch(e) {
-    // Эндпоинт ещё не добавлен — бейдж просто не покажется
-  }
+  } catch(e) {}
 }
 
-/* SKELETONS */
+/* ── SKELETONS ───────────────────────────────────────── */
 function skeletonTaskCards(count = 6) {
   return Array.from({ length: count }, () => `
     <div class="skeleton-task-card">
@@ -234,7 +239,7 @@ function skeletonFreelancerCards(count = 4) {
     </div>`).join('');
 }
 
-/* TOAST */
+/* ── TOAST ───────────────────────────────────────────── */
 function showToast(msg, type = 'info') {
   const c = document.getElementById('toastContainer');
   if (!c) return;
@@ -246,14 +251,14 @@ function showToast(msg, type = 'info') {
   setTimeout(() => t.remove(), 4000);
 }
 
-/* MODALS */
+/* ── MODALS ──────────────────────────────────────────── */
 function openModal(id) { document.getElementById(id)?.classList.add('open'); }
 function closeModal(id) {
   document.getElementById(id)?.classList.remove('open');
   document.querySelectorAll(`#${id} input, #${id} textarea`).forEach(el => el.value = '');
 }
 
-/* RENDER TASK CARD — используется на index.html */
+/* ── RENDER TASK CARD ────────────────────────────────── */
 function renderTaskCard(task) {
   const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
   const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
@@ -293,7 +298,7 @@ function renderTaskCard(task) {
     </div>`;
 }
 
-/* TIME */
+/* ── TIME ────────────────────────────────────────────── */
 function formatTime(date) { return new Date(date).toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }); }
 function formatDate(date) {
   const d = new Date(date);
@@ -301,7 +306,7 @@ function formatDate(date) {
   return d.toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
 }
 
-/* CHAT SEARCH */
+/* ── CHAT SEARCH ─────────────────────────────────────── */
 function filterConversations(val) {
   document.querySelectorAll('.conversation-item').forEach(item => {
     const name = item.querySelector('.conv-name')?.textContent?.toLowerCase() || '';

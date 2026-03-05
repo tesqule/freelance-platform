@@ -25,6 +25,8 @@ app.use('/api/reviews',   require('./routes/reviews'));
 app.use('/api/portfolio', require('./routes/portfolio'));
 app.use('/api/favorites', require('./routes/favorites'));
 app.use('/api/admin',     require('./routes/admin'));
+app.use('/api/notifications', require('./routes/notifications'));
+
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.static(path.join(__dirname, '../frontend')));

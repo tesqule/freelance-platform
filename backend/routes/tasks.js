@@ -4,9 +4,17 @@ const auth = require('../middleware/auth');
 const Task = require('../models/Task');
 const Proposal = require('../models/Proposal');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const notify = require('../utils/notify');
 
-// ⚠️ /my/tasks — ПЕРВЫМ
+async function createNotification(userId, text, icon = '🔔', link = '') {
+  try {
+    await Notification.create({ user: userId, text, icon, link });
+  } catch(e) {
+    console.error('Notification error:', e.message);
+  }
+}
+
 router.get('/my/tasks', auth, async (req, res) => {
   try {
     let tasks;
@@ -30,7 +38,6 @@ router.get('/my/tasks', auth, async (req, res) => {
   }
 });
 
-// Get all tasks
 router.get('/', async (req, res) => {
   try {
     const { category, minBudget, maxBudget, status, search } = req.query;
@@ -58,7 +65,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get single task
 router.get('/:id', async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
@@ -74,7 +80,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create task
 router.post('/', auth, async (req, res) => {
   try {
     if (req.user.role !== 'client') {
@@ -94,7 +99,6 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Submit proposal — с уведомлением заказчику
 router.post('/:id/proposals', auth, async (req, res) => {
   try {
     if (req.user.role !== 'freelancer') {
@@ -113,11 +117,16 @@ router.post('/:id/proposals', auth, async (req, res) => {
     task.proposals.push(proposal._id);
     await task.save();
 
-    // 🔔 Уведомление заказчику
-    const client = await User.findById(task.client._id || task.client);
-    if (client) {
-      notify.notifyNewProposal(client, task, req.user).catch(console.error);
-    }
+    const clientId = task.client._id || task.client;
+    await createNotification(
+      clientId,
+      `💼 ${req.user.name} откликнулся на задание «${task.title}»`,
+      '💼',
+      `task-detail.html?id=${task._id}`
+    );
+
+    const client = await User.findById(clientId);
+    if (client) notify.notifyNewProposal(client, task, req.user).catch(console.error);
 
     const populated = await Proposal.findById(proposal._id)
       .populate('freelancer', 'name avatar rating completedTasks skills');
@@ -127,7 +136,6 @@ router.post('/:id/proposals', auth, async (req, res) => {
   }
 });
 
-// Accept proposal — с уведомлением фрилансеру
 router.patch('/:taskId/proposals/:proposalId/accept', auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId);
@@ -148,11 +156,15 @@ router.patch('/:taskId/proposals/:proposalId/accept', auth, async (req, res) => 
       { status: 'rejected' }
     );
 
-    // 🔔 Уведомление фрилансеру
+    await createNotification(
+      proposal.freelancer,
+      `✅ Ваш отклик на задание «${task.title}» принят!`,
+      '✅',
+      `task-detail.html?id=${task._id}`
+    );
+
     const freelancer = await User.findById(proposal.freelancer);
-    if (freelancer) {
-      notify.notifyProposalAccepted(freelancer, task).catch(console.error);
-    }
+    if (freelancer) notify.notifyProposalAccepted(freelancer, task).catch(console.error);
 
     res.json({ message: 'Proposal accepted', task, proposal });
   } catch (err) {
@@ -160,7 +172,6 @@ router.patch('/:taskId/proposals/:proposalId/accept', auth, async (req, res) => 
   }
 });
 
-// Reject proposal
 router.patch('/:taskId/proposals/:proposalId/reject', auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId);
@@ -172,13 +183,20 @@ router.patch('/:taskId/proposals/:proposalId/reject', auth, async (req, res) => 
     if (!proposal) return res.status(404).json({ message: 'Proposal not found' });
     proposal.status = 'rejected';
     await proposal.save();
+
+    await createNotification(
+      proposal.freelancer,
+      `❌ Ваш отклик на задание «${task.title}» отклонён`,
+      '❌',
+      `task-detail.html?id=${task._id}`
+    );
+
     res.json({ message: 'Proposal rejected', proposal });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// Complete task — с уведомлением фрилансеру
 router.patch('/:id/complete', auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -191,11 +209,16 @@ router.patch('/:id/complete', auth, async (req, res) => {
 
     if (task.assignedTo) {
       await User.findByIdAndUpdate(task.assignedTo, { $inc: { completedTasks: 1 } });
-      // 🔔 Уведомление фрилансеру
+
+      await createNotification(
+        task.assignedTo,
+        `🎉 Задание «${task.title}» отмечено как выполненное!`,
+        '🎉',
+        `task-detail.html?id=${task._id}`
+      );
+
       const freelancer = await User.findById(task.assignedTo);
-      if (freelancer) {
-        notify.notifyTaskCompleted(freelancer, task).catch(console.error);
-      }
+      if (freelancer) notify.notifyTaskCompleted(freelancer, task).catch(console.error);
     }
     res.json({ message: 'Task completed', task });
   } catch (err) {
