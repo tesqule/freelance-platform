@@ -588,21 +588,15 @@
     // SERVICES
     // ═══════════════════════════════════════════
     async function loadServices() {
-      try {
-        const users = await api('/users?role=freelancer');
-        const results = await Promise.all(
-          users.slice(0, 12).map(async u => {
-            try { const p = await api(`/portfolio/${u._id}`); return p.map(i => ({...i, author: u})); }
-            catch { return []; }
-          })
-        );
-        allServices = results.flat().slice(0, 12);
-        renderServices(allServices);
-      } catch(e) {
-        document.getElementById('servicesGrid').innerHTML =
-          '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛠</div><p>Услуги скоро появятся</p></div>';
-      }
-    }
+  try {
+    const services = await api('/services');
+    allServices = services;
+    renderServices(allServices);
+  } catch(e) {
+    document.getElementById('servicesGrid').innerHTML =
+      '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛠</div><p>Услуги скоро появятся</p></div>';
+  }
+}
 
     function filterServices(cat, btn) {
       currentServiceCategory = cat;
