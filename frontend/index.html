@@ -79,7 +79,7 @@
       <div class="hero-search-wrap">
         <div class="hero-search">
           <span class="search-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>      
           </span>
           <input type="text" id="heroSearch" placeholder="Найди задание: React, дизайн логотипа, SEO..." autocomplete="off" oninput="handleHeroSearch(this.value)" />
           <a href="tasks.html" class="search-btn">Найти</a>
@@ -451,7 +451,7 @@
         const tasks = await api('/tasks');
         const c = document.getElementById('recentTasks');
         if (!tasks.length) {
-          c.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📭</div><h3>Заданий пока нет</h3><p>Стань первым кто разместит задание</p><button class="btn btn-primary mt-2" onclick="openAuthModal('register')">Разместить →</button></div>`;
+          c.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">�<</div><h3>Заданий пока нет</h3><p>Стань первым кто разместит задание</p><button class="btn btn-primary mt-2" onclick="openAuthModal('register')">Разместить →</button></div>`;
           return;
         }
         c.innerHTML = tasks.slice(0, 6).map(renderTaskCard).join('');
@@ -476,7 +476,7 @@
         renderServices(allServices);
       } catch(e) {
         document.getElementById('servicesGrid').innerHTML =
-          '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛠</div><p>Услуги скоро появятся</p></div>';
+          '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛠</div><p>Услу ги скоро появятся</p></div>';
       }
     }
 
@@ -533,7 +533,7 @@
         const users = await api('/users?role=freelancer');
         const c = document.getElementById('topFreelancers');
         if (!users.length) {
-          c.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">👥</div><p>Фрилансеров пока нет</p></div>`;
+          c.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">�<</div><p>Фрилансеров пока нет</p></div>`;
           return;
         }
         c.innerHTML = users.slice(0, 8).map((u, idx) => {
