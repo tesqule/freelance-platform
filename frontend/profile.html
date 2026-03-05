@@ -13,12 +13,24 @@
     .profile-tab { padding:.6rem 1.1rem; font-size:.875rem; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .16s; background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-body); }
     .profile-tab:hover { color:var(--text); }
     .profile-tab.active { color:var(--blue-light); border-bottom-color:var(--blue); }
+
     .portfolio-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:1rem; }
     .portfolio-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; transition:all .22s; }
     .portfolio-card:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.3); }
     .portfolio-img { width:100%; height:155px; background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:2.5rem; overflow:hidden; }
     .portfolio-img img { width:100%; height:155px; object-fit:cover; }
     .portfolio-body { padding:1rem; }
+
+    /* Услуги — такая же сетка как портфолио */
+    .services-grid-profile { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:1rem; }
+    .service-card-profile { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; transition:all .22s; }
+    .service-card-profile:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.3); }
+    .service-card-img { width:100%; height:155px; background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:2.5rem; overflow:hidden; position:relative; }
+    .service-card-img img { width:100%; height:155px; object-fit:cover; }
+    .service-card-body { padding:1rem; }
+    .service-card-price { font-family:var(--font-display); font-size:1.2rem; font-weight:800; color:var(--green); letter-spacing:-.03em; margin:.4rem 0; }
+    .service-card-delivery { font-size:.75rem; color:var(--text3); }
+
     .review-item { padding:1.1rem 0; border-bottom:1px solid var(--border); }
     .review-item:last-child { border-bottom:none; }
     .toggle-switch { position:relative; width:44px; height:24px; flex-shrink:0; }
@@ -27,7 +39,11 @@
     .toggle-slider::before { content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:var(--text3); border-radius:50%; transition:.2s; }
     .toggle-switch input:checked + .toggle-slider { background:rgba(79,110,247,.2); border-color:var(--blue); }
     .toggle-switch input:checked + .toggle-slider::before { transform:translateX(20px); background:var(--blue-light); }
-    @media (max-width:600px) { .portfolio-grid { grid-template-columns:1fr; } .profile-tabs { overflow-x:auto; white-space:nowrap; } }
+
+    @media (max-width:600px) {
+      .portfolio-grid, .services-grid-profile { grid-template-columns:1fr; }
+      .profile-tabs { overflow-x:auto; white-space:nowrap; }
+    }
   </style>
 </head>
 <body>
@@ -75,6 +91,7 @@
       <div class="profile-tabs">
         <button class="profile-tab active" onclick="switchProfileTab('edit',this)">✏️ Редактировать</button>
         <button class="profile-tab" onclick="switchProfileTab('portfolio',this)" id="portfolioTabBtn">🖼 Портфолио</button>
+        <button class="profile-tab" onclick="switchProfileTab('services',this)" id="servicesTabBtn">🛠 Услуги</button>
         <button class="profile-tab" onclick="switchProfileTab('reviews',this)">⭐ Отзывы</button>
         <button class="profile-tab" onclick="switchProfileTab('notifications',this)">🔔 Уведомления</button>
       </div>
@@ -109,10 +126,25 @@
       <!-- TAB: PORTFOLIO -->
       <div id="tab-portfolio" style="display:none;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
-          <h3 style="font-size:1.05rem;letter-spacing:-.02em;">Мои работы</h3>
+          <div>
+            <h3 style="font-size:1.05rem;letter-spacing:-.02em;">Мои работы</h3>
+            <p style="font-size:.8rem;color:var(--text3);margin-top:.2rem;">Покажите заказчикам что вы уже делали</p>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="openModal('portfolioModal')">+ Добавить работу</button>
         </div>
         <div class="portfolio-grid" id="portfolioGrid"><div class="spinner"></div></div>
+      </div>
+
+      <!-- TAB: SERVICES -->
+      <div id="tab-services" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+          <div>
+            <h3 style="font-size:1.05rem;letter-spacing:-.02em;">Мои услуги</h3>
+            <p style="font-size:.8rem;color:var(--text3);margin-top:.2rem;">Что вы предлагаете заказчикам прямо сейчас</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Добавить услугу</button>
+        </div>
+        <div class="services-grid-profile" id="servicesGrid"><div class="spinner"></div></div>
       </div>
 
       <!-- TAB: REVIEWS -->
@@ -204,22 +236,56 @@
     </div>
   </div>
 
+  <!-- SERVICE MODAL -->
+  <div class="modal-overlay" id="serviceModal">
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-header">
+        <h3 id="serviceModalTitle">Добавить услугу</h3>
+        <button class="modal-close" onclick="closeServiceModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <input type="hidden" id="serviceEditId" />
+      <div class="form-group"><label>Название услуги *</label><input type="text" class="form-control" id="sTitle" placeholder="Создам сайт под ключ на React" /></div>
+      <div class="form-group"><label>Описание *</label><textarea class="form-control" id="sDesc" style="min-height:100px;" placeholder="Подробно опишите что входит в услугу..."></textarea></div>
+      <div class="form-group">
+        <label>Категория</label>
+        <select class="form-control" id="sCategory">
+          <option value="development">💻 Разработка</option>
+          <option value="design">🎨 Дизайн</option>
+          <option value="writing">✍️ Тексты</option>
+          <option value="marketing">📣 Маркетинг</option>
+          <option value="video">🎬 Видео</option>
+          <option value="other">🔧 Другое</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label>Цена (₽) *</label><input type="number" class="form-control" id="sPrice" placeholder="3000" min="1" /></div>
+        <div class="form-group"><label>Срок выполнения (дней) *</label><input type="number" class="form-control" id="sDeliveryDays" placeholder="7" min="1" /></div>
+      </div>
+      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="sImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <div class="form-group" style="margin-bottom:0;"><label>Навыки (через запятую)</label><input type="text" class="form-control" id="sSkills" placeholder="React, Node.js..." /></div>
+      <button class="btn btn-primary w-full mt-3" id="serviceSubmitBtn" onclick="saveService()">Сохранить услугу</button>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/profile.js"></script>
   <script>
+    const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
+
     function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
-    function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
+    function closeMobileMenu()  { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
 
     function switchProfileTab(name, btn) {
       document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
-      ['edit','portfolio','reviews','notifications'].forEach(t => {
+      ['edit','portfolio','services','reviews','notifications'].forEach(t => {
         document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
       });
       if (name === 'portfolio')     loadPortfolio();
+      if (name === 'services')      loadServices();
       if (name === 'reviews')       loadReviews();
       if (name === 'notifications') loadNotifSettings();
     }
@@ -229,18 +295,20 @@
       document.getElementById('skillsPreview').innerHTML = skills.map(s=>`<span class="skill-tag">${s}</span>`).join('');
     }
 
+    // ═══════════════════════════════════════════
+    // ПОРТФОЛИО
+    // ═══════════════════════════════════════════
     async function loadPortfolio() {
       const grid = document.getElementById('portfolioGrid');
       grid.innerHTML = '<div class="spinner"></div>';
       try {
         const user = getCurrentUser();
         const items = await apiAuth(`/portfolio/${user.id}`);
-        const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
         if (!items.length) {
           grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
             <div class="empty-icon">🖼</div>
             <h3>Портфолио пусто</h3>
-            <p>Добавьте работы чтобы привлечь заказчиков</p>
+            <p>Добавьте работы чтобы заказчики видели ваш опыт</p>
             <button class="btn btn-primary mt-2" onclick="openModal('portfolioModal')">+ Добавить первую</button>
           </div>`;
           return;
@@ -301,7 +369,7 @@
         const items = await apiAuth(`/portfolio/${user.id}`);
         const item = items.find(i => i._id === id);
         if (!item) return;
-        document.getElementById('portfolioEditId').value = id;
+        document.getElementById('portfolioEditId').value  = id;
         document.getElementById('portfolioModalTitle').textContent = 'Редактировать работу';
         document.getElementById('pTitle').value      = item.title || '';
         document.getElementById('pDesc').value       = item.description || '';
@@ -322,6 +390,130 @@
       } catch(e) { showToast(e.message||'Ошибка', 'error'); }
     }
 
+    // ═══════════════════════════════════════════
+    // УСЛУГИ
+    // ═══════════════════════════════════════════
+    async function loadServices() {
+      const grid = document.getElementById('servicesGrid');
+      grid.innerHTML = '<div class="spinner"></div>';
+      try {
+        const services = await apiAuth('/services/my');
+        if (!services.length) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">🛠</div>
+            <h3>Услуг пока нет</h3>
+            <p>Добавьте услуги чтобы заказчики могли вас нанять напрямую</p>
+            <button class="btn btn-primary mt-2" onclick="openServiceModal()">+ Добавить первую</button>
+          </div>`;
+          return;
+        }
+        grid.innerHTML = services.map(s => `
+          <div class="service-card-profile">
+            <div class="service-card-img">
+              ${s.imageUrl
+                ? `<img src="${s.imageUrl}" alt="${s.title}" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem>${catEmojis[s.category]||'🔧'}</span>';">`
+                : `<span style="font-size:2.5rem;">${catEmojis[s.category]||'🔧'}</span>`}
+            </div>
+            <div class="service-card-body">
+              <div style="font-weight:700;font-size:.95rem;">${s.title}</div>
+              ${s.description ? `<div style="font-size:.8rem;color:var(--text2);line-height:1.6;margin-top:.3rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${s.description}</div>` : ''}
+              <div class="service-card-price">₽${s.price.toLocaleString()}</div>
+              <div class="service-card-delivery">⏱ ${s.deliveryDays} дн.</div>
+              ${s.skills?.length ? `<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem;">${s.skills.slice(0,3).map(sk=>`<span class="skill-tag">${sk}</span>`).join('')}</div>` : ''}
+              <div style="display:flex;gap:.4rem;margin-top:.75rem;">
+                <button class="btn btn-glass btn-sm" onclick="editService('${s._id}')">✏️ Редактировать</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteService('${s._id}')">🗑</button>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch(e) { grid.innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
+    }
+
+    function openServiceModal(service) {
+      document.getElementById('serviceEditId').value = '';
+      document.getElementById('serviceModalTitle').textContent = 'Добавить услугу';
+      ['sTitle','sDesc','sPrice','sDeliveryDays','sImageUrl','sSkills'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('sCategory').value = 'development';
+      if (service) {
+        document.getElementById('serviceEditId').value = service._id;
+        document.getElementById('serviceModalTitle').textContent = 'Редактировать услугу';
+        document.getElementById('sTitle').value        = service.title || '';
+        document.getElementById('sDesc').value         = service.description || '';
+        document.getElementById('sCategory').value     = service.category || 'development';
+        document.getElementById('sPrice').value        = service.price || '';
+        document.getElementById('sDeliveryDays').value = service.deliveryDays || '';
+        document.getElementById('sImageUrl').value     = service.imageUrl || '';
+        document.getElementById('sSkills').value       = (service.skills||[]).join(', ');
+      }
+      document.getElementById('serviceModal').classList.add('open');
+    }
+
+    function closeServiceModal() {
+      document.getElementById('serviceModal').classList.remove('open');
+      const btn = document.getElementById('serviceSubmitBtn');
+      btn.disabled = false;
+      btn.textContent = 'Сохранить услугу';
+    }
+
+    async function saveService() {
+      const editId = document.getElementById('serviceEditId').value;
+      const data = {
+        title:        document.getElementById('sTitle').value.trim(),
+        description:  document.getElementById('sDesc').value.trim(),
+        category:     document.getElementById('sCategory').value,
+        price:        Number(document.getElementById('sPrice').value),
+        deliveryDays: Number(document.getElementById('sDeliveryDays').value),
+        imageUrl:     document.getElementById('sImageUrl').value.trim(),
+        skills:       document.getElementById('sSkills').value.split(',').map(s=>s.trim()).filter(Boolean)
+      };
+      if (!data.title)        { showToast('Введите название', 'error'); return; }
+      if (!data.description)  { showToast('Введите описание', 'error'); return; }
+      if (!data.price || data.price < 1)        { showToast('Введите корректную цену', 'error'); return; }
+      if (!data.deliveryDays || data.deliveryDays < 1) { showToast('Введите срок выполнения', 'error'); return; }
+
+      const btn = document.getElementById('serviceSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Сохраняем...';
+
+      try {
+        if (editId) {
+          await apiAuth(`/services/${editId}`, { method:'PUT', body:JSON.stringify(data) });
+          showToast('Услуга обновлена ✅', 'success');
+        } else {
+          await apiAuth('/services', { method:'POST', body:JSON.stringify(data) });
+          showToast('Услуга добавлена! 🎉', 'success');
+        }
+        closeServiceModal();
+        loadServices();
+      } catch(e) {
+        showToast(e.message||'Ошибка', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Сохранить услугу';
+      }
+    }
+
+    async function editService(id) {
+      try {
+        const services = await apiAuth('/services/my');
+        const s = services.find(s => s._id === id);
+        if (s) openServiceModal(s);
+      } catch(e) {}
+    }
+
+    async function deleteService(id) {
+      if (!confirm('Удалить эту услугу?')) return;
+      try {
+        await apiAuth(`/services/${id}`, { method:'DELETE' });
+        showToast('Услуга удалена', 'success');
+        loadServices();
+      } catch(e) { showToast(e.message||'Ошибка', 'error'); }
+    }
+
+    // ═══════════════════════════════════════════
+    // ОТЗЫВЫ
+    // ═══════════════════════════════════════════
     async function loadReviews() {
       try {
         const user = getCurrentUser();
@@ -359,6 +551,9 @@
       } catch(e) { document.getElementById('reviewsList').innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
     }
 
+    // ═══════════════════════════════════════════
+    // УВЕДОМЛЕНИЯ
+    // ═══════════════════════════════════════════
     async function loadNotifSettings() {
       try {
         const res = await apiAuth('/auth/me');
@@ -404,12 +599,40 @@
 
     function openAuthModal() { window.location.href = 'index.html'; }
 
+    // Закрытие модалок по оверлею
     document.addEventListener('DOMContentLoaded', () => {
       const user = getCurrentUser();
       if (!user) { window.location.href = 'index.html'; return; }
       updateNavForAuth();
       loadProfile();
-      if (user.role === 'client') document.getElementById('portfolioTabBtn').style.display = 'none';
+
+      // Скрываем вкладки портфолио и услуг для заказчиков
+      if (user.role === 'client') {
+        document.getElementById('portfolioTabBtn').style.display = 'none';
+        document.getElementById('servicesTabBtn').style.display  = 'none';
+      }
+
+      // Если пришли с index.html после клика "Разместить заказ" фрилансером
+      if (sessionStorage.getItem('pendingAction') === 'addService') {
+        sessionStorage.removeItem('pendingAction');
+        setTimeout(() => {
+          const btn = document.querySelector('[onclick*="switchProfileTab(\'services\'"]');
+          switchProfileTab('services', document.getElementById('servicesTabBtn'));
+          document.getElementById('servicesTabBtn').classList.add('active');
+          document.querySelectorAll('.profile-tab').forEach(t => {
+            if (t.id !== 'servicesTabBtn') t.classList.remove('active');
+          });
+          setTimeout(openServiceModal, 300);
+        }, 400);
+      }
+
+      document.getElementById('serviceModal').addEventListener('click', e => {
+        if (e.target.id === 'serviceModal') closeServiceModal();
+      });
+      document.getElementById('portfolioModal').addEventListener('click', e => {
+        if (e.target.id === 'portfolioModal') closePortfolioModal();
+      });
+
       window.addEventListener('scroll', () => {
         document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
       });

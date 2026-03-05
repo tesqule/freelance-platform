@@ -324,14 +324,18 @@
     function handlePlaceOrder() {
       const user = getCurrentUser();
       if (!user) {
-        sessionStorage.setItem('pendingAction', 'createTask');
+        // Запомним что хотел сделать — после входа разберёмся по роли
+        sessionStorage.setItem('pendingAction', 'placeOrder');
         openAuthModal('register');
         return;
       }
       if (user.role === 'freelancer') {
-        showToast('Только заказчики могут размещать задания', 'info');
+        // Фрилансер → идём в профиль, открываем вкладку услуг + модалку
+        sessionStorage.setItem('pendingAction', 'addService');
+        window.location.href = 'profile.html';
         return;
       }
+      // Заказчик → модалка создания задания прямо здесь
       openCreateTaskModal();
     }
 
@@ -693,13 +697,17 @@
       renderReviews();
       selectRole('client');
 
-      // Если вернулись после входа/регистрации и нужно создать задание
+      // Если вернулись после входа/регистрации
       const pending = sessionStorage.getItem('pendingAction');
-      if (pending === 'createTask') {
+      if (pending === 'createTask' || pending === 'placeOrder') {
         sessionStorage.removeItem('pendingAction');
         const user = getCurrentUser();
-        if (user && user.role === 'client') {
-          setTimeout(openCreateTaskModal, 400);
+        if (user) {
+          if (user.role === 'client') setTimeout(openCreateTaskModal, 400);
+          else if (user.role === 'freelancer') {
+            sessionStorage.setItem('pendingAction', 'addService');
+            window.location.href = 'profile.html';
+          }
         }
       }
 
