@@ -1,76 +1,51 @@
-// backend/utils/telegramBot.js
-// Простой polling-бот который отвечает на /start и отдаёт Chat ID
-// Запускается автоматически вместе с сервером
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-async function sendTelegramMessage(chatId, text) {
-  if (!process.env.TELEGRAM_BOT_TOKEN) return;
-  try {
-    await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
-    });
-  } catch(e) {
-    console.error('Telegram send error:', e.message);
-  }
-}
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
 
-let lastUpdateId = 0;
+app.use(cors());
+app.use(express.json());
 
-async function pollTelegram() {
-  if (!process.env.TELEGRAM_BOT_TOKEN) return;
-  try {
-    const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&timeout=30`;
-    const res  = await fetch(url);
-    const data = await res.json();
-    if (!data.ok || !data.result?.length) return;
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB error:', err));
 
-    for (const update of data.result) {
-      lastUpdateId = update.update_id;
-      const msg = update.message;
-      if (!msg) continue;
+app.use('/api/auth',      require('./routes/auth'));
+app.use('/api/tasks',     require('./routes/tasks'));
+app.use('/api/chat',      require('./routes/chat'));
+app.use('/api/users',     require('./routes/users'));
+app.use('/api/reviews',   require('./routes/reviews'));
+app.use('/api/portfolio', require('./routes/portfolio'));
+app.use('/api/favorites', require('./routes/favorites'));
+app.use('/api/admin',     require('./routes/admin'));
 
-      const chatId = msg.chat.id;
-      const text   = msg.text?.trim();
-      const name   = msg.from?.first_name || 'пользователь';
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-      if (text === '/start') {
-        await sendTelegramMessage(chatId,
-          `👋 Привет, <b>${name}</b>!\n\n` +
-          `Это бот платформы <b>FreeLanceHub</b>.\n\n` +
-          `Твой <b>Chat ID</b>:\n` +
-          `<code>${chatId}</code>\n\n` +
-          `📋 Скопируй этот ID и вставь его в настройках профиля на сайте:\n` +
-          `<b>Профиль → Уведомления → Telegram</b>\n\n` +
-          `После этого ты будешь получать уведомления о новых откликах, принятых заявках и выполненных заданиях! 🚀`
-        );
-        console.log(`📱 Telegram /start from chatId: ${chatId}, name: ${name}`);
-      } else if (text === '/help') {
-        await sendTelegramMessage(chatId,
-          `ℹ️ <b>FreeLanceHub Bot</b>\n\n` +
-          `Этот бот отправляет уведомления о событиях на платформе.\n\n` +
-          `<b>Команды:</b>\n` +
-          `/start — получить свой Chat ID\n` +
-          `/help — справка\n\n` +
-          `Твой Chat ID: <code>${chatId}</code>`
-        );
-      }
-    }
-  } catch(e) {
-    // Молча игнорируем ошибки polling — сервер не должен падать
-  }
-}
+const Message = require('./models/Message');
+io.on('connection', (socket) => {
+  socket.on('join_room', (roomId) => socket.join(roomId));
+  socket.on('send_message', async (data) => {
+    try {
+      const message = new Message({ room: data.room, sender: data.senderId, text: data.text, createdAt: new Date() });
+      await message.save();
+      const populated = await Message.findById(message._id).populate('sender', 'name avatar role');
+      io.to(data.room).emit('receive_message', populated);
+    } catch(err) { console.error('Message error:', err); }
+  });
+});
 
-function startTelegramBot() {
-  if (!process.env.TELEGRAM_BOT_TOKEN) {
-    console.log('⚠️  TELEGRAM_BOT_TOKEN не задан — Telegram бот отключён');
-    return;
-  }
-  console.log('📱 Telegram бот запущен');
-  // Запускаем polling каждые 3 секунды
-  setInterval(pollTelegram, 3000);
-  // И сразу один раз
-  pollTelegram();
-}
+const { startTelegramBot } = require('./utils/telegramBot');
+startTelegramBot();
 
-module.exports = { startTelegramBot, sendTelegramMessage };
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../frontend/index.html')));
+
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
