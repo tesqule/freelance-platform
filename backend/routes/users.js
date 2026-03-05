@@ -6,10 +6,15 @@ const User = require('../models/User');
 // ⚠️ ВАЖНО: /profile/update должен быть ПЕРВЫМ, до /:id
 router.put('/profile/update', auth, async (req, res) => {
   try {
-    const { name, bio, skills, avatar } = req.body;
+    const { name, bio, skills, avatar, telegramChatId, emailNotifications } = req.body;
+    
+    const updateData = { name, bio, skills, avatar };
+    if (telegramChatId !== undefined) updateData.telegramChatId = telegramChatId;
+    if (emailNotifications !== undefined) updateData.emailNotifications = emailNotifications;
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { name, bio, skills, avatar },
+      updateData,
       { new: true }
     ).select('-password');
     res.json(user);
@@ -17,7 +22,6 @@ router.put('/profile/update', auth, async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
-
 // Get users list
 router.get('/', async (req, res) => {
   try {
