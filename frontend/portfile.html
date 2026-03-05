@@ -10,48 +10,40 @@
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .profile-tabs { display:flex; gap:.3rem; margin-bottom:1.75rem; border-bottom:1px solid var(--border); }
-    .profile-tab {
-      padding:.6rem 1.1rem; font-size:.875rem; font-weight:600; color:var(--text2);
-      cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
-      transition:all .16s; background:none; border-top:none; border-left:none; border-right:none;
-      font-family:var(--font-body);
-    }
+    .profile-tab { padding:.6rem 1.1rem; font-size:.875rem; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .16s; background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-body); }
     .profile-tab:hover { color:var(--text); }
     .profile-tab.active { color:var(--blue-light); border-bottom-color:var(--blue); }
-
     .portfolio-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:1rem; }
     .portfolio-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; transition:all .22s; }
     .portfolio-card:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.3); }
     .portfolio-img { width:100%; height:155px; object-fit:cover; background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
     .portfolio-img img { width:100%; height:155px; object-fit:cover; }
     .portfolio-body { padding:1rem; }
-
     .review-item { padding:1.1rem 0; border-bottom:1px solid var(--border); }
     .review-item:last-child { border-bottom:none; }
-
     .toggle-switch { position:relative; width:44px; height:24px; flex-shrink:0; }
     .toggle-switch input { opacity:0; width:0; height:0; }
     .toggle-slider { position:absolute; inset:0; background:var(--surface2); border-radius:99px; cursor:pointer; transition:.2s; border:1px solid var(--border2); }
     .toggle-slider::before { content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:var(--text3); border-radius:50%; transition:.2s; }
     .toggle-switch input:checked + .toggle-slider { background:rgba(79,110,247,.2); border-color:var(--blue); }
     .toggle-switch input:checked + .toggle-slider::before { transform:translateX(20px); background:var(--blue-light); }
-
-    @media (max-width:600px) {
-      .portfolio-grid { grid-template-columns:1fr; }
-      .profile-tabs { overflow-x:auto; white-space:nowrap; }
-    }
+    @media (max-width:600px) { .portfolio-grid { grid-template-columns:1fr; } .profile-tabs { overflow-x:auto; white-space:nowrap; } }
   </style>
 </head>
 <body>
 
   <div class="noise-overlay"></div>
-  <div class="bg-canvas"><div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-grid"></div></div>
+  <div class="bg-canvas">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-blob b4"></div>
+    <div class="bg-grid"></div>
+  </div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
-      <div class="logo-mark">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg>
-      </div>
+      <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg></div>
       <span class="logo-text">FreeLanceHub</span>
     </a>
     <ul class="nav-links">
@@ -73,14 +65,11 @@
 
   <div class="page">
     <div class="container" style="padding-bottom:4rem;max-width:860px;">
-
       <div style="margin:2rem 0 1.5rem;">
         <div class="section-eyebrow">Аккаунт</div>
         <h2 style="font-size:1.8rem;letter-spacing:-.04em;">Мой профиль</h2>
       </div>
-
       <div id="profileHeader" style="margin-bottom:1.5rem;"><div class="spinner"></div></div>
-
       <div class="profile-tabs">
         <button class="profile-tab active" onclick="switchProfileTab('edit',this)">✏️ Редактировать</button>
         <button class="profile-tab" onclick="switchProfileTab('portfolio',this)" id="portfolioTabBtn">🖼 Портфолио</button>
@@ -88,23 +77,13 @@
         <button class="profile-tab" onclick="switchProfileTab('notifications',this)">🔔 Уведомления</button>
       </div>
 
-      <!-- TAB: EDIT -->
       <div id="tab-edit">
         <div class="card" style="border-radius:var(--radius-lg);padding:2rem;">
           <div class="grid-2" style="gap:1rem;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Имя</label>
-              <input type="text" class="form-control" id="editName" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>URL аватара</label>
-              <input type="text" class="form-control" id="editAvatar" placeholder="https://example.com/photo.jpg" />
-            </div>
+            <div class="form-group" style="margin-bottom:0;"><label>Имя</label><input type="text" class="form-control" id="editName" /></div>
+            <div class="form-group" style="margin-bottom:0;"><label>URL аватара</label><input type="text" class="form-control" id="editAvatar" placeholder="https://example.com/photo.jpg" /></div>
           </div>
-          <div class="form-group mt-2">
-            <label>О себе</label>
-            <textarea class="form-control" id="editBio" placeholder="Расскажите о себе, своём опыте и навыках..." style="min-height:115px;"></textarea>
-          </div>
+          <div class="form-group mt-2"><label>О себе</label><textarea class="form-control" id="editBio" placeholder="Расскажите о себе, своём опыте и навыках..." style="min-height:115px;"></textarea></div>
           <div class="form-group">
             <label>Навыки (через запятую)</label>
             <input type="text" class="form-control" id="editSkills" placeholder="React, Node.js, Figma..." oninput="updateSkillsPreview()" />
@@ -115,7 +94,6 @@
         </div>
       </div>
 
-      <!-- TAB: PORTFOLIO -->
       <div id="tab-portfolio" style="display:none;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
           <h3 style="font-size:1.05rem;letter-spacing:-.02em;">Мои работы</h3>
@@ -124,7 +102,6 @@
         <div class="portfolio-grid" id="portfolioGrid"><div class="spinner"></div></div>
       </div>
 
-      <!-- TAB: REVIEWS -->
       <div id="tab-reviews" style="display:none;">
         <div class="card" style="border-radius:var(--radius-lg);padding:1.75rem;">
           <div style="display:flex;align-items:center;gap:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;">
@@ -138,32 +115,23 @@
         </div>
       </div>
 
-      <!-- TAB: NOTIFICATIONS -->
       <div id="tab-notifications" style="display:none;">
         <div class="card" style="border-radius:var(--radius-lg);padding:2rem;">
           <h3 style="font-size:1.05rem;letter-spacing:-.02em;margin-bottom:1.5rem;">Настройки уведомлений</h3>
-
           <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 0;border-bottom:1px solid var(--border);">
             <div>
               <div style="font-weight:600;font-size:.9rem;">📧 Email уведомления</div>
               <div style="font-size:.78rem;color:var(--text3);margin-top:.2rem;">Отклики, принятые заявки, выполненные задания</div>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="emailNotifToggle" onchange="saveEmailNotif()" checked />
-              <span class="toggle-slider"></span>
-            </label>
+            <label class="toggle-switch"><input type="checkbox" id="emailNotifToggle" onchange="saveEmailNotif()" checked /><span class="toggle-slider"></span></label>
           </div>
-
           <div style="padding:.9rem 0 1.25rem;border-bottom:1px solid var(--border);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
               <div>
                 <div style="font-weight:600;font-size:.9rem;">📱 Telegram уведомления</div>
                 <div style="font-size:.78rem;color:var(--text3);margin-top:.2rem;">Мгновенные уведомления прямо в Telegram</div>
               </div>
-              <label class="toggle-switch">
-                <input type="checkbox" id="telegramToggle" onchange="toggleTelegramInput()" />
-                <span class="toggle-slider"></span>
-              </label>
+              <label class="toggle-switch"><input type="checkbox" id="telegramToggle" onchange="toggleTelegramInput()" /><span class="toggle-slider"></span></label>
             </div>
             <div id="telegramInputWrap" style="display:none;">
               <div style="background:rgba(79,110,247,.06);border:1px solid rgba(79,110,247,.15);border-radius:var(--radius);padding:1rem;margin-bottom:.85rem;font-size:.82rem;color:var(--text2);line-height:1.7;">
@@ -177,291 +145,154 @@
               </div>
             </div>
           </div>
-
           <div style="margin-top:1.25rem;">
             <button class="btn btn-glass btn-sm" onclick="showToast('Тест отправлен! 🔔','success')">Тест уведомления</button>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- PORTFOLIO MODAL -->
   <div class="modal-overlay" id="portfolioModal">
     <div class="modal" style="max-width:540px;">
       <div class="modal-header">
         <h3 id="portfolioModalTitle">Добавить работу</h3>
-        <button class="modal-close" onclick="closePortfolioModal()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="modal-close" onclick="closePortfolioModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <input type="hidden" id="portfolioEditId" />
-      <div class="form-group">
-        <label>Название *</label>
-        <input type="text" class="form-control" id="pTitle" placeholder="Лендинг для стартапа" />
-      </div>
-      <div class="form-group">
-        <label>Описание</label>
-        <textarea class="form-control" id="pDesc" style="min-height:85px;" placeholder="Расскажите о проекте..."></textarea>
-      </div>
+      <div class="form-group"><label>Название *</label><input type="text" class="form-control" id="pTitle" placeholder="Лендинг для стартапа" /></div>
+      <div class="form-group"><label>Описание</label><textarea class="form-control" id="pDesc" style="min-height:85px;" placeholder="Расскажите о проекте..."></textarea></div>
       <div class="grid-2">
-        <div class="form-group">
-          <label>Категория</label>
-          <select class="form-control" id="pCategory">
-            <option value="development">💻 Разработка</option>
-            <option value="design">🎨 Дизайн</option>
-            <option value="writing">✍️ Тексты</option>
-            <option value="marketing">📣 Маркетинг</option>
-            <option value="video">🎬 Видео</option>
-            <option value="other">🔧 Другое</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Навыки</label>
-          <input type="text" class="form-control" id="pSkills" placeholder="React, Figma..." />
-        </div>
+        <div class="form-group"><label>Категория</label><select class="form-control" id="pCategory"><option value="development">💻 Разработка</option><option value="design">🎨 Дизайн</option><option value="writing">✍️ Тексты</option><option value="marketing">📣 Маркетинг</option><option value="video">🎬 Видео</option><option value="other">🔧 Другое</option></select></div>
+        <div class="form-group"><label>Навыки</label><input type="text" class="form-control" id="pSkills" placeholder="React, Figma..." /></div>
       </div>
-      <div class="form-group">
-        <label>URL картинки</label>
-        <input type="text" class="form-control" id="pImageUrl" placeholder="https://i.imgur.com/..." />
-      </div>
-      <div class="form-group" style="margin-bottom:0;">
-        <label>Ссылка на проект</label>
-        <input type="text" class="form-control" id="pProjectUrl" placeholder="https://myproject.com" />
-      </div>
+      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="pImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <div class="form-group" style="margin-bottom:0;"><label>Ссылка на проект</label><input type="text" class="form-control" id="pProjectUrl" placeholder="https://myproject.com" /></div>
       <button class="btn btn-primary w-full mt-3" onclick="savePortfolioItem()">Сохранить</button>
     </div>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
-
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/profile.js"></script>
   <script>
-    function toggleMobileMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
-      document.getElementById('burger').classList.toggle('open');
-    }
-    function closeMobileMenu() {
-      document.getElementById('mobileMenu').classList.remove('open');
-      document.getElementById('burger').classList.remove('open');
-    }
-
+    function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
+    function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
     function switchProfileTab(name, btn) {
       document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
-      ['edit','portfolio','reviews','notifications'].forEach(t => {
-        document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
-      });
+      ['edit','portfolio','reviews','notifications'].forEach(t => { document.getElementById('tab-'+t).style.display = t === name ? 'block' : 'none'; });
       if (name === 'portfolio')     loadPortfolio();
       if (name === 'reviews')       loadReviews();
       if (name === 'notifications') loadNotifSettings();
     }
-
     function updateSkillsPreview() {
       const skills = document.getElementById('editSkills').value.split(',').map(s=>s.trim()).filter(Boolean);
-      document.getElementById('skillsPreview').innerHTML = skills.map(s=>`<span class="skill-tag">${s}</span>`).join('');
+      document.getElementById('skillsPreview').innerHTML = skills.map(s=>'<span class="skill-tag">'+s+'</span>').join('');
     }
-
-    // ── PORTFOLIO ──────────────────────────────────────
     async function loadPortfolio() {
       const grid = document.getElementById('portfolioGrid');
       grid.innerHTML = '<div class="spinner"></div>';
       try {
         const user = getCurrentUser();
-        const items = await apiAuth(`/portfolio/${user.id}`);
+        const items = await apiAuth('/portfolio/'+user.id);
         const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
         if (!items.length) {
-          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-            <div class="empty-icon">🖼</div>
-            <h3>Портфолио пусто</h3>
-            <p>Добавьте работы чтобы привлечь заказчиков</p>
-            <button class="btn btn-primary mt-2" onclick="openModal('portfolioModal')">+ Добавить первую</button>
-          </div>`;
+          grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🖼</div><h3>Портфолио пусто</h3><p>Добавьте работы чтобы привлечь заказчиков</p><button class="btn btn-primary mt-2" onclick="openModal(\'portfolioModal\')">+ Добавить первую</button></div>';
           return;
         }
-        grid.innerHTML = items.map(item => `
-          <div class="portfolio-card">
-            <div class="portfolio-img">
-              ${item.imageUrl
-                ? `<img src="${item.imageUrl}" alt="${item.title}" onerror="this.parentElement.innerHTML='${catEmojis[item.category]||'🔧'}';">`
-                : catEmojis[item.category]||'🔧'}
-            </div>
-            <div class="portfolio-body">
-              <div style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">${item.title}</div>
-              ${item.description ? `<div style="font-size:.8rem;color:var(--text2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${item.description}</div>` : ''}
-              ${item.skills?.length ? `<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.6rem;">${item.skills.slice(0,3).map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
-              <div style="display:flex;gap:.4rem;margin-top:.75rem;">
-                ${item.projectUrl ? `<a href="${item.projectUrl}" target="_blank" class="btn btn-glass btn-sm">🔗 Открыть</a>` : ''}
-                <button class="btn btn-glass btn-sm" onclick="editPortfolioItem('${item._id}')">✏️</button>
-                <button class="btn btn-danger btn-sm" onclick="deletePortfolioItem('${item._id}')">🗑</button>
-              </div>
-            </div>
-          </div>`).join('');
-      } catch(e) {
-        grid.innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>';
-      }
+        grid.innerHTML = items.map(item => '<div class="portfolio-card"><div class="portfolio-img">'+(item.imageUrl ? '<img src="'+item.imageUrl+'" alt="'+item.title+'" onerror="this.parentElement.innerHTML=\''+( catEmojis[item.category]||'🔧')+'\';">' : (catEmojis[item.category]||'🔧'))+'</div><div class="portfolio-body"><div style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">'+item.title+'</div>'+(item.description ? '<div style="font-size:.8rem;color:var(--text2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+item.description+'</div>' : '')+(item.skills&&item.skills.length ? '<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.6rem;">'+item.skills.slice(0,3).map(s=>'<span class="skill-tag">'+s+'</span>').join('')+'</div>' : '')+'<div style="display:flex;gap:.4rem;margin-top:.75rem;">'+(item.projectUrl ? '<a href="'+item.projectUrl+'" target="_blank" class="btn btn-glass btn-sm">🔗 Открыть</a>' : '')+'<button class="btn btn-glass btn-sm" onclick="editPortfolioItem(\''+item._id+'\')">✏️</button><button class="btn btn-danger btn-sm" onclick="deletePortfolioItem(\''+item._id+'\')">🗑</button></div></div></div>').join('');
+      } catch(e) { grid.innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
     }
-
     function closePortfolioModal() {
       closeModal('portfolioModal');
       document.getElementById('portfolioEditId').value = '';
       document.getElementById('portfolioModalTitle').textContent = 'Добавить работу';
       ['pTitle','pDesc','pImageUrl','pProjectUrl','pSkills'].forEach(id => document.getElementById(id).value = '');
     }
-
     async function savePortfolioItem() {
       const editId = document.getElementById('portfolioEditId').value;
-      const data = {
-        title:       document.getElementById('pTitle').value.trim(),
-        description: document.getElementById('pDesc').value.trim(),
-        category:    document.getElementById('pCategory').value,
-        imageUrl:    document.getElementById('pImageUrl').value.trim(),
-        projectUrl:  document.getElementById('pProjectUrl').value.trim(),
-        skills:      document.getElementById('pSkills').value.split(',').map(s=>s.trim()).filter(Boolean)
-      };
+      const data = { title: document.getElementById('pTitle').value.trim(), description: document.getElementById('pDesc').value.trim(), category: document.getElementById('pCategory').value, imageUrl: document.getElementById('pImageUrl').value.trim(), projectUrl: document.getElementById('pProjectUrl').value.trim(), skills: document.getElementById('pSkills').value.split(',').map(s=>s.trim()).filter(Boolean) };
       if (!data.title) { showToast('Введите название', 'error'); return; }
       try {
-        if (editId) {
-          await apiAuth(`/portfolio/${editId}`, { method:'PUT', body:JSON.stringify(data) });
-          showToast('Обновлено ✅', 'success');
-        } else {
-          await apiAuth('/portfolio', { method:'POST', body:JSON.stringify(data) });
-          showToast('Работа добавлена! 🎉', 'success');
-        }
-        closePortfolioModal();
-        loadPortfolio();
+        if (editId) { await apiAuth('/portfolio/'+editId, { method:'PUT', body:JSON.stringify(data) }); showToast('Обновлено ✅', 'success'); }
+        else { await apiAuth('/portfolio', { method:'POST', body:JSON.stringify(data) }); showToast('Работа добавлена! 🎉', 'success'); }
+        closePortfolioModal(); loadPortfolio();
       } catch(e) { showToast(e.message||'Ошибка', 'error'); }
     }
-
     async function editPortfolioItem(id) {
       try {
         const user = getCurrentUser();
-        const items = await apiAuth(`/portfolio/${user.id}`);
+        const items = await apiAuth('/portfolio/'+user.id);
         const item = items.find(i => i._id === id);
         if (!item) return;
         document.getElementById('portfolioEditId').value = id;
         document.getElementById('portfolioModalTitle').textContent = 'Редактировать работу';
-        document.getElementById('pTitle').value      = item.title || '';
-        document.getElementById('pDesc').value       = item.description || '';
-        document.getElementById('pCategory').value   = item.category || 'other';
-        document.getElementById('pImageUrl').value   = item.imageUrl || '';
-        document.getElementById('pProjectUrl').value = item.projectUrl || '';
-        document.getElementById('pSkills').value     = (item.skills||[]).join(', ');
+        document.getElementById('pTitle').value = item.title||'';
+        document.getElementById('pDesc').value = item.description||'';
+        document.getElementById('pCategory').value = item.category||'other';
+        document.getElementById('pImageUrl').value = item.imageUrl||'';
+        document.getElementById('pProjectUrl').value = item.projectUrl||'';
+        document.getElementById('pSkills').value = (item.skills||[]).join(', ');
         openModal('portfolioModal');
       } catch(e) {}
     }
-
     async function deletePortfolioItem(id) {
       if (!confirm('Удалить эту работу?')) return;
-      try {
-        await apiAuth(`/portfolio/${id}`, { method:'DELETE' });
-        showToast('Удалено', 'success');
-        loadPortfolio();
-      } catch(e) { showToast(e.message||'Ошибка', 'error'); }
+      try { await apiAuth('/portfolio/'+id, { method:'DELETE' }); showToast('Удалено', 'success'); loadPortfolio(); } catch(e) { showToast(e.message||'Ошибка', 'error'); }
     }
-
-    // ── REVIEWS ────────────────────────────────────────
     async function loadReviews() {
       try {
         const user = getCurrentUser();
-        const reviews = await api(`/reviews/user/${user.id}`);
-
+        const reviews = await api('/reviews/user/'+user.id);
         if (!reviews.length) {
           document.getElementById('reviewAvgRating').textContent = '—';
           document.getElementById('reviewStars').textContent = '☆☆☆☆☆';
           document.getElementById('reviewCount').textContent = 'нет отзывов';
-          document.getElementById('reviewsList').innerHTML = `<div class="empty-state" style="padding:2rem 0;">
-            <div class="empty-icon">⭐</div><p>Выполняйте задания чтобы получать отзывы</p></div>`;
+          document.getElementById('reviewsList').innerHTML = '<div class="empty-state" style="padding:2rem 0;"><div class="empty-icon">⭐</div><p>Выполняйте задания чтобы получать отзывы</p></div>';
           return;
         }
-
         const avg = reviews.reduce((s,r) => s + r.rating, 0) / reviews.length;
         document.getElementById('reviewAvgRating').textContent = avg.toFixed(1);
-        document.getElementById('reviewStars').innerHTML =
-          `<span style="color:var(--amber)">${'★'.repeat(Math.round(avg))}</span><span style="color:var(--text3)">${'★'.repeat(5-Math.round(avg))}</span>`;
-        document.getElementById('reviewCount').textContent = `${reviews.length} отзыв${reviews.length===1?'':reviews.length<5?'а':'ов'}`;
-
-        document.getElementById('reviewsList').innerHTML = reviews.map(r => `
-          <div class="review-item">
-            <div style="display:flex;gap:.75rem;">
-              <div class="avatar" style="width:38px;height:38px;font-size:.9rem;flex-shrink:0;">
-                ${r.reviewer.avatar ? `<img src="${r.reviewer.avatar}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">` : r.reviewer.name.charAt(0)}
-              </div>
-              <div style="flex:1;">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.25rem;">
-                  <div style="font-weight:700;font-size:.9rem;">${r.reviewer.name}</div>
-                  <div style="color:var(--amber);font-size:.9rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-                </div>
-                ${r.task?.title ? `<div style="font-size:.74rem;color:var(--text3);margin-bottom:.35rem;">📋 ${r.task.title}</div>` : ''}
-                ${r.comment ? `<p style="font-size:.875rem;color:var(--text2);line-height:1.65;margin:0;">${r.comment}</p>` : ''}
-                <div style="font-size:.72rem;color:var(--text3);margin-top:.35rem;">${formatRelDate(r.createdAt)}</div>
-              </div>
-            </div>
-          </div>`).join('');
-      } catch(e) {
-        document.getElementById('reviewsList').innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>';
-      }
+        document.getElementById('reviewStars').innerHTML = '<span style="color:var(--amber)">'+'★'.repeat(Math.round(avg))+'</span><span style="color:var(--text3)">'+'★'.repeat(5-Math.round(avg))+'</span>';
+        document.getElementById('reviewCount').textContent = reviews.length+' отзыв'+(reviews.length===1?'':reviews.length<5?'а':'ов');
+        document.getElementById('reviewsList').innerHTML = reviews.map(r => '<div class="review-item"><div style="display:flex;gap:.75rem;"><div class="avatar" style="width:38px;height:38px;font-size:.9rem;flex-shrink:0;">'+(r.reviewer.avatar ? '<img src="'+r.reviewer.avatar+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">' : r.reviewer.name.charAt(0))+'</div><div style="flex:1;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.25rem;"><div style="font-weight:700;font-size:.9rem;">'+r.reviewer.name+'</div><div style="color:var(--amber);font-size:.9rem;">'+'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)+'</div></div>'+(r.task&&r.task.title ? '<div style="font-size:.74rem;color:var(--text3);margin-bottom:.35rem;">📋 '+r.task.title+'</div>' : '')+(r.comment ? '<p style="font-size:.875rem;color:var(--text2);line-height:1.65;margin:0;">'+r.comment+'</p>' : '')+'<div style="font-size:.72rem;color:var(--text3);margin-top:.35rem;">'+formatRelDate(r.createdAt)+'</div></div></div></div>').join('');
+      } catch(e) { document.getElementById('reviewsList').innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
     }
-
-    // ── NOTIFICATIONS ──────────────────────────────────
     async function loadNotifSettings() {
       try {
         const res = await apiAuth('/auth/me');
         document.getElementById('emailNotifToggle').checked = res.emailNotifications !== false;
-        if (res.telegramChatId) {
-          document.getElementById('telegramToggle').checked = true;
-          document.getElementById('telegramChatId').value = res.telegramChatId;
-          document.getElementById('telegramInputWrap').style.display = 'block';
-        }
+        if (res.telegramChatId) { document.getElementById('telegramToggle').checked = true; document.getElementById('telegramChatId').value = res.telegramChatId; document.getElementById('telegramInputWrap').style.display = 'block'; }
       } catch(e) {}
     }
-
     async function saveEmailNotif() {
-      try {
-        const emailNotifications = document.getElementById('emailNotifToggle').checked;
-        await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ emailNotifications }) });
-        showToast('Сохранено', 'success');
-      } catch(e) {}
+      try { const emailNotifications = document.getElementById('emailNotifToggle').checked; await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ emailNotifications }) }); showToast('Сохранено', 'success'); } catch(e) {}
     }
-
     function toggleTelegramInput() {
       const on = document.getElementById('telegramToggle').checked;
       document.getElementById('telegramInputWrap').style.display = on ? 'block' : 'none';
       if (!on) apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ telegramChatId:'' }) }).catch(()=>{});
     }
-
     async function saveTelegram() {
       const chatId = document.getElementById('telegramChatId').value.trim();
       if (!chatId) { showToast('Введите Chat ID', 'error'); return; }
-      try {
-        await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ telegramChatId: chatId }) });
-        showToast('Telegram подключён! 📱', 'success');
-      } catch(e) { showToast(e.message||'Ошибка', 'error'); }
+      try { await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ telegramChatId: chatId }) }); showToast('Telegram подключён! 📱', 'success'); } catch(e) { showToast(e.message||'Ошибка', 'error'); }
     }
-
-    // ── HELPERS ────────────────────────────────────────
     function formatRelDate(iso) {
       const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-      if (days === 0) return 'Сегодня';
-      if (days === 1) return 'Вчера';
-      if (days < 7)  return `${days} дн. назад`;
+      if (days === 0) return 'Сегодня'; if (days === 1) return 'Вчера'; if (days < 7) return days+' дн. назад';
       return new Date(iso).toLocaleDateString('ru-RU');
     }
-
     function openAuthModal() { window.location.href = 'index.html'; }
-
     document.addEventListener('DOMContentLoaded', () => {
       const user = getCurrentUser();
       if (!user) { window.location.href = 'index.html'; return; }
       updateNavForAuth();
       loadProfile();
       if (user.role === 'client') document.getElementById('portfolioTabBtn').style.display = 'none';
-      window.addEventListener('scroll', () => {
-        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
-      });
+      window.addEventListener('scroll', () => { document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20); });
     });
   </script>
 </body>

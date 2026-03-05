@@ -15,6 +15,8 @@
   <div class="bg-canvas">
     <div class="bg-blob b1"></div>
     <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-blob b4"></div>
     <div class="bg-grid"></div>
   </div>
 
@@ -75,7 +77,6 @@
 
         <!-- MAIN -->
         <main>
-          <!-- OVERVIEW -->
           <div id="tab-overview">
             <div style="margin-bottom:2rem;">
               <div class="section-eyebrow">Дашборд</div>
@@ -88,11 +89,10 @@
             <div id="recentActivity"></div>
           </div>
 
-          <!-- TASKS TAB -->
           <div id="tab-tasks" class="hidden">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
               <h3 style="font-size:1.3rem;letter-spacing:-.03em;" id="tasksTabTitle">Мои задания</h3>
-              <button class="btn btn-primary btn-sm" id="addTaskBtn" onclick="window.location.href='tasks.html'" style="display:none;">+ Разместить</button>
+              <button class="btn btn-primary btn-sm" id="addTaskBtn" onclick="window.location.href='tasks.html?action=create'" style="display:none;">+ Разместить</button>
             </div>
             <div id="myTasksList"></div>
           </div>
@@ -106,8 +106,6 @@
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    let currentTab = 'overview';
-
     function toggleMobileMenu() {
       document.getElementById('mobileMenu').classList.toggle('open');
       document.getElementById('burger').classList.toggle('open');
@@ -122,7 +120,6 @@
       if (el) el.classList.add('active');
       document.getElementById('tab-overview').classList.toggle('hidden', tab !== 'overview');
       document.getElementById('tab-tasks').classList.toggle('hidden', tab !== 'tasks');
-      currentTab = tab;
       if (tab === 'tasks') loadMyTasks();
     }
 

@@ -21,8 +21,15 @@
   </style>
 </head>
 <body>
+
   <div class="noise-overlay"></div>
-  <div class="bg-canvas"><div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-grid"></div></div>
+  <div class="bg-canvas">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-blob b4"></div>
+    <div class="bg-grid"></div>
+  </div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
@@ -36,6 +43,7 @@
     <div class="nav-actions" id="navActions"></div>
     <button class="burger" id="burger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
   </nav>
+
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
@@ -86,7 +94,7 @@
       </div>
       <div class="form-group" style="margin-bottom:0;">
         <label>Комментарий</label>
-        <textarea class="form-control" id="reviewComment" placeholder="Поделитесь впечатлениями от работы..." style="min-height:100px;"></textarea>
+        <textarea class="form-control" id="reviewComment" placeholder="Поделитесь впечатлениями..." style="min-height:100px;"></textarea>
       </div>
       <button class="btn btn-primary w-full mt-3" onclick="submitReview()">Отправить отзыв ⭐</button>
     </div>
@@ -97,8 +105,7 @@
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    let currentTask = null;
-    let selectedRating = 0;
+    let currentTask = null, selectedRating = 0;
     const taskId = new URLSearchParams(window.location.search).get('id');
 
     function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
@@ -131,7 +138,6 @@
 
       document.getElementById('taskDetail').innerHTML = `
         <div class="task-detail-grid">
-          <!-- MAIN -->
           <div>
             <div class="card mb-2" style="padding:1.75rem;">
               <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.25rem;">
@@ -146,22 +152,14 @@
               ${task.skills?.length ? `<div class="task-skills mt-3">${task.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
             </div>
 
-            <!-- REVIEW FORM (только если задание выполнено и ты участник) -->
             ${task.status === 'completed' && user && (isOwner || isAssigned) ? `
             <div class="card mb-2" style="padding:1.5rem;border-color:rgba(245,158,11,.15);" id="reviewFormCard">
               <h3 style="font-size:1rem;margin-bottom:.5rem;">⭐ Оставить отзыв</h3>
               <p style="font-size:.82rem;color:var(--text3);margin-bottom:1rem;">Задание выполнено — поделитесь впечатлениями</p>
-              ${isOwner && task.assignedTo ? `
-                <button class="btn btn-primary btn-sm" onclick="openReviewModal('${task.assignedTo._id||task.assignedTo}','${task.assignedTo.name||'Фрилансер'}')">
-                  Оценить фрилансера
-                </button>` : ''}
-              ${isAssigned ? `
-                <button class="btn btn-outline btn-sm" onclick="openReviewModal('${task.client._id}','${task.client.name}')">
-                  Оценить заказчика
-                </button>` : ''}
+              ${isOwner && task.assignedTo ? `<button class="btn btn-primary btn-sm" onclick="openReviewModal('${task.assignedTo._id||task.assignedTo}','${task.assignedTo.name||'Фрилансер'}')">Оценить фрилансера</button>` : ''}
+              ${isAssigned ? `<button class="btn btn-outline btn-sm" onclick="openReviewModal('${task.client._id}','${task.client.name}')">Оценить заказчика</button>` : ''}
             </div>` : ''}
 
-            <!-- PROPOSALS -->
             <div class="card" style="padding:1.75rem;">
               <h3 style="font-size:1.05rem;margin-bottom:1.5rem;letter-spacing:-.02em;">
                 Отклики <span style="font-size:.85rem;color:var(--text3);font-weight:400;">(${task.proposals?.length||0})</span>
@@ -170,24 +168,17 @@
             </div>
           </div>
 
-          <!-- SIDEBAR -->
           <div class="task-detail-sidebar">
             <div class="card mb-2" style="padding:1.5rem;">
               <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.5rem;">Бюджет</div>
               <div style="font-family:var(--font-display);font-size:2.4rem;font-weight:800;color:var(--green);letter-spacing:-.04em;line-height:1;">
                 ₽${task.budget.toLocaleString()}
               </div>
-
-              ${isFreelancer && task.status === 'open' && !alreadyApplied ? `
-                <button class="btn btn-primary w-full mt-3" onclick="openModal('proposalModal')">Откликнуться 🚀</button>` : ''}
-              ${isFreelancer && alreadyApplied ? `
-                <div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">✅ Вы уже откликнулись</div>` : ''}
-              ${isOwner && task.status === 'open' ? `
-                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text3);">💡 Примите отклик чтобы начать работу</div>` : ''}
-              ${isOwner && task.status === 'in_progress' ? `
-                <button class="btn btn-success w-full mt-3" onclick="completeTask()">✅ Отметить выполненным</button>` : ''}
-              ${isOwner && task.status === 'completed' ? `
-                <div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">🎉 Задание выполнено</div>` : ''}
+              ${isFreelancer && task.status === 'open' && !alreadyApplied ? `<button class="btn btn-primary w-full mt-3" onclick="openModal('proposalModal')">Откликнуться 🚀</button>` : ''}
+              ${isFreelancer && alreadyApplied ? `<div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">✅ Вы уже откликнулись</div>` : ''}
+              ${isOwner && task.status === 'open' ? `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text3);">💡 Примите отклик чтобы начать работу</div>` : ''}
+              ${isOwner && task.status === 'in_progress' ? `<button class="btn btn-success w-full mt-3" onclick="completeTask()">✅ Отметить выполненным</button>` : ''}
+              ${isOwner && task.status === 'completed' ? `<div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.2);color:var(--green);border-radius:99px;padding:.7rem;text-align:center;font-size:.875rem;font-weight:600;margin-top:1rem;">🎉 Задание выполнено</div>` : ''}
               ${!user ? `<button class="btn btn-outline w-full mt-3" onclick="window.location.href='index.html'">Войдите чтобы откликнуться</button>` : ''}
             </div>
 
@@ -247,7 +238,6 @@
       }).join('');
     }
 
-    // ── REVIEW ─────────────────────────────────────────
     function openReviewModal(revieweeId, revieweeName) {
       selectedRating = 0;
       document.getElementById('revieweeId').value = revieweeId;
@@ -265,9 +255,7 @@
     }
 
     function updateStars(n) {
-      document.querySelectorAll('#starPicker span').forEach((s, i) => {
-        s.classList.toggle('active', i < n);
-      });
+      document.querySelectorAll('#starPicker span').forEach((s, i) => s.classList.toggle('active', i < n));
     }
 
     async function submitReview() {
@@ -275,22 +263,15 @@
       const revieweeId = document.getElementById('revieweeId').value;
       const comment    = document.getElementById('reviewComment').value.trim();
       try {
-        await apiAuth('/reviews', {
-          method: 'POST',
-          body: JSON.stringify({ taskId, revieweeId, rating: selectedRating, comment })
-        });
+        await apiAuth('/reviews', { method:'POST', body:JSON.stringify({ taskId, revieweeId, rating:selectedRating, comment }) });
         showToast('Отзыв отправлен! ⭐', 'success');
         closeModal('reviewModal');
-        // Скрыть кнопку после отправки
         const card = document.getElementById('reviewFormCard');
         if (card) card.style.display = 'none';
       } catch(e) { showToast(e.message||'Ошибка', 'error'); }
     }
 
-    // ── TASK ACTIONS ───────────────────────────────────
-    function statusLabel(s) {
-      return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s]||s;
-    }
+    function statusLabel(s) { return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s]||s; }
 
     async function submitProposal() {
       const data = {
@@ -327,7 +308,7 @@
     }
 
     async function completeTask() {
-      if (!confirm('Отметить задание как выполненное? Это нельзя отменить.')) return;
+      if (!confirm('Отметить задание как выполненное?')) return;
       try {
         await apiAuth(`/tasks/${taskId}/complete`, { method:'PATCH' });
         showToast('Задание выполнено! 🎊', 'success');

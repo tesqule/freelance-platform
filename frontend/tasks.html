@@ -24,7 +24,13 @@
 </head>
 <body>
   <div class="noise-overlay"></div>
-  <div class="bg-canvas"><div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-grid"></div></div>
+  <div class="bg-canvas">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-blob b4"></div>
+    <div class="bg-grid"></div>
+  </div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
@@ -295,9 +301,27 @@
         allTasks = await api('/tasks');
         await loadFavoriteIds();
         const params = new URLSearchParams(window.location.search);
-        if (params.get('category')) currentCategory = params.get('category');
+        if (params.get('category')) {
+          currentCategory = params.get('category');
+          // Активируем нужную кнопку фильтра
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.toLowerCase().includes(currentCategory));
+          });
+        }
         if (params.get('search')) document.getElementById('searchInput').value = params.get('search');
         filterTasks();
+
+        // НОВОЕ: если action=create — открываем модалку создания задания
+        if (params.get('action') === 'create') {
+          const user = getCurrentUser();
+          if (user && user.role === 'client') {
+            setTimeout(() => openCreateTask(), 400);
+          } else if (user && user.role !== 'client') {
+            showToast('Только заказчики могут размещать задания', 'info');
+          } else {
+            window.location.href = 'index.html';
+          }
+        }
       } catch(e) {
         document.getElementById('tasksGrid').innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">Ошибка загрузки</p>';
       }

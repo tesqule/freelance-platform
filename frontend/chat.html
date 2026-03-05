@@ -8,12 +8,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .chat-empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100%; text-align: center;
+    }
+    #convSearch:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(79,110,247,.1); }
+    @media (max-width: 900px) {
+      .chat-layout { grid-template-columns: 1fr; }
+      .chat-sidebar { display: flex; height: calc(100vh - var(--nav-h)); border-right: none; border-bottom: 1px solid var(--border); }
+      .chat-main { height: calc(100vh - var(--nav-h)); }
+      body.chat-open .chat-sidebar { display: none; }
+      body.chat-open .chat-main { display: flex; }
+    }
+  </style>
 </head>
 <body>
 
   <div class="noise-overlay"></div>
   <div class="bg-canvas">
-    <div class="bg-blob b1" style="opacity:.4;"></div>
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-blob b4"></div>
     <div class="bg-grid"></div>
   </div>
 
@@ -33,7 +50,6 @@
     <button class="burger" id="burger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
   </nav>
 
-  <!-- Mobile back button (shown inside chat on mobile) -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
@@ -43,8 +59,6 @@
   </div>
 
   <div class="chat-layout">
-
-    <!-- SIDEBAR -->
     <div class="chat-sidebar" id="chatSidebar">
       <div class="chat-sidebar-header">
         <div style="display:flex;align-items:center;gap:.6rem;">
@@ -52,8 +66,6 @@
           <span>Сообщения</span>
         </div>
       </div>
-
-      <!-- Search conversations -->
       <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);">
         <div style="position:relative;">
           <input type="text" id="convSearch" placeholder="Поиск..." style="
@@ -64,13 +76,11 @@
           <span style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.85rem;pointer-events:none;">⌕</span>
         </div>
       </div>
-
       <div id="conversationsList">
         <div style="padding:2rem;text-align:center;color:var(--text3);font-size:.85rem;">Загрузка...</div>
       </div>
     </div>
 
-    <!-- MAIN CHAT -->
     <div class="chat-main" id="chatMain">
       <div class="chat-empty-state">
         <div style="font-size:3rem;margin-bottom:.75rem;opacity:.4;">💬</div>
@@ -78,7 +88,6 @@
         <div style="font-size:.8rem;color:var(--text3);margin-top:.3rem;">или начните новый из карточки задания</div>
       </div>
     </div>
-
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
@@ -102,45 +111,12 @@
       if (!user) { window.location.href = 'index.html'; return; }
       updateNavForAuth();
       initChat();
-
       const targetUser = new URLSearchParams(window.location.search).get('user');
       if (targetUser) openChatWith(targetUser);
-
       window.addEventListener('scroll', () => {
         document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
       });
     });
   </script>
-
-  <style>
-    .chat-empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      text-align: center;
-    }
-
-    /* Mobile: show back button when chat is open */
-    @media (max-width: 900px) {
-      .chat-layout { grid-template-columns: 1fr; }
-      .chat-sidebar {
-        display: flex;
-        height: calc(100vh - var(--nav-h));
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-      }
-      .chat-main { height: calc(100vh - var(--nav-h)); }
-      body.chat-open .chat-sidebar { display: none; }
-      body.chat-open .chat-main { display: flex; }
-    }
-
-    /* Conversation search focus */
-    #convSearch:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 2px rgba(79,110,247,.1);
-    }
-  </style>
 </body>
 </html>

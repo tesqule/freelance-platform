@@ -56,7 +56,13 @@
 <body>
 
   <div class="noise-overlay"></div>
-  <div class="bg-canvas"><div class="bg-grid"></div></div>
+  <div class="bg-canvas">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-blob b4"></div>
+    <div class="bg-grid"></div>
+  </div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
@@ -72,39 +78,30 @@
   </nav>
 
   <div class="admin-layout">
-
-    <!-- SIDEBAR -->
     <aside class="admin-sidebar">
       <div class="admin-sidebar-title">Обзор</div>
       <div class="admin-nav-item active" onclick="switchTab('overview', this)">📊 Статистика</div>
-
       <div class="admin-sidebar-title">Управление</div>
       <div class="admin-nav-item" onclick="switchTab('users', this)">👥 Пользователи</div>
       <div class="admin-nav-item" onclick="switchTab('tasks', this)">📋 Задания</div>
-
       <div class="admin-sidebar-title">Система</div>
       <div class="admin-nav-item" onclick="window.location.href='index.html'">🏠 На сайт</div>
       <div class="admin-nav-item" onclick="logout()" style="color:var(--red);">🚪 Выйти</div>
     </aside>
 
-    <!-- MAIN -->
     <main class="admin-main">
-
       <!-- OVERVIEW TAB -->
       <div class="tab-content active" id="tab-overview">
         <div style="margin-bottom:1.75rem;">
           <div class="section-eyebrow">Admin</div>
           <h2 style="font-size:1.6rem;letter-spacing:-.035em;">Панель управления</h2>
         </div>
-
         <div class="stats-grid-4" id="statsGrid">
-          <!-- рендерится JS -->
           <div class="stat-card"><div class="spinner" style="margin:0;width:20px;height:20px;"></div></div>
           <div class="stat-card"><div class="spinner" style="margin:0;width:20px;height:20px;"></div></div>
           <div class="stat-card"><div class="spinner" style="margin:0;width:20px;height:20px;"></div></div>
           <div class="stat-card"><div class="spinner" style="margin:0;width:20px;height:20px;"></div></div>
         </div>
-
         <div class="stats-grid-2">
           <div class="admin-section">
             <div class="admin-section-header"><h3>📈 Задания по статусам</h3></div>
@@ -115,7 +112,6 @@
             <div id="topFreelancersList" style="padding:.5rem 0;"></div>
           </div>
         </div>
-
         <div class="admin-section">
           <div class="admin-section-header">
             <h3>🕐 Последние регистрации</h3>
@@ -144,19 +140,12 @@
             </select>
           </div>
         </div>
-
         <div class="admin-section">
           <div style="overflow-x:auto;">
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>Пользователь</th>
-                  <th>Email</th>
-                  <th>Роль</th>
-                  <th>Рейтинг</th>
-                  <th>Задания</th>
-                  <th>Дата рег.</th>
-                  <th>Действия</th>
+                  <th>Пользователь</th><th>Email</th><th>Роль</th><th>Рейтинг</th><th>Задания</th><th>Дата рег.</th><th>Действия</th>
                 </tr>
               </thead>
               <tbody id="usersTableBody">
@@ -183,19 +172,12 @@
             <option value="cancelled">Отменённые</option>
           </select>
         </div>
-
         <div class="admin-section">
           <div style="overflow-x:auto;">
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>Название</th>
-                  <th>Заказчик</th>
-                  <th>Категория</th>
-                  <th>Бюджет</th>
-                  <th>Статус</th>
-                  <th>Дата</th>
-                  <th>Действия</th>
+                  <th>Название</th><th>Заказчик</th><th>Категория</th><th>Бюджет</th><th>Статус</th><th>Дата</th><th>Действия</th>
                 </tr>
               </thead>
               <tbody id="tasksTableBody">
@@ -206,13 +188,11 @@
           <div class="pagination" id="tasksPagination"></div>
         </div>
       </div>
-
     </main>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- ROLE CHANGE MODAL -->
   <div class="modal-overlay" id="roleModal">
     <div class="modal" style="max-width:360px;">
       <div class="modal-header">
@@ -237,9 +217,7 @@
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    let currentRoleUserId = null;
-    let usersPage = 1;
-    let tasksPage = 1;
+    let currentRoleUserId = null, usersPage = 1, tasksPage = 1;
 
     function switchTab(name, el) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -250,11 +228,9 @@
       if (name === 'tasks') loadAdminTasks(1);
     }
 
-    // ── STATS ──────────────────────────────────────────
     async function loadStats() {
       try {
         const s = await apiAuth('/admin/stats');
-
         document.getElementById('statsGrid').innerHTML = `
           <div class="stat-card" style="border-color:rgba(79,110,247,.18);">
             <div class="stat-card-num" style="color:var(--blue-light);">${s.users.total}</div>
@@ -277,12 +253,11 @@
             <div class="stat-card-sub">${s.users.freelancers} фрилансеров</div>
           </div>`;
 
-        // Task status chart (simple bars)
         const total = s.tasks.total || 1;
         const bars = [
-          { label: 'Открытые', val: s.tasks.open, color: 'var(--green)' },
-          { label: 'В работе', val: s.tasks.inProgress, color: 'var(--amber)' },
-          { label: 'Выполнено', val: s.tasks.completed, color: 'var(--blue-light)' },
+          { label:'Открытые', val:s.tasks.open, color:'var(--green)' },
+          { label:'В работе', val:s.tasks.inProgress, color:'var(--amber)' },
+          { label:'Выполнено', val:s.tasks.completed, color:'var(--blue-light)' },
         ];
         document.getElementById('taskStatusChart').innerHTML = bars.map(b => `
           <div style="margin-bottom:.9rem;">
@@ -295,7 +270,6 @@
             </div>
           </div>`).join('');
 
-        // Top freelancers
         document.getElementById('topFreelancersList').innerHTML = s.topFreelancers.map((u, i) => `
           <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);">
             <div style="font-family:var(--font-display);font-size:.85rem;font-weight:800;color:var(--text3);width:20px;">#${i+1}</div>
@@ -307,14 +281,9 @@
               <div style="font-size:.75rem;color:var(--text3);">★ ${(u.rating||0).toFixed(1)} · ${u.completedTasks} задан</div>
             </div>
           </div>`).join('');
-
-      } catch(e) {
-        console.error(e);
-        showToast('Ошибка загрузки статистики', 'error');
-      }
+      } catch(e) { showToast('Ошибка загрузки статистики', 'error'); }
     }
 
-    // ── USERS ──────────────────────────────────────────
     async function loadUsers(page = 1) {
       usersPage = page;
       const search = document.getElementById('userSearch')?.value || '';
@@ -326,12 +295,10 @@
         if (search) params.set('search', search);
         if (role)   params.set('role', role);
         const data = await apiAuth(`/admin/users?${params}`);
-
         if (!data.users.length) {
           tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text3);">Пользователей не найдено</td></tr>`;
           return;
         }
-
         tbody.innerHTML = data.users.map(u => `
           <tr>
             <td>
@@ -354,14 +321,12 @@
               </div>
             </td>
           </tr>`).join('');
-
         renderPagination('usersPagination', data.pages, page, loadUsers);
       } catch(e) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--red);">Ошибка загрузки</td></tr>`;
       }
     }
 
-    // ── TASKS ──────────────────────────────────────────
     async function loadAdminTasks(page = 1) {
       tasksPage = page;
       const status = document.getElementById('taskStatusFilter')?.value || '';
@@ -371,35 +336,27 @@
         const params = new URLSearchParams({ page, limit: 15 });
         if (status) params.set('status', status);
         const data = await apiAuth(`/admin/tasks?${params}`);
-
         if (!data.tasks.length) {
           tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text3);">Заданий не найдено</td></tr>`;
           return;
         }
-
         const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
         tbody.innerHTML = data.tasks.map(t => `
           <tr>
-            <td>
-              <a href="task-detail.html?id=${t._id}" style="font-weight:600;color:var(--blue-light);font-size:.875rem;">${t.title}</a>
-            </td>
+            <td><a href="task-detail.html?id=${t._id}" style="font-weight:600;color:var(--blue-light);font-size:.875rem;">${t.title}</a></td>
             <td style="color:var(--text2);font-size:.82rem;">${t.client?.name || '—'}</td>
             <td>${catEmojis[t.category]||'🔧'} ${t.category}</td>
             <td style="color:var(--green);font-weight:700;">₽${t.budget.toLocaleString()}</td>
             <td><span class="badge badge-${t.status}">${statusLabel(t.status)}</span></td>
             <td style="color:var(--text3);font-size:.78rem;">${new Date(t.createdAt).toLocaleDateString('ru-RU')}</td>
-            <td>
-              <button class="btn btn-danger btn-sm" onclick="deleteTask('${t._id}','${t.title}')">Удалить</button>
-            </td>
+            <td><button class="btn btn-danger btn-sm" onclick="deleteTask('${t._id}','${t.title}')">Удалить</button></td>
           </tr>`).join('');
-
         renderPagination('tasksPagination', data.pages, page, loadAdminTasks);
       } catch(e) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--red);">Ошибка загрузки</td></tr>`;
       }
     }
 
-    // ── ACTIONS ────────────────────────────────────────
     function openRoleModal(id, name, currentRole) {
       currentRoleUserId = id;
       document.getElementById('roleModalName').textContent = name;
@@ -410,9 +367,7 @@
     async function confirmRoleChange() {
       const role = document.getElementById('newRoleSelect').value;
       try {
-        await apiAuth(`/admin/users/${currentRoleUserId}/role`, {
-          method: 'PATCH', body: JSON.stringify({ role })
-        });
+        await apiAuth(`/admin/users/${currentRoleUserId}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
         showToast('Роль изменена ✅', 'success');
         closeModal('roleModal');
         loadUsers(usersPage);
@@ -437,14 +392,8 @@
       } catch(e) { showToast(e.message || 'Ошибка', 'error'); }
     }
 
-    // ── HELPERS ────────────────────────────────────────
-    function roleLabel(r) {
-      return { client:'Заказчик', freelancer:'Фрилансер', admin:'Админ' }[r] || r;
-    }
-
-    function statusLabel(s) {
-      return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s] || s;
-    }
+    function roleLabel(r) { return { client:'Заказчик', freelancer:'Фрилансер', admin:'Админ' }[r] || r; }
+    function statusLabel(s) { return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s] || s; }
 
     function renderPagination(containerId, totalPages, current, loadFn) {
       const el = document.getElementById(containerId);
@@ -454,9 +403,6 @@
       `).join('');
     }
 
-    function openAuthModal() { window.location.href = 'index.html'; }
-
-    // ── RECENT USERS ───────────────────────────────────
     async function loadRecentUsers() {
       try {
         const data = await apiAuth('/admin/users?limit=5&page=1');
@@ -475,7 +421,8 @@
       } catch(e) {}
     }
 
-    // ── INIT ───────────────────────────────────────────
+    function openAuthModal() { window.location.href = 'index.html'; }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const user = getCurrentUser();
       if (!user) { window.location.href = 'index.html'; return; }

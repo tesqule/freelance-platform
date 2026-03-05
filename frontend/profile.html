@@ -31,8 +31,15 @@
   </style>
 </head>
 <body>
+
   <div class="noise-overlay"></div>
-  <div class="bg-canvas"><div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-grid"></div></div>
+  <div class="bg-canvas">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+    <div class="bg-blob b4"></div>
+    <div class="bg-grid"></div>
+  </div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
@@ -47,6 +54,7 @@
     <div class="nav-actions" id="navActions"></div>
     <button class="burger" id="burger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
   </nav>
+
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
@@ -86,11 +94,12 @@
           </div>
           <div class="form-group mt-2">
             <label>О себе</label>
-            <textarea class="form-control" id="editBio" placeholder="Расскажите о себе..." style="min-height:115px;"></textarea>
+            <textarea class="form-control" id="editBio" placeholder="Расскажите о себе, своём опыте и навыках..." style="min-height:115px;"></textarea>
           </div>
           <div class="form-group">
             <label>Навыки (через запятую)</label>
             <input type="text" class="form-control" id="editSkills" placeholder="React, Node.js, Figma..." oninput="updateSkillsPreview()" />
+            <div style="font-size:.75rem;color:var(--text3);margin-top:.4rem;">Укажи навыки чтобы заказчики могли тебя найти</div>
           </div>
           <div id="skillsPreview" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.25rem;min-height:24px;"></div>
           <button class="btn btn-primary" onclick="saveProfile()">Сохранить изменения</button>
@@ -100,8 +109,8 @@
       <!-- TAB: PORTFOLIO -->
       <div id="tab-portfolio" style="display:none;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
-          <h3 style="font-size:1.05rem;">Мои работы</h3>
-          <button class="btn btn-primary btn-sm" onclick="openModal('portfolioModal')">+ Добавить</button>
+          <h3 style="font-size:1.05rem;letter-spacing:-.02em;">Мои работы</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('portfolioModal')">+ Добавить работу</button>
         </div>
         <div class="portfolio-grid" id="portfolioGrid"><div class="spinner"></div></div>
       </div>
@@ -111,7 +120,7 @@
         <div class="card" style="border-radius:var(--radius-lg);padding:1.75rem;">
           <div style="display:flex;align-items:center;gap:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;">
             <div style="text-align:center;">
-              <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;color:var(--amber);line-height:1;" id="reviewAvgRating">—</div>
+              <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--amber);" id="reviewAvgRating">—</div>
               <div style="font-size:1rem;color:var(--amber);margin:.2rem 0;" id="reviewStars">☆☆☆☆☆</div>
               <div style="font-size:.75rem;color:var(--text3);" id="reviewCount">нет отзывов</div>
             </div>
@@ -123,8 +132,7 @@
       <!-- TAB: NOTIFICATIONS -->
       <div id="tab-notifications" style="display:none;">
         <div class="card" style="border-radius:var(--radius-lg);padding:2rem;">
-          <h3 style="font-size:1.05rem;margin-bottom:1.5rem;">Настройки уведомлений</h3>
-
+          <h3 style="font-size:1.05rem;letter-spacing:-.02em;margin-bottom:1.5rem;">Настройки уведомлений</h3>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 0;border-bottom:1px solid var(--border);">
             <div>
               <div style="font-weight:600;font-size:.9rem;">📧 Email уведомления</div>
@@ -135,7 +143,6 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
-
           <div style="padding:.9rem 0 1.25rem;border-bottom:1px solid var(--border);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
               <div>
@@ -150,7 +157,7 @@
             <div id="telegramInputWrap" style="display:none;">
               <div style="background:rgba(79,110,247,.06);border:1px solid rgba(79,110,247,.15);border-radius:var(--radius);padding:1rem;margin-bottom:.85rem;font-size:.82rem;color:var(--text2);line-height:1.7;">
                 1. Найди бота <strong>@freelancehub_bot</strong> в Telegram<br>
-                2. Отправь ему <code style="background:var(--surface2);padding:.1rem .35rem;border-radius:4px;">/start</code><br>
+                2. Отправь ему <code style="background:var(--surface2);padding:.1rem .35rem;border-radius:4px;font-size:.8rem;">/start</code><br>
                 3. Вставь полученный <strong>Chat ID</strong> сюда:
               </div>
               <div style="display:flex;gap:.5rem;">
@@ -159,7 +166,6 @@
               </div>
             </div>
           </div>
-
           <div style="margin-top:1.25rem;">
             <button class="btn btn-glass btn-sm" onclick="showToast('Тест отправлен! 🔔','success')">Тест уведомления</button>
           </div>
@@ -223,11 +229,169 @@
       document.getElementById('skillsPreview').innerHTML = skills.map(s=>`<span class="skill-tag">${s}</span>`).join('');
     }
 
+    async function loadPortfolio() {
+      const grid = document.getElementById('portfolioGrid');
+      grid.innerHTML = '<div class="spinner"></div>';
+      try {
+        const user = getCurrentUser();
+        const items = await apiAuth(`/portfolio/${user.id}`);
+        const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
+        if (!items.length) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">🖼</div>
+            <h3>Портфолио пусто</h3>
+            <p>Добавьте работы чтобы привлечь заказчиков</p>
+            <button class="btn btn-primary mt-2" onclick="openModal('portfolioModal')">+ Добавить первую</button>
+          </div>`;
+          return;
+        }
+        grid.innerHTML = items.map(item => `
+          <div class="portfolio-card">
+            <div class="portfolio-img">
+              ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.title}" onerror="this.parentElement.innerHTML='${catEmojis[item.category]||'🔧'}';">` : catEmojis[item.category]||'🔧'}
+            </div>
+            <div class="portfolio-body">
+              <div style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">${item.title}</div>
+              ${item.description ? `<div style="font-size:.8rem;color:var(--text2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${item.description}</div>` : ''}
+              ${item.skills?.length ? `<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.6rem;">${item.skills.slice(0,3).map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
+              <div style="display:flex;gap:.4rem;margin-top:.75rem;">
+                ${item.projectUrl ? `<a href="${item.projectUrl}" target="_blank" class="btn btn-glass btn-sm">🔗 Открыть</a>` : ''}
+                <button class="btn btn-glass btn-sm" onclick="editPortfolioItem('${item._id}')">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="deletePortfolioItem('${item._id}')">🗑</button>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch(e) { grid.innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
+    }
+
     function closePortfolioModal() {
       closeModal('portfolioModal');
       document.getElementById('portfolioEditId').value = '';
       document.getElementById('portfolioModalTitle').textContent = 'Добавить работу';
       ['pTitle','pDesc','pImageUrl','pProjectUrl','pSkills'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    }
+
+    async function savePortfolioItem() {
+      const editId = document.getElementById('portfolioEditId').value;
+      const data = {
+        title:       document.getElementById('pTitle').value.trim(),
+        description: document.getElementById('pDesc').value.trim(),
+        category:    document.getElementById('pCategory').value,
+        imageUrl:    document.getElementById('pImageUrl').value.trim(),
+        projectUrl:  document.getElementById('pProjectUrl').value.trim(),
+        skills:      document.getElementById('pSkills').value.split(',').map(s=>s.trim()).filter(Boolean)
+      };
+      if (!data.title) { showToast('Введите название', 'error'); return; }
+      try {
+        if (editId) {
+          await apiAuth(`/portfolio/${editId}`, { method:'PUT', body:JSON.stringify(data) });
+          showToast('Обновлено ✅', 'success');
+        } else {
+          await apiAuth('/portfolio', { method:'POST', body:JSON.stringify(data) });
+          showToast('Работа добавлена! 🎉', 'success');
+        }
+        closePortfolioModal();
+        loadPortfolio();
+      } catch(e) { showToast(e.message||'Ошибка', 'error'); }
+    }
+
+    async function editPortfolioItem(id) {
+      try {
+        const user = getCurrentUser();
+        const items = await apiAuth(`/portfolio/${user.id}`);
+        const item = items.find(i => i._id === id);
+        if (!item) return;
+        document.getElementById('portfolioEditId').value = id;
+        document.getElementById('portfolioModalTitle').textContent = 'Редактировать работу';
+        document.getElementById('pTitle').value      = item.title || '';
+        document.getElementById('pDesc').value       = item.description || '';
+        document.getElementById('pCategory').value   = item.category || 'other';
+        document.getElementById('pImageUrl').value   = item.imageUrl || '';
+        document.getElementById('pProjectUrl').value = item.projectUrl || '';
+        document.getElementById('pSkills').value     = (item.skills||[]).join(', ');
+        openModal('portfolioModal');
+      } catch(e) {}
+    }
+
+    async function deletePortfolioItem(id) {
+      if (!confirm('Удалить эту работу?')) return;
+      try {
+        await apiAuth(`/portfolio/${id}`, { method:'DELETE' });
+        showToast('Удалено', 'success');
+        loadPortfolio();
+      } catch(e) { showToast(e.message||'Ошибка', 'error'); }
+    }
+
+    async function loadReviews() {
+      try {
+        const user = getCurrentUser();
+        const reviews = await api(`/reviews/user/${user.id}`);
+        if (!reviews.length) {
+          document.getElementById('reviewAvgRating').textContent = '—';
+          document.getElementById('reviewStars').textContent = '☆☆☆☆☆';
+          document.getElementById('reviewCount').textContent = 'нет отзывов';
+          document.getElementById('reviewsList').innerHTML = `<div class="empty-state" style="padding:2rem 0;">
+            <div class="empty-icon">⭐</div><p>Выполняйте задания чтобы получать отзывы</p></div>`;
+          return;
+        }
+        const avg = reviews.reduce((s,r) => s + r.rating, 0) / reviews.length;
+        document.getElementById('reviewAvgRating').textContent = avg.toFixed(1);
+        document.getElementById('reviewStars').innerHTML =
+          `<span style="color:var(--amber)">${'★'.repeat(Math.round(avg))}</span><span style="color:var(--text3)">${'★'.repeat(5-Math.round(avg))}</span>`;
+        document.getElementById('reviewCount').textContent = `${reviews.length} отзыв${reviews.length===1?'':reviews.length<5?'а':'ов'}`;
+        document.getElementById('reviewsList').innerHTML = reviews.map(r => `
+          <div class="review-item">
+            <div style="display:flex;gap:.75rem;">
+              <div class="avatar" style="width:38px;height:38px;font-size:.9rem;flex-shrink:0;">
+                ${r.reviewer.avatar ? `<img src="${r.reviewer.avatar}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">` : r.reviewer.name.charAt(0)}
+              </div>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.25rem;">
+                  <div style="font-weight:700;font-size:.9rem;">${r.reviewer.name}</div>
+                  <div style="color:var(--amber);font-size:.9rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+                </div>
+                ${r.task?.title ? `<div style="font-size:.74rem;color:var(--text3);margin-bottom:.35rem;">📋 ${r.task.title}</div>` : ''}
+                ${r.comment ? `<p style="font-size:.875rem;color:var(--text2);line-height:1.65;margin:0;">${r.comment}</p>` : ''}
+                <div style="font-size:.72rem;color:var(--text3);margin-top:.35rem;">${formatRelDate(r.createdAt)}</div>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch(e) { document.getElementById('reviewsList').innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
+    }
+
+    async function loadNotifSettings() {
+      try {
+        const res = await apiAuth('/auth/me');
+        document.getElementById('emailNotifToggle').checked = res.emailNotifications !== false;
+        if (res.telegramChatId) {
+          document.getElementById('telegramToggle').checked = true;
+          document.getElementById('telegramChatId').value = res.telegramChatId;
+          document.getElementById('telegramInputWrap').style.display = 'block';
+        }
+      } catch(e) {}
+    }
+
+    async function saveEmailNotif() {
+      try {
+        const emailNotifications = document.getElementById('emailNotifToggle').checked;
+        await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ emailNotifications }) });
+        showToast('Сохранено', 'success');
+      } catch(e) {}
+    }
+
+    function toggleTelegramInput() {
+      const on = document.getElementById('telegramToggle').checked;
+      document.getElementById('telegramInputWrap').style.display = on ? 'block' : 'none';
+      if (!on) apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ telegramChatId:'' }) }).catch(()=>{});
+    }
+
+    async function saveTelegram() {
+      const chatId = document.getElementById('telegramChatId').value.trim();
+      if (!chatId) { showToast('Введите Chat ID', 'error'); return; }
+      try {
+        await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ telegramChatId: chatId }) });
+        showToast('Telegram подключён! 📱', 'success');
+      } catch(e) { showToast(e.message||'Ошибка', 'error'); }
     }
 
     function formatRelDate(iso) {
