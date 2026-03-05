@@ -62,8 +62,14 @@ router.post('/login', async (req, res) => {
 });
 
 // Get current user
+
 router.get('/me', require('../middleware/auth'), async (req, res) => {
-  res.json(req.user);
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    res.json(user);
+  } catch(err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;
