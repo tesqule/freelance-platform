@@ -154,7 +154,14 @@ function updateNavForAuth() {
           <div class="notif-list" id="notifList"><div class="notif-empty">🔔 Уведомлений нет</div></div>
         </div>
       </div>
-      <a href="chat.html" class="btn btn-ghost btn-sm">💬</a>
+      <a href="chat.html" class="btn btn-ghost btn-sm" style="position:relative;">
+        💬<span id="chatNavBadge" style="
+          display:none;position:absolute;top:-4px;right:-4px;
+          background:var(--blue);color:#fff;border-radius:99px;
+          font-size:.6rem;font-weight:700;min-width:16px;height:16px;
+          align-items:center;justify-content:center;padding:0 4px;
+        ">0</span>
+      </a>
       ${user.role === 'admin' ? `<a href="admin.html" class="btn btn-ghost btn-sm">⚙️</a>` : ''}
       <a href="dashboard.html" class="btn btn-ghost btn-sm">
         <span class="avatar" style="width:28px;height:28px;font-size:0.8rem;background:linear-gradient(135deg,var(--blue),var(--purple));">
@@ -167,11 +174,30 @@ function updateNavForAuth() {
       if (wrapper && !wrapper.contains(e.target)) document.getElementById('notifDropdown')?.classList.remove('open');
     });
     updateNotifBadge();
+    // Загружаем непрочитанные сообщения для бейджа на чате
+    loadChatUnreadBadge();
   } else {
     el.innerHTML = `
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">${themeIcon}</button>
       <a href="#" class="btn btn-outline btn-sm" onclick="openAuthModal ? openAuthModal('login') : window.location.href='index.html'">Войти</a>
       <a href="#" class="btn btn-primary btn-sm" onclick="openAuthModal ? openAuthModal('register') : window.location.href='index.html'">Регистрация</a>`;
+  }
+}
+
+// Загружает общее кол-во непрочитанных сообщений и показывает бейдж на иконке чата
+async function loadChatUnreadBadge() {
+  try {
+    const counts = await apiAuth('/chat/unread/counts');
+    if (counts && typeof counts === 'object') {
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+      const badge = document.getElementById('chatNavBadge');
+      if (badge && total > 0) {
+        badge.textContent = total > 9 ? '9+' : total;
+        badge.style.display = 'flex';
+      }
+    }
+  } catch(e) {
+    // Эндпоинт ещё не добавлен — бейдж просто не покажется
   }
 }
 

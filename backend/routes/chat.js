@@ -3,21 +3,30 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Message = require('../models/Message');
 
-// Get messages for a room
-router.get('/:room', auth, async (req, res) => {
+// Get unread message counts per room — ПЕРВЫМ (до /:room)
+router.get('/unread/counts', auth, async (req, res) => {
   try {
-    const messages = await Message.find({ room: req.params.room })
-      .populate('sender', 'name avatar role')
-      .sort({ createdAt: 1 })
-      .limit(100);
+    const userId = req.user._id.toString();
 
-    // Mark as read
-    await Message.updateMany(
-      { room: req.params.room, sender: { $ne: req.user._id }, read: false },
-      { read: true }
-    );
+    const unread = await Message.aggregate([
+      {
+        $match: {
+          room: { $regex: userId },
+          sender: { $ne: req.user._id },
+          read: false
+        }
+      },
+      {
+        $group: {
+          _id: '$room',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
 
-    res.json(messages);
+    const result = {};
+    unread.forEach(item => { result[item._id] = item.count; });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -36,9 +45,7 @@ router.get('/conversations/list', auth, async (req, res) => {
           ]
         }
       },
-      {
-        $sort: { createdAt: -1 }
-      },
+      { $sort: { createdAt: -1 } },
       {
         $group: {
           _id: '$room',
@@ -51,6 +58,26 @@ router.get('/conversations/list', auth, async (req, res) => {
     ]);
 
     res.json(rooms);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Get messages for a room
+router.get('/:room', auth, async (req, res) => {
+  try {
+    const messages = await Message.find({ room: req.params.room })
+      .populate('sender', 'name avatar role')
+      .sort({ createdAt: 1 })
+      .limit(100);
+
+    // Mark as read
+    await Message.updateMany(
+      { room: req.params.room, sender: { $ne: req.user._id }, read: false },
+      { read: true }
+    );
+
+    res.json(messages);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
