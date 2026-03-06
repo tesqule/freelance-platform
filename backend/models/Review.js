@@ -9,15 +9,12 @@ const reviewSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Уникальность: один отзыв на задание от одного пользователя (только если task не null)
-// Для прямых отзывов (task=null) — один от reviewer на reviewee
+// Только для отзывов с заданием — один отзыв от reviewer на task
 reviewSchema.index(
   { task: 1, reviewer: 1 },
   { unique: true, partialFilterExpression: { task: { $type: 'objectId' } } }
 );
-reviewSchema.index(
-  { reviewer: 1, reviewee: 1, task: 1 },
-  { unique: true, sparse: true }
-);
+
+// Для прямых отзывов (task=null) проверка дублей идёт в route-коде, не индексом
 
 module.exports = mongoose.model('Review', reviewSchema);

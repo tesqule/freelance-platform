@@ -5,6 +5,9 @@ const Review = require('../models/Review');
 const Task = require('../models/Task');
 const User = require('../models/User');
 
+// Дропаем старый проблемный индекс при старте (один раз)
+Review.collection.dropIndex('reviewer_1_reviewee_1_task_1').catch(() => {});
+
 // POST /api/reviews
 router.post('/', auth, async (req, res) => {
   try {
@@ -18,7 +21,7 @@ router.post('/', auth, async (req, res) => {
     }
 
     if (taskId) {
-      // Отзыв привязан к заданию — проверяем участие
+      // Отзыв привязан к заданию
       const task = await Task.findById(taskId);
       if (!task) return res.status(404).json({ message: 'Task not found' });
       const isClient     = task.client.toString() === req.user._id.toString();
@@ -29,8 +32,12 @@ router.post('/', auth, async (req, res) => {
       const existing = await Review.findOne({ task: taskId, reviewer: req.user._id });
       if (existing) return res.status(400).json({ message: 'You already left a review for this task' });
     } else {
-      // Прямой отзыв на профиль — не более одного
-      const existing = await Review.findOne({ reviewer: req.user._id, reviewee: revieweeId, task: null });
+      // Прямой отзыв на профиль — один от reviewer на reviewee
+      const existing = await Review.findOne({
+        reviewer: req.user._id,
+        reviewee: revieweeId,
+        task: null
+      });
       if (existing) return res.status(400).json({ message: 'You already left a review for this user' });
     }
 
