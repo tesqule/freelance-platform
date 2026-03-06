@@ -176,7 +176,10 @@
                 : user.name.charAt(0)}
             </div>
             <div class="pub-info">
-              <div class="pub-name">${user.name}</div>
+              <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.25rem;">
+                <div class="pub-name" style="margin-bottom:0;">${user.name}</div>
+                ${user.isVerified ? `<span style="display:inline-flex;align-items:center;gap:.3rem;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.25);color:#10d98a;border-radius:99px;padding:.2rem .65rem;font-size:.72rem;font-weight:700;letter-spacing:.04em;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Верифицирован</span>` : ''}
+              </div>
               <div class="pub-role">${user.specialization || (user.skills?.slice(0,2).join(' · ') || 'Фрилансер')}</div>
               ${user.bio ? `<div class="pub-bio">${user.bio}</div>` : ''}
               ${user.skills?.length
