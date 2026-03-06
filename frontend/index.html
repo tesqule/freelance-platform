@@ -910,10 +910,13 @@
         document.getElementById('socialFabMenu').classList.remove('open');
       }, 400);
     }
-    const fab = document.getElementById('socialFab');
-    if (fab) {
-      fab.addEventListener('mouseenter', openSocialMenu);
-      fab.addEventListener('mouseleave', closeSocialMenuDelayed);
+    const fabBtn = document.querySelector('.social-fab-btn');
+    const fabMenu = document.getElementById('socialFabMenu');
+    if (fabBtn) {
+      fabBtn.addEventListener('mouseenter', openSocialMenu);
+      fabMenu.addEventListener('mouseenter', () => clearTimeout(socialMenuTimer));
+      fabMenu.addEventListener('mouseleave', closeSocialMenuDelayed);
+      fabBtn.addEventListener('mouseleave', closeSocialMenuDelayed);
     }
   </script>
 
