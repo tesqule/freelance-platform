@@ -264,17 +264,18 @@ function renderTaskCard(task) {
   const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
   const isFav = typeof favTaskIds !== 'undefined' && favTaskIds.has(task._id);
   const user = getCurrentUser();
-  const favBtn = user ? `
-    <button onclick="typeof toggleFavorite==='function'?toggleFavorite('${task._id}',this,event):event.stopPropagation()"
-      style="position:absolute;top:.85rem;right:.85rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;z-index:2;">
-      ${isFav ? '❤️' : '🤍'}
-    </button>` : '';
+
   return `
     <div class="task-card" style="position:relative;" onclick="window.location.href='task-detail.html?id=${task._id}'">
-      ${favBtn}
       <div class="task-card-header">
         <h3>${task.title}</h3>
-        <div class="task-budget">₽${task.budget.toLocaleString()}</div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
+          <div class="task-budget">₽${task.budget.toLocaleString()}</div>
+          ${user ? `<button onclick="typeof toggleFavorite==='function'?toggleFavorite('${task._id}',this,event):event.stopPropagation()"
+            style="width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;flex-shrink:0;">
+            ${isFav ? '❤️' : '🤍'}
+          </button>` : ''}
+        </div>
       </div>
       <p class="task-desc">${task.description}</p>
       ${task.skills?.length ? `
