@@ -230,11 +230,12 @@ body::after {
 ═══════════════════════════════════════════ */
 .mobile-menu { position:fixed;inset:0;z-index:150;background:rgba(5,5,15,0.97);backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all 0.3s ease; }
 .mobile-menu.open { opacity:1;visibility:visible; }
-.mobile-menu-inner { display:flex;flex-direction:column;gap:0.5rem;text-align:center;transform:translateY(20px);transition:transform 0.35s ease; }
+.mobile-menu-inner { display:flex;flex-direction:column;gap:0.35rem;text-align:center;transform:translateY(20px);transition:transform 0.35s ease;width:100%;padding:2rem; }
 .mobile-menu.open .mobile-menu-inner { transform:translateY(0); }
-.mobile-menu-inner a { font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--text2);padding:0.4rem 1rem;border-radius:var(--radius);transition:color 0.18s; }
+.mobile-menu-inner a { font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--text2);padding:0.5rem 1rem;border-radius:var(--radius);transition:color 0.18s; }
 .mobile-menu-inner a:hover { color:var(--text); }
-.mobile-menu-btns { display:flex;gap:0.75rem;justify-content:center;margin-top:1.5rem; }
+.mobile-menu-btns { display:flex;flex-direction:column;gap:0.6rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border); }
+.mobile-menu-btns .btn { width:100%;justify-content:center;font-size:1rem;padding:.85rem 1.5rem; }
 
 /* ═══════════════════════════════════════════
    BUTTONS
@@ -351,12 +352,13 @@ body::after {
 .how-tab.active { background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent;box-shadow:0 4px 18px rgba(79,110,247,0.35); }
 .how-tab:not(.active):hover { color:var(--text);background:var(--surface2); }
 .how-steps { display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;transition:all 0.35s ease; }
-.how-step { background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.2rem 1.75rem;transition:border-color .22s,transform .22s;position:relative;overflow:hidden;animation:fadeUp 0.4s ease both; }
+.how-step { background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem 1.5rem;transition:border-color .22s,transform .22s;position:relative;overflow:hidden;animation:fadeUp 0.4s ease both; }
 .how-step:hover { border-color:rgba(79,110,247,0.3);transform:translateY(-3px); }
-.how-step-num { font-family:var(--font-display);font-size:0.7rem;font-weight:800;letter-spacing:0.1em;color:var(--text3);margin-bottom:0.9rem;text-transform:uppercase; }
-.how-step-icon { font-size:2rem;margin-bottom:1rem;display:block; }
-.how-step h3 { font-size:1.05rem;margin-bottom:.55rem; }
-.how-step p  { font-size:.875rem;color:var(--text2);line-height:1.7; }
+.how-step-badge { display:flex;align-items:center;gap:.75rem;margin-bottom:1rem; }
+.how-step-num { font-family:var(--font-display);font-size:.65rem;font-weight:800;letter-spacing:.12em;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));padding:.25rem .6rem;border-radius:99px;text-transform:uppercase; }
+.how-step-icon { font-size:1.6rem; }
+.how-step-content h3 { font-size:1rem;margin-bottom:.45rem; }
+.how-step-content p { font-size:.875rem;color:var(--text2);line-height:1.7; }
 
 /* ═══════════════════════════════════════════
    FREELANCER CARDS + HOVER TOOLTIP
@@ -529,8 +531,7 @@ body::after {
 .cta-title { font-size:2.4rem;letter-spacing:-.045em;margin-bottom:1rem; }
 .cta-sub   { color:var(--text2);max-width:430px;margin:0 auto 2.5rem;line-height:1.75; }
 .cta-btns  { display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap; }
-.mobile-fab { display:none;position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:100;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border:none;border-radius:99px;padding:0.85rem 1.75rem;font-family:var(--font-body);font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 8px 32px rgba(79,110,247,0.5),0 0 0 1px rgba(255,255,255,0.1) inset;gap:0.5rem;align-items:center;white-space:nowrap;animation:fabFloat 3s ease-in-out infinite; }
-@keyframes fabFloat { 0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-4px)} }
+.mobile-fab { display:none !important; }
 
 /* ═══════════════════════════════════════════
    AVATAR / BADGE / SKILL TAG
@@ -754,10 +755,10 @@ textarea.form-control { resize:vertical;min-height:110px; }
 ═══════════════════════════════════════════ */
 @media (max-width:1024px) {
   .how-steps{grid-template-columns:1fr;gap:.85rem}
-  .how-step{display:flex;gap:1.25rem;text-align:left;align-items:flex-start}
-  .how-step-icon{flex-shrink:0;font-size:1.5rem}
+  .how-step{display:flex;gap:1.25rem;text-align:left;align-items:flex-start;padding:1.5rem}
+  .how-step-badge{flex-direction:column;align-items:flex-start;gap:.35rem;flex-shrink:0;min-width:48px}
   .review-card{flex:0 0 calc(50% - 0.5rem)}
-  .fl-tooltip { display:none; } /* на планшете убираем tooltip */
+  .fl-tooltip { display:none; }
 }
 @media (max-width:900px) {
   .dashboard-grid{grid-template-columns:1fr}
@@ -803,6 +804,10 @@ textarea.form-control { resize:vertical;min-height:110px; }
   .modal{max-width:100%;max-height:92vh;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:1.5rem 1.25rem 2rem;transform:translateY(100%)}
   .modal-overlay.open .modal{transform:translateY(0)}
   .fl-tooltip { display:none; }
+  .how-steps{grid-template-columns:1fr;gap:.75rem}
+  .how-step{display:flex;gap:1rem;padding:1.25rem;text-align:left;align-items:flex-start}
+  .how-step-badge{flex-direction:column;align-items:flex-start;gap:.3rem;flex-shrink:0;min-width:44px}
+  .how-step-icon{font-size:1.4rem}
 }
 @media (max-width:480px) {
   .cats-grid{grid-template-columns:repeat(2,1fr)}

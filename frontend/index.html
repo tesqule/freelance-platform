@@ -51,7 +51,7 @@
       <a href="#freelancers" onclick="closeMobileMenu()">Специалисты</a>
       <a href="#how" onclick="closeMobileMenu()">Как работает</a>
       <a href="#reviews" onclick="closeMobileMenu()">Отзывы</a>
-      <div class="mobile-menu-btns">
+      <div class="mobile-menu-btns" id="mobileMenuBtns">
         <a href="#" class="btn btn-outline" onclick="openAuthModal('login');closeMobileMenu()">Войти</a>
         <a href="#" class="btn btn-primary" onclick="openAuthModal('register');closeMobileMenu()">Начать →</a>
       </div>
@@ -219,10 +219,7 @@
     </div>
   </section>
 
-  <a href="#" class="mobile-fab" onclick="handlePlaceOrder(); return false;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Разместить заказ
-  </a>
+
 
   <!-- МОДАЛКА АВТОРИЗАЦИИ -->
   <div class="modal-overlay" id="authModal">
@@ -463,12 +460,16 @@
       const el = document.getElementById('howSteps');
       el.style.opacity = '0'; el.style.transform = 'translateY(10px)';
       setTimeout(() => {
-        el.innerHTML = howData[type].map(s => `
+        el.innerHTML = howData[type].map((s, i) => `
           <div class="how-step">
-            <div class="how-step-num">${s.num}</div>
-            <div class="how-step-icon">${s.icon}</div>
-            <h3>${s.title}</h3>
-            <p>${s.desc}</p>
+            <div class="how-step-badge">
+              <span class="how-step-num">${s.num}</span>
+              <span class="how-step-icon">${s.icon}</span>
+            </div>
+            <div class="how-step-content">
+              <h3>${s.title}</h3>
+              <p>${s.desc}</p>
+            </div>
           </div>`).join('');
         el.style.transition = 'all 0.35s ease';
         el.style.opacity = '1'; el.style.transform = 'translateY(0)';
@@ -549,7 +550,7 @@
     }
 
     function openAuthModal(type) {
-      if (getCurrentUser()) { window.location.href = 'dashboard.html'; return; }
+      if (getCurrentUser()) { window.location.href = 'profile.html'; return; }
       document.getElementById('authModal').classList.add('open');
       switchAuth(type);
     }
@@ -791,11 +792,17 @@
         document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
       });
 
-      const fab = document.querySelector('.mobile-fab');
-      if (window.innerWidth > 700) fab.style.display = 'none';
-      window.addEventListener('resize', () => {
-        fab.style.display = window.innerWidth > 700 ? 'none' : '';
-      });
+      // Обновляем мобильное меню для авторизованного пользователя
+      const me = getCurrentUser();
+      if (me) {
+        const mobileBtns = document.getElementById('mobileMenuBtns');
+        if (mobileBtns) {
+          mobileBtns.innerHTML = `
+            <a href="profile.html" class="btn btn-glass" onclick="closeMobileMenu()">👤 Профиль</a>
+            <a href="tasks.html" class="btn btn-primary" onclick="closeMobileMenu()">Найти задание</a>
+          `;
+        }
+      }
     });
   </script>
 

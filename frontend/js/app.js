@@ -165,7 +165,7 @@ function updateNavForAuth() {
         ">0</span>
       </a>
       ${user.role === 'admin' ? `<a href="admin.html" class="btn btn-ghost btn-sm">⚙️</a>` : ''}
-      <a href="dashboard.html" class="btn btn-ghost btn-sm">
+      <a href="profile.html" class="btn btn-ghost btn-sm">
         <span class="avatar" style="width:28px;height:28px;font-size:0.8rem;background:linear-gradient(135deg,var(--blue),var(--purple));">
           ${user.avatar ? `<img src="${user.avatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">` : user.name.charAt(0)}
         </span>
@@ -252,7 +252,6 @@ function closeModal(id) {
   document.querySelectorAll(`#${id} input, #${id} textarea`).forEach(el => el.value = '');
 }
 
-/* ── RENDER TASK CARD — сердечко перемещено вниз ──────── */
 function renderTaskCard(task) {
   const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
   const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
