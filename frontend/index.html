@@ -306,7 +306,6 @@
     </div>
   </div>
 
-
   <!-- МОДАЛКА ПРОСМОТРА УСЛУГИ -->
   <div class="modal-overlay" id="serviceViewModal">
     <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
@@ -359,27 +358,18 @@
     let allServices = [];
     let currentServiceCategory = '';
 
-    // ═══════════════════════════════════════════
-    // КНОПКА «РАЗМЕСТИТЬ ЗАКАЗ»
-    // Логика: не авторизован → регистрация → после входа открываем модалку
-    //         фрилансер → тост с объяснением
-    //         заказчик  → сразу модалка
-    // ═══════════════════════════════════════════
     function handlePlaceOrder() {
       const user = getCurrentUser();
       if (!user) {
-        // Запомним что хотел сделать — после входа разберёмся по роли
         sessionStorage.setItem('pendingAction', 'placeOrder');
         openAuthModal('register');
         return;
       }
       if (user.role === 'freelancer') {
-        // Фрилансер → идём в профиль, открываем вкладку услуг + модалку
         sessionStorage.setItem('pendingAction', 'addService');
         window.location.href = 'profile.html';
         return;
       }
-      // Заказчик → модалка создания задания прямо здесь
       openCreateTaskModal();
     }
 
@@ -433,9 +423,6 @@
       }
     }
 
-    // ═══════════════════════════════════════════
-    // HOW IT WORKS
-    // ═══════════════════════════════════════════
     const howData = {
       client: [
         { num:'01', icon:'📝', title:'Опиши задачу', desc:'Расскажи что нужно сделать, укажи бюджет и сроки. Займёт меньше двух минут.' },
@@ -471,9 +458,6 @@
       }, 150);
     }
 
-    // ═══════════════════════════════════════════
-    // REVIEWS
-    // ═══════════════════════════════════════════
     const reviewsData = [
       { name:'Артём К.',   role:'Заказчик',   avatar:'А', rating:5, text:'Нашёл разработчика за 2 часа. Парень сделал мне лендинг точно в срок, ещё и с правками помог. Буду возвращаться!' },
       { name:'Мария Л.',   role:'Фрилансер',  avatar:'М', rating:5, text:'Уже третий месяц работаю здесь. Заказы стабильные, платят честно. Всё понятно и без лишней бюрократии.' },
@@ -511,9 +495,6 @@
       document.querySelectorAll('#carouselDots .dot').forEach((d, i) => d.classList.toggle('active', i === n));
     }
 
-    // ═══════════════════════════════════════════
-    // SEARCH
-    // ═══════════════════════════════════════════
     const searchTips = ['React разработчик','Дизайн логотипа','SEO оптимизация','Монтаж видео','Копирайтинг','Telegram бот','Motion design','Создание сайта','Настройка рекламы','Озвучка'];
 
     function handleHeroSearch(val) {
@@ -537,9 +518,6 @@
 
     function quickSearch(q) { window.location.href = `tasks.html?search=${encodeURIComponent(q)}`; }
 
-    // ═══════════════════════════════════════════
-    // MOBILE MENU
-    // ═══════════════════════════════════════════
     function toggleMobileMenu() {
       const menu   = document.getElementById('mobileMenu');
       const burger = document.getElementById('burger');
@@ -553,9 +531,6 @@
       document.body.style.overflow = '';
     }
 
-    // ═══════════════════════════════════════════
-    // AUTH
-    // ═══════════════════════════════════════════
     function openAuthModal(type) {
       if (getCurrentUser()) { window.location.href = 'dashboard.html'; return; }
       document.getElementById('authModal').classList.add('open');
@@ -575,9 +550,6 @@
     }
     function goCategory(cat) { window.location.href = `tasks.html?category=${cat}`; }
 
-    // ═══════════════════════════════════════════
-    // STATS
-    // ═══════════════════════════════════════════
     function animateNum(id, target) {
       const el = document.getElementById(id);
       if (!el || !target) { if(el) el.textContent = '0'; return; }
@@ -605,9 +577,6 @@
       }
     }
 
-    // ═══════════════════════════════════════════
-    // RECENT TASKS
-    // ═══════════════════════════════════════════
     async function loadRecentTasks() {
       try {
         const tasks = await api('/tasks');
@@ -628,19 +597,16 @@
       }
     }
 
-    // ═══════════════════════════════════════════
-    // SERVICES
-    // ═══════════════════════════════════════════
     async function loadServices() {
-  try {
-    const services = await api('/services');
-    allServices = services;
-    renderServices(allServices);
-  } catch(e) {
-    document.getElementById('servicesGrid').innerHTML =
-      '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛠</div><p>Услуги скоро появятся</p></div>';
-  }
-}
+      try {
+        const services = await api('/services');
+        allServices = services;
+        renderServices(allServices);
+      } catch(e) {
+        document.getElementById('servicesGrid').innerHTML =
+          '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛠</div><p>Услуги скоро появятся</p></div>';
+      }
+    }
 
     function filterServices(cat, btn) {
       currentServiceCategory = cat;
@@ -723,9 +689,9 @@
         window.location.href = `chat.html?user=${aId}`;
       };
       document.getElementById('svcProfileBtn').onclick = () => {
-  if (!aId) { showToast('ID фрилансера не найден', 'error'); return; }
-  window.location.href = `portfile.html?id=${aId}`;
-};
+        if (!aId) { showToast('ID фрилансера не найден', 'error'); return; }
+        window.location.href = `portfile.html?id=${aId}`;
+      };
 
       document.getElementById('serviceViewModal').classList.add('open');
     }
@@ -735,7 +701,7 @@
     }
 
     // ═══════════════════════════════════════════
-    // TOP FREELANCERS
+    // TOP FREELANCERS — описание внутри карточки
     // ═══════════════════════════════════════════
     async function loadTopFreelancers() {
       try {
@@ -745,18 +711,8 @@
           c.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">👥</div><p>Фрилансеров пока нет</p></div>`;
           return;
         }
-        c.innerHTML = users.slice(0, 8).map((u, idx) => `
+        c.innerHTML = users.slice(0, 8).map((u) => `
           <div class="freelancer-card" onclick="window.location.href='portfile.html?id=${u._id}'" data-id="${u._id}">
-            <div class="fl-tooltip fl-tooltip-${idx < 2 ? 'bottom' : 'top'}">
-              <div class="fl-tooltip-name">${u.name}</div>
-              <div class="fl-tooltip-role">${u.specialization || (u.skills?.slice(0,2).join(' · ') || 'Фрилансер')}</div>
-              ${u.bio ? `<div class="fl-tooltip-bio">${u.bio}</div>` : '<div class="fl-tooltip-bio" style="color:var(--text3);font-style:italic;">Нет описания</div>'}
-              ${u.skills?.length ? `<div class="fl-tooltip-skills">${u.skills.slice(0,4).map(s=>`<span class="skill-tag" style="font-size:.65rem;">${s}</span>`).join('')}</div>` : ''}
-              <div class="fl-tooltip-stats">
-                <div class="fl-tooltip-stat">⭐ <strong>${(u.rating||0).toFixed(1)}</strong></div>
-                <div class="fl-tooltip-stat">✅ <strong>${u.completedTasks||0}</strong> задан</div>
-              </div>
-            </div>
             <div class="fl-avatar">
               ${u.avatar ? `<img src="${u.avatar}" alt="${u.name}">` : `<span>${u.name.charAt(0)}</span>`}
               <div class="fl-online"></div>
@@ -764,14 +720,18 @@
             <h4 class="fl-name">${u.name}</h4>
             <div class="fl-rating">★ ${(u.rating||0).toFixed(1)} <span class="fl-count">(${u.completedTasks||0})</span></div>
             ${u.skills?.length ? `<div class="fl-skills">${u.skills.slice(0,3).map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
+            <div class="fl-inline-info">
+              <div class="fl-inline-bio">${u.bio || '<span style="color:var(--text3);font-style:italic;">Нет описания</span>'}</div>
+              <div class="fl-inline-stats">
+                <span>⭐ ${(u.rating||0).toFixed(1)}</span>
+                <span>✅ ${u.completedTasks||0} задан</span>
+              </div>
+            </div>
             <a href="chat.html?user=${u._id}" class="btn btn-glass btn-sm fl-btn" onclick="event.stopPropagation()">Написать</a>
           </div>`).join('');
       } catch(e) {}
     }
 
-    // ═══════════════════════════════════════════
-    // INIT
-    // ═══════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', () => {
       updateNavForAuth();
       loadStats();
@@ -782,7 +742,6 @@
       renderReviews();
       selectRole('client');
 
-      // Если вернулись после входа/регистрации
       const pending = sessionStorage.getItem('pendingAction');
       if (pending === 'createTask' || pending === 'placeOrder') {
         sessionStorage.removeItem('pendingAction');
@@ -796,7 +755,6 @@
         }
       }
 
-      // Закрытие по клику на оверлей
       document.getElementById('authModal').addEventListener('click', e => {
         if (e.target.id === 'authModal') closeAuthModal();
       });
@@ -825,19 +783,45 @@
   </script>
 
   <style>
-    .fl-tooltip-bottom {
-      bottom: auto !important;
-      top: calc(100% + 12px) !important;
-      transform: translateX(-50%) translateY(-6px) !important;
+    /* ── Убираем старый тултип полностью ── */
+    .fl-tooltip { display: none !important; }
+
+    /* ── Описание внутри карточки при hover ── */
+    .freelancer-card {
+      overflow: hidden;
     }
-    .freelancer-card:hover .fl-tooltip-bottom {
-      transform: translateX(-50%) translateY(0) !important;
+
+    .fl-inline-info {
+      width: 100%;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+      text-align: left;
     }
-    .fl-tooltip-bottom::after {
-      bottom: 100% !important; top: auto !important;
-      border-top-color: transparent !important;
-      border-bottom-color: var(--border2) !important;
+    .freelancer-card:hover .fl-inline-info {
+      max-height: 160px;
+      opacity: 1;
     }
+    .fl-inline-bio {
+      font-size: .78rem;
+      color: var(--text2);
+      line-height: 1.6;
+      padding: 0.6rem 0 0.4rem;
+      border-top: 1px solid var(--border);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .fl-inline-stats {
+      display: flex;
+      gap: 0.85rem;
+      font-size: .72rem;
+      color: var(--text3);
+      padding-top: 0.35rem;
+    }
+
     @media (max-width: 500px) {
       .services-grid { grid-template-columns: 1fr; }
       .services-filters { overflow-x: auto; flex-wrap: nowrap; padding-bottom: .5rem; }
