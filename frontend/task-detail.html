@@ -228,7 +228,7 @@
                 ${user && user.id !== task.client._id
                   ? `<a href="chat.html?user=${task.client._id}" class="btn btn-glass w-full btn-sm">💬 Написать</a>` : ''}
                 ${user && user.id !== task.client._id
-                  ? `<button class="btn btn-outline w-full btn-sm" onclick="openReviewModal('${task.client._id}','${task.client.name.replace(/'/g,"\\'")}',false)">⭐ Оставить отзыв</button>` : ''}
+                  ? `<button class="btn btn-outline w-full btn-sm" onclick="openReviewModal('${task.client._id}','${task.client.name.replace(/'/g,"\\'")}',true)">⭐ Оставить отзыв</button>` : ''}
               </div>
             </div>
           </div>
@@ -267,7 +267,7 @@
                 <button class="btn btn-success btn-sm" onclick="acceptProposal('${p._id}')">✓ Принять</button>
                 <button class="btn btn-danger btn-sm"  onclick="rejectProposal('${p._id}')">✗ Отклонить</button>` : ''}
               ${user && user.id !== (fr._id||'') ? `<a href="chat.html?user=${fr._id}" class="btn btn-glass btn-sm">💬 Написать</a>` : ''}
-              ${user && user.id !== (fr._id||'') ? `<button class="btn btn-outline btn-sm" onclick="openReviewModal('${fr._id}','${(fr.name||'Фрилансер').replace(/'/g,"\\'")}',false)">⭐ Отзыв</button>` : ''}
+              ${user && user.id !== (fr._id||'') ? `<button class="btn btn-outline btn-sm" onclick="openReviewModal('${fr._id}','${(fr.name||'Фрилансер').replace(/'/g,"\\'")}',true)">⭐ Отзыв</button>` : ''}
             </div>
           </div>`;
       }).join('');
