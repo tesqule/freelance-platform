@@ -56,8 +56,6 @@ function toggleTheme() {
 
 initTheme();
 
-/* ── NOTIFICATIONS (MongoDB) ─────────────────────────── */
-
 async function loadNotifCount() {
   try {
     const data = await apiAuth('/notifications/unread/count');
@@ -137,7 +135,6 @@ function formatRelativeTime(iso) {
   return `${Math.floor(hours / 24)} д назад`;
 }
 
-/* ── NAV ─────────────────────────────────────────────── */
 function updateNavForAuth() {
   const user = getCurrentUser();
   const el = document.getElementById('navActions');
@@ -206,7 +203,6 @@ async function loadChatUnreadBadge() {
   } catch(e) {}
 }
 
-/* ── SKELETONS ───────────────────────────────────────── */
 function skeletonTaskCards(count = 6) {
   return Array.from({ length: count }, () => `
     <div class="skeleton-task-card">
@@ -239,7 +235,6 @@ function skeletonFreelancerCards(count = 4) {
     </div>`).join('');
 }
 
-/* ── TOAST ───────────────────────────────────────────── */
 function showToast(msg, type = 'info') {
   const c = document.getElementById('toastContainer');
   if (!c) return;
@@ -251,14 +246,13 @@ function showToast(msg, type = 'info') {
   setTimeout(() => t.remove(), 4000);
 }
 
-/* ── MODALS ──────────────────────────────────────────── */
 function openModal(id) { document.getElementById(id)?.classList.add('open'); }
 function closeModal(id) {
   document.getElementById(id)?.classList.remove('open');
   document.querySelectorAll(`#${id} input, #${id} textarea`).forEach(el => el.value = '');
 }
 
-/* ── RENDER TASK CARD ────────────────────────────────── */
+/* ── RENDER TASK CARD — сердечко перемещено вниз ──────── */
 function renderTaskCard(task) {
   const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
   const deadline = new Date(task.deadline).toLocaleDateString('ru-RU');
@@ -266,16 +260,10 @@ function renderTaskCard(task) {
   const user = getCurrentUser();
 
   return `
-    <div class="task-card" style="position:relative;" onclick="window.location.href='task-detail.html?id=${task._id}'">
+    <div class="task-card" onclick="window.location.href='task-detail.html?id=${task._id}'">
       <div class="task-card-header">
         <h3>${task.title}</h3>
-        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-          <div class="task-budget">₽${task.budget.toLocaleString()}</div>
-          ${user ? `<button onclick="typeof toggleFavorite==='function'?toggleFavorite('${task._id}',this,event):event.stopPropagation()"
-            style="width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;flex-shrink:0;">
-            ${isFav ? '❤️' : '🤍'}
-          </button>` : ''}
-        </div>
+        <div class="task-budget">₽${task.budget.toLocaleString()}</div>
       </div>
       <p class="task-desc">${task.description}</p>
       ${task.skills?.length ? `
@@ -290,16 +278,24 @@ function renderTaskCard(task) {
           </div>
           ${task.client?.name || 'Заказчик'}
         </div>
-        <div class="task-info">
-          <span>${catEmojis[task.category]||'🔧'}</span>
-          <span>⏰ ${deadline}</span>
-          <span>💬 ${task.proposals?.length||0}</span>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div class="task-info">
+            <span>${catEmojis[task.category]||'🔧'}</span>
+            <span>⏰ ${deadline}</span>
+            <span>💬 ${task.proposals?.length||0}</span>
+          </div>
+          ${user ? `<button
+            onclick="typeof toggleFavorite==='function'?toggleFavorite('${task._id}',this,event):event.stopPropagation()"
+            style="width:26px;height:26px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.75rem;flex-shrink:0;transition:background .15s;"
+            onmouseover="this.style.background='rgba(79,110,247,.15)'"
+            onmouseout="this.style.background='var(--surface2)'">
+            ${isFav ? '❤️' : '🤍'}
+          </button>` : ''}
         </div>
       </div>
     </div>`;
 }
 
-/* ── TIME ────────────────────────────────────────────── */
 function formatTime(date) { return new Date(date).toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }); }
 function formatDate(date) {
   const d = new Date(date);
@@ -307,7 +303,6 @@ function formatDate(date) {
   return d.toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
 }
 
-/* ── CHAT SEARCH ─────────────────────────────────────── */
 function filterConversations(val) {
   document.querySelectorAll('.conversation-item').forEach(item => {
     const name = item.querySelector('.conv-name')?.textContent?.toLowerCase() || '';
