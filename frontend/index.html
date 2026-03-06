@@ -723,8 +723,10 @@
         window.location.href = `chat.html?user=${aId}`;
       };
       document.getElementById('svcProfileBtn').onclick = () => {
-        window.location.href = `portfile.html?id=${aId}`;
-      };
+  console.log('freelancer id:', aId, s.freelancer);
+  if (!aId) { showToast('ID фрилансера не найден', 'error'); return; }
+  window.location.href = `portfile.html?id=${aId}`;
+};
 
       document.getElementById('serviceViewModal').classList.add('open');
     }
