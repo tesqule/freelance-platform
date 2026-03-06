@@ -181,6 +181,23 @@ function updateNavForAuth() {
     loadChatUnreadBadge();
     setInterval(loadNotifCount, 30000);
     setInterval(loadChatUnreadBadge, 30000);
+
+    // Обновляем мобильное меню на всех страницах
+    const mobileInner = document.querySelector('.mobile-menu-inner');
+    if (mobileInner) {
+      mobileInner.innerHTML = `
+        <a href="tasks.html" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">Задания</a>
+        <a href="profile.html" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">Профиль</a>
+        <a href="chat.html" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">Сообщения</a>
+        <div class="mobile-menu-btns">
+          <a href="profile.html" class="btn btn-glass" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">
+            ${user.avatar ? `<img src="${user.avatar}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : '👤'}
+            ${user.name.split(' ')[0]}
+          </a>
+          <button class="btn btn-danger" onclick="logout()">Выйти</button>
+        </div>`;
+    }
+
   } else {
     el.innerHTML = `
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">${themeIcon}</button>
