@@ -51,7 +51,7 @@
       <a href="#freelancers" onclick="closeMobileMenu()">Специалисты</a>
       <a href="#how" onclick="closeMobileMenu()">Как работает</a>
       <a href="#reviews" onclick="closeMobileMenu()">Отзывы</a>
-      <div class="mobile-menu-btns" id="mobileMenuBtns">
+      <div class="mobile-menu-btns">
         <a href="#" class="btn btn-outline" onclick="openAuthModal('login');closeMobileMenu()">Войти</a>
         <a href="#" class="btn btn-primary" onclick="openAuthModal('register');closeMobileMenu()">Начать →</a>
       </div>
@@ -219,36 +219,41 @@
     </div>
   </section>
 
-
+  <a href="#" class="mobile-fab" onclick="handlePlaceOrder(); return false;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Разместить заказ
+  </a>
 
   <!-- МОДАЛКА АВТОРИЗАЦИИ -->
   <div class="modal-overlay" id="authModal">
     <div class="modal">
-      <div class="modal-header">
-        <h3 id="authTitle">Вход</h3>
-        <button class="modal-close" onclick="closeAuthModal()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div id="loginForm">
-        <div class="form-group"><label>Email</label><input type="email" class="form-control" id="loginEmail" placeholder="your@email.com" /></div>
-        <div class="form-group"><label>Пароль</label><input type="password" class="form-control" id="loginPassword" placeholder="••••••••" /></div>
-        <button class="btn btn-primary w-full mt-2" onclick="handleLogin()">Войти →</button>
-        <p class="auth-switch">Нет аккаунта? <a href="#" onclick="switchAuth('register')">Зарегистрироваться</a></p>
-      </div>
-      <div id="registerForm" class="hidden">
-        <div class="form-group"><label>Имя</label><input type="text" class="form-control" id="regName" placeholder="Ваше имя" /></div>
-        <div class="form-group"><label>Email</label><input type="email" class="form-control" id="regEmail" placeholder="your@email.com" /></div>
-        <div class="form-group"><label>Пароль</label><input type="password" class="form-control" id="regPassword" placeholder="Минимум 6 символов" /></div>
-        <div class="form-group">
-          <label>Я хочу</label>
-          <div class="role-grid">
-            <div class="role-card" id="roleCardClient" onclick="selectRole('client')"><div class="role-icon">📋</div><div class="role-name">Заказывать</div><div class="role-hint">Размещаю задания</div></div>
-            <div class="role-card" id="roleCardFreelancer" onclick="selectRole('freelancer')"><div class="role-icon">💼</div><div class="role-name">Выполнять</div><div class="role-hint">Зарабатываю здесь</div></div>
-          </div>
+      <div class="modal-inner-pad">
+        <div class="modal-header">
+          <h3 id="authTitle">Вход</h3>
+          <button class="modal-close" onclick="closeAuthModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
-        <button class="btn btn-primary w-full mt-2" onclick="handleRegister()">Создать аккаунт →</button>
-        <p class="auth-switch">Уже есть аккаунт? <a href="#" onclick="switchAuth('login')">Войти</a></p>
+        <div id="loginForm">
+          <div class="form-group"><label>Email</label><input type="email" class="form-control" id="loginEmail" placeholder="your@email.com" /></div>
+          <div class="form-group"><label>Пароль</label><input type="password" class="form-control" id="loginPassword" placeholder="••••••••" /></div>
+          <button class="btn btn-primary w-full mt-2" onclick="handleLogin()">Войти →</button>
+          <p class="auth-switch">Нет аккаунта? <a href="#" onclick="switchAuth('register')">Зарегистрироваться</a></p>
+        </div>
+        <div id="registerForm" class="hidden">
+          <div class="form-group"><label>Имя</label><input type="text" class="form-control" id="regName" placeholder="Ваше имя" /></div>
+          <div class="form-group"><label>Email</label><input type="email" class="form-control" id="regEmail" placeholder="your@email.com" /></div>
+          <div class="form-group"><label>Пароль</label><input type="password" class="form-control" id="regPassword" placeholder="Минимум 6 символов" /></div>
+          <div class="form-group">
+            <label>Я хочу</label>
+            <div class="role-grid">
+              <div class="role-card" id="roleCardClient" onclick="selectRole('client')"><div class="role-icon">📋</div><div class="role-name">Заказывать</div><div class="role-hint">Размещаю задания</div></div>
+              <div class="role-card" id="roleCardFreelancer" onclick="selectRole('freelancer')"><div class="role-icon">💼</div><div class="role-name">Выполнять</div><div class="role-hint">Зарабатываю здесь</div></div>
+            </div>
+          </div>
+          <button class="btn btn-primary w-full mt-2" onclick="handleRegister()">Создать аккаунт →</button>
+          <p class="auth-switch">Уже есть аккаунт? <a href="#" onclick="switchAuth('login')">Войти</a></p>
+        </div>
       </div>
     </div>
   </div>
@@ -460,16 +465,12 @@
       const el = document.getElementById('howSteps');
       el.style.opacity = '0'; el.style.transform = 'translateY(10px)';
       setTimeout(() => {
-        el.innerHTML = howData[type].map((s, i) => `
+        el.innerHTML = howData[type].map(s => `
           <div class="how-step">
-            <div class="how-step-badge">
-              <span class="how-step-num">${s.num}</span>
-              <span class="how-step-icon">${s.icon}</span>
-            </div>
-            <div class="how-step-content">
-              <h3>${s.title}</h3>
-              <p>${s.desc}</p>
-            </div>
+            <div class="how-step-num">${s.num}</div>
+            <div class="how-step-icon">${s.icon}</div>
+            <h3>${s.title}</h3>
+            <p>${s.desc}</p>
           </div>`).join('');
         el.style.transition = 'all 0.35s ease';
         el.style.opacity = '1'; el.style.transform = 'translateY(0)';
@@ -550,7 +551,7 @@
     }
 
     function openAuthModal(type) {
-      if (getCurrentUser()) { window.location.href = 'profile.html'; return; }
+      if (getCurrentUser()) { window.location.href = 'dashboard.html'; return; }
       document.getElementById('authModal').classList.add('open');
       switchAuth(type);
     }
@@ -792,17 +793,11 @@
         document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
       });
 
-      // Обновляем мобильное меню для авторизованного пользователя
-      const me = getCurrentUser();
-      if (me) {
-        const mobileBtns = document.getElementById('mobileMenuBtns');
-        if (mobileBtns) {
-          mobileBtns.innerHTML = `
-            <a href="profile.html" class="btn btn-glass" onclick="closeMobileMenu()">👤 Профиль</a>
-            <a href="tasks.html" class="btn btn-primary" onclick="closeMobileMenu()">Найти задание</a>
-          `;
-        }
-      }
+      const fab = document.querySelector('.mobile-fab');
+      if (window.innerWidth > 700) fab.style.display = 'none';
+      window.addEventListener('resize', () => {
+        fab.style.display = window.innerWidth > 700 ? 'none' : '';
+      });
     });
   </script>
 
