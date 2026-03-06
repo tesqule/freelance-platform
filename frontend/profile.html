@@ -38,9 +38,27 @@
     .star-picker { display:flex; gap:.3rem; font-size:1.6rem; cursor:pointer; margin:.5rem 0; }
     .star-picker span { color:var(--text3); transition:color .12s; user-select:none; }
     .star-picker span.active { color:var(--amber); }
+
+    /* Бейдж верификации */
+    .verified-badge {
+      display:inline-flex; align-items:center; gap:.3rem;
+      background:rgba(16,217,138,.1); border:1px solid rgba(16,217,138,.25);
+      color:var(--green); border-radius:99px;
+      padding:.2rem .65rem; font-size:.72rem; font-weight:700;
+      letter-spacing:.04em;
+    }
+    .verified-badge svg { flex-shrink:0; }
+
+    /* Блок верификации в настройках */
+    .verify-block {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:.9rem 0; border-bottom:1px solid var(--border);
+    }
+
     @media (max-width:600px) {
       .portfolio-grid, .services-grid-profile { grid-template-columns:1fr; }
       .profile-tabs { overflow-x:auto; white-space:nowrap; }
+      .verify-block { flex-direction:column; align-items:flex-start; gap:.75rem; }
     }
   </style>
 </head>
@@ -91,7 +109,7 @@
         <button class="profile-tab" id="notifTabBtn"         onclick="switchProfileTab('notifications',this)">🔔 Уведомления</button>
       </div>
 
-      <!-- TAB: EDIT (только свой профиль) -->
+      <!-- TAB: EDIT -->
       <div id="tab-edit">
         <div class="card" style="border-radius:var(--radius-lg);padding:2rem;">
           <div class="grid-2" style="gap:1rem;">
@@ -144,7 +162,6 @@
                 <div style="font-size:.75rem;color:var(--text3);" id="reviewCount">нет отзывов</div>
               </div>
             </div>
-            <!-- Кнопка "оставить отзыв" для чужого профиля -->
             <button class="btn btn-primary btn-sm" id="leaveReviewBtn" style="display:none;" onclick="openSelfReviewModal()">⭐ Оставить отзыв</button>
           </div>
           <div id="reviewsList"><div class="spinner"></div></div>
@@ -155,6 +172,18 @@
       <div id="tab-notifications" style="display:none;">
         <div class="card" style="border-radius:var(--radius-lg);padding:2rem;">
           <h3 style="font-size:1.05rem;letter-spacing:-.02em;margin-bottom:1.5rem;">Настройки уведомлений</h3>
+
+          <!-- ВЕРИФИКАЦИЯ EMAIL -->
+          <div class="verify-block">
+            <div>
+              <div style="font-weight:600;font-size:.9rem;">✅ Верификация email</div>
+              <div style="font-size:.78rem;color:var(--text3);margin-top:.2rem;" id="verifyStatusText">Подтвердите почту чтобы получить зелёную галочку в профиле</div>
+            </div>
+            <div id="verifyAction">
+              <button class="btn btn-success btn-sm" onclick="sendVerifyEmail()" id="verifyBtn">Подтвердить почту</button>
+            </div>
+          </div>
+
           <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 0;border-bottom:1px solid var(--border);">
             <div>
               <div style="font-weight:600;font-size:.9rem;">📧 Email уведомления</div>
@@ -231,7 +260,7 @@
     </div>
   </div>
 
-  <!-- REVIEW MODAL (для чужого профиля) -->
+  <!-- REVIEW MODAL -->
   <div class="modal-overlay" id="selfReviewModal">
     <div class="modal" style="max-width:460px;">
       <div class="modal-header">
@@ -261,26 +290,58 @@
   <script>
     const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
 
-    // Определяем: свой профиль или чужой
     const urlParams   = new URLSearchParams(window.location.search);
-    const viewUserId  = urlParams.get('id'); // если есть — чужой профиль
+    const viewUserId  = urlParams.get('id');
+    const verifyToken = urlParams.get('verify');
     let   profileData = null;
     let   selfReviewRating = 0;
 
     function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
     function closeMobileMenu()  { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
 
+    // ── ВЕРИФИКАЦИЯ ────────────────────────────────
+    async function handleVerifyToken(token) {
+      try {
+        const res = await api(`/users/verify/${token}`);
+        showToast('Email подтверждён! 🎉', 'success');
+        // Убираем токен из URL
+        window.history.replaceState({}, '', '/profile.html');
+        // Обновляем отображение
+        loadNotifSettings();
+      } catch(e) {
+        showToast(e.message || 'Ссылка недействительна', 'error');
+      }
+    }
+
+    async function sendVerifyEmail() {
+      const btn = document.getElementById('verifyBtn');
+      btn.disabled = true;
+      btn.textContent = 'Отправляем...';
+      try {
+        const res = await apiAuth('/users/verify/send', { method: 'POST' });
+        showToast(res.message || 'Письмо отправлено! Проверь почту 📧', 'success');
+        btn.textContent = 'Письмо отправлено';
+      } catch(e) {
+        showToast(e.message || 'Ошибка отправки', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Подтвердить почту';
+      }
+    }
+
     // ── ИНИЦИАЛИЗАЦИЯ ──────────────────────────────
     async function initProfile() {
       const me = getCurrentUser();
 
+      // Если в URL есть токен верификации — обрабатываем
+      if (verifyToken) {
+        await handleVerifyToken(verifyToken);
+      }
+
       if (viewUserId && (!me || viewUserId !== me.id)) {
-        // ЧУЖОЙ ПРОФИЛЬ
         await loadPublicProfile(viewUserId, me);
       } else {
-        // СВОЙ ПРОФИЛЬ
         if (!me) { window.location.href = 'index.html'; return; }
-        loadProfile(); // из profile.js
+        loadProfile();
         if (me.role === 'client') {
           document.getElementById('portfolioTabBtn').style.display = 'none';
           document.getElementById('servicesTabBtn').style.display  = 'none';
@@ -296,7 +357,6 @@
     }
 
     async function loadPublicProfile(userId, me) {
-      // Меняем заголовок страницы
       document.getElementById('pageTitle').innerHTML = `
         <a href="javascript:history.back()" class="btn btn-glass btn-sm mb-2" style="display:inline-flex;gap:.4rem;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -305,11 +365,9 @@
         <div class="section-eyebrow">Профиль</div>
         <h2 style="font-size:1.8rem;letter-spacing:-.04em;" id="publicProfileTitle">Загрузка...</h2>`;
 
-      // Скрываем вкладки редактирования и уведомлений
       document.getElementById('tabEditBtn').style.display  = 'none';
       document.getElementById('notifTabBtn').style.display = 'none';
 
-      // Активируем вкладку портфолио по умолчанию
       document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
 
       try {
@@ -318,7 +376,13 @@
         document.title = `${user.name} — FreeLanceHub`;
         document.getElementById('publicProfileTitle').textContent = user.name;
 
-        // Рендерим шапку профиля
+        const verifiedBadge = user.isVerified
+          ? `<span class="verified-badge">
+               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+               Верифицирован
+             </span>`
+          : '';
+
         document.getElementById('profileHeader').innerHTML = `
           <div class="card" style="padding:1.75rem;">
             <div style="display:flex;align-items:flex-start;gap:1.5rem;flex-wrap:wrap;">
@@ -329,6 +393,7 @@
                 <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.4rem;">
                   <h2 style="font-size:1.4rem;letter-spacing:-.03em;margin:0;">${user.name}</h2>
                   <span class="badge badge-${user.role === 'freelancer' ? 'open' : 'in_progress'}">${user.role === 'freelancer' ? '🎨 Фрилансер' : '💼 Заказчик'}</span>
+                  ${verifiedBadge}
                 </div>
                 ${user.bio ? `<p style="font-size:.9rem;color:var(--text2);line-height:1.7;margin-bottom:.75rem;">${user.bio}</p>` : ''}
                 ${user.skills?.length ? `<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.75rem;">${user.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
@@ -346,23 +411,14 @@
             </div>
           </div>`;
 
-        // Показываем нужные вкладки
         if (user.role === 'client') {
           document.getElementById('portfolioTabBtn').style.display = 'none';
           document.getElementById('servicesTabBtn').style.display  = 'none';
         }
 
-        // Активируем отзывы как первую вкладку
-        const firstVisible = document.querySelector('.profile-tab:not([style*="display: none"])');
-        if (firstVisible) {
-          firstVisible.classList.add('active');
-          const tabName = firstVisible.id.replace('TabBtn','').replace('tab','').replace('Edit','edit').replace('Notif','notifications').replace('Reviews','reviews').replace('Portfolio','portfolio').replace('Services','services').replace('reviews','reviews');
-          // Переключаем на отзывы
-          switchProfileTab('reviews', document.getElementById('reviewsTabBtn'));
-          document.getElementById('reviewsTabBtn').classList.add('active');
-        }
+        switchProfileTab('reviews', document.getElementById('reviewsTabBtn'));
+        document.getElementById('reviewsTabBtn').classList.add('active');
 
-        // Показываем кнопку "оставить отзыв" в шапке вкладки отзывов
         if (me && me.id !== userId) {
           document.getElementById('leaveReviewBtn').style.display = 'inline-flex';
         }
@@ -431,7 +487,6 @@
       } catch(e) { grid.innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
     }
 
-    // Обёртки для совместимости с profile.js
     function loadPortfolio() { loadPortfolioForUser(getCurrentUser()?.id); }
 
     function closePortfolioModal() {
@@ -585,7 +640,6 @@
     async function loadReviewsForUser(userId) {
       try {
         const reviews = await api(`/reviews/user/${userId}`);
-        const me = getCurrentUser();
         if (!reviews.length) {
           document.getElementById('reviewAvgRating').textContent = '—';
           document.getElementById('reviewStars').textContent = '☆☆☆☆☆';
@@ -663,6 +717,15 @@
           document.getElementById('telegramToggle').checked = true;
           document.getElementById('telegramChatId').value = res.telegramChatId;
           document.getElementById('telegramInputWrap').style.display = 'block';
+        }
+        // Статус верификации
+        if (res.isVerified) {
+          document.getElementById('verifyStatusText').textContent = 'Email подтверждён ✅';
+          document.getElementById('verifyAction').innerHTML = `
+            <span class="verified-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Верифицирован
+            </span>`;
         }
       } catch(e) {}
     }

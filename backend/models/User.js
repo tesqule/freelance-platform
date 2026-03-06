@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
   reviewCount:    { type: Number, default: 0 },
   completedTasks: { type: Number, default: 0 },
   balance:        { type: Number, default: 0 },
+  // Верификация email
+  isVerified:          { type: Boolean, default: false },
+  verifyToken:         { type: String, default: '' },
+  verifyTokenExpires:  { type: Date },
   // Telegram уведомления
   telegramChatId: { type: String, default: '' },
   // Email уведомления
