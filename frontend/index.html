@@ -351,6 +351,23 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Кнопка соцсетей -->
+  <div class="social-fab" id="socialFab">
+    <div class="social-fab-menu" id="socialFabMenu">
+      <a href="https://t.me/freelance_hub24" target="_blank" class="social-fab-item tg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 14.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
+        Telegram
+      </a>
+      <a href="https://vk.com/freelance_hub24" target="_blank" class="social-fab-item vk">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.785 16.241s.288-.032.436-.194c.136-.148.131-.427.131-.427s-.019-1.304.587-1.496c.598-.19 1.365 1.26 2.179 1.815.615.421 1.082.329 1.082.329l2.175-.03s1.137-.071.598-1.099c-.044-.083-.313-.661-1.612-1.87-1.362-1.264-1.179-1.059.461-3.246.999-1.332 1.399-2.146 1.273-2.494-.12-.331-.854-.244-.854-.244l-2.447.015s-.181-.025-.315.055c-.132.078-.217.262-.217.262s-.387 1.032-.903 1.909c-1.088 1.85-1.524 1.948-1.703 1.834-.414-.267-.311-1.075-.311-1.649 0-1.793.272-2.54-.529-2.733-.266-.065-.461-.107-1.141-.114-.872-.009-1.609.003-2.027.207-.278.136-.492.439-.361.456.161.021.526.099.72.363.25.341.241 1.107.241 1.107s.144 2.11-.335 2.372c-.329.179-.78-.186-1.748-1.854-.497-.859-.873-1.81-.873-1.81s-.072-.178-.202-.273c-.157-.115-.376-.151-.376-.151l-2.322.015s-.349.01-.477.162C4.915 8.07 5 8.456 5 8.456s1.816 4.25 3.872 6.395c1.886 1.967 4.03 1.838 4.03 1.838l1.883.032z"/></svg>
+        ВКонтакте
+      </a>
+    </div>
+    <button class="social-fab-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+  </div>
+
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script>
@@ -827,6 +844,78 @@
       .services-filters { overflow-x: auto; flex-wrap: nowrap; padding-bottom: .5rem; }
       .service-filter-btn { white-space: nowrap; }
     }
+
+    /* ── Кнопка соцсетей ── */
+    .social-fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+    .social-fab-btn {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border: none; cursor: pointer; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(79,110,247,0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+      flex-shrink: 0;
+    }
+    .social-fab-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 32px rgba(79,110,247,0.65);
+    }
+    .social-fab-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .social-fab-menu.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .social-fab-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 1rem;
+      border-radius: 99px;
+      font-size: 0.875rem; font-weight: 600;
+      color: #fff; text-decoration: none;
+      white-space: nowrap;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .social-fab-item:hover { transform: translateX(-4px); }
+    .social-fab-item.tg { background: #229ED9; }
+    .social-fab-item.vk { background: #4C75A3; }
   </style>
+
+  <script>
+    let socialMenuTimer;
+    function openSocialMenu() {
+      clearTimeout(socialMenuTimer);
+      document.getElementById('socialFabMenu').classList.add('open');
+    }
+    function closeSocialMenuDelayed() {
+      socialMenuTimer = setTimeout(() => {
+        document.getElementById('socialFabMenu').classList.remove('open');
+      }, 400);
+    }
+    const fab = document.getElementById('socialFab');
+    if (fab) {
+      fab.addEventListener('mouseenter', openSocialMenu);
+      fab.addEventListener('mouseleave', closeSocialMenuDelayed);
+    }
+  </script>
+
 </body>
 </html>
