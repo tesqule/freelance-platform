@@ -851,10 +851,8 @@
       bottom: 1.5rem;
       right: 1.5rem;
       z-index: 500;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.5rem;
+      width: 52px;
+      height: 52px;
     }
     .social-fab-btn {
       width: 52px; height: 52px;
@@ -864,13 +862,15 @@
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 8px 24px rgba(79,110,247,0.5);
       transition: transform 0.2s, box-shadow 0.2s;
-      flex-shrink: 0;
     }
     .social-fab-btn:hover {
       transform: scale(1.08);
       box-shadow: 0 12px 32px rgba(79,110,247,0.65);
     }
     .social-fab-menu {
+      position: absolute;
+      bottom: 60px;
+      right: 0;
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
