@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const User = require('../models/User');
 const Task = require('../models/Task');
 const Review = require('../models/Review');
+const Service = require('../models/Service');
 
 // Middleware: только admin
 const adminOnly = (req, res, next) => {
@@ -19,7 +20,7 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
     const [
       totalUsers, totalClients, totalFreelancers,
       totalTasks, openTasks, inProgressTasks, completedTasks,
-      totalReviews
+      totalReviews, totalServices
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ role: 'client' }),
@@ -28,15 +29,14 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
       Task.countDocuments({ status: 'open' }),
       Task.countDocuments({ status: 'in_progress' }),
       Task.countDocuments({ status: 'completed' }),
-      Review.countDocuments()
+      Review.countDocuments(),
+      Service.countDocuments()
     ]);
 
-    // Новые пользователи за последние 7 дней
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const newUsersThisWeek = await User.countDocuments({ createdAt: { $gte: weekAgo } });
     const newTasksThisWeek = await Task.countDocuments({ createdAt: { $gte: weekAgo } });
 
-    // Топ фрилансеры
     const topFreelancers = await User.find({ role: 'freelancer' })
       .select('name avatar rating completedTasks')
       .sort({ completedTasks: -1 })
@@ -46,6 +46,7 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
       users: { total: totalUsers, clients: totalClients, freelancers: totalFreelancers, newThisWeek: newUsersThisWeek },
       tasks: { total: totalTasks, open: openTasks, inProgress: inProgressTasks, completed: completedTasks, newThisWeek: newTasksThisWeek },
       reviews: { total: totalReviews },
+      services: { total: totalServices },
       topFreelancers
     });
   } catch (err) {
@@ -93,6 +94,24 @@ router.get('/tasks', auth, adminOnly, async (req, res) => {
   }
 });
 
+// GET /api/admin/services — все услуги
+router.get('/services', auth, adminOnly, async (req, res) => {
+  try {
+    const { category, page = 1, limit = 20 } = req.query;
+    let query = {};
+    if (category) query.category = category;
+    const services = await Service.find(query)
+      .populate('freelancer', 'name email avatar')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+    const total = await Service.countDocuments(query);
+    res.json({ services, total, pages: Math.ceil(total / limit) });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 // DELETE /api/admin/users/:id — удалить пользователя
 router.delete('/users/:id', auth, adminOnly, async (req, res) => {
   try {
@@ -109,8 +128,20 @@ router.delete('/users/:id', auth, adminOnly, async (req, res) => {
 // DELETE /api/admin/tasks/:id — удалить задание
 router.delete('/tasks/:id', auth, adminOnly, async (req, res) => {
   try {
-    await Task.findByIdAndDelete(req.params.id);
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
     res.json({ message: 'Task deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// DELETE /api/admin/services/:id — удалить услугу (НОВЫЙ МАРШРУТ)
+router.delete('/services/:id', auth, adminOnly, async (req, res) => {
+  try {
+    const service = await Service.findByIdAndDelete(req.params.id);
+    if (!service) return res.status(404).json({ message: 'Service not found' });
+    res.json({ message: 'Service deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

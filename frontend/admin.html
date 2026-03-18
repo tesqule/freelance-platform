@@ -84,6 +84,7 @@
       <div class="admin-sidebar-title">Управление</div>
       <div class="admin-nav-item" onclick="switchTab('users', this)">👥 Пользователи</div>
       <div class="admin-nav-item" onclick="switchTab('tasks', this)">📋 Задания</div>
+      <div class="admin-nav-item" onclick="switchTab('services', this)">🛠️ Услуги</div>
       <div class="admin-sidebar-title">Система</div>
       <div class="admin-nav-item" onclick="window.location.href='index.html'">🏠 На сайт</div>
       <div class="admin-nav-item" onclick="logout()" style="color:var(--red);">🚪 Выйти</div>
@@ -188,6 +189,41 @@
           <div class="pagination" id="tasksPagination"></div>
         </div>
       </div>
+
+      <!-- SERVICES TAB (НОВАЯ ВКЛАДКА) -->
+      <div class="tab-content" id="tab-services">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <div class="section-eyebrow">Управление</div>
+            <h2 style="font-size:1.6rem;letter-spacing:-.035em;">Услуги</h2>
+          </div>
+          <select class="form-control" id="serviceCategoryFilter" style="width:180px;padding:.45rem .75rem;font-size:.82rem;" onchange="loadAdminServices(1)">
+            <option value="">Все категории</option>
+            <option value="development">💻 Разработка</option>
+            <option value="design">🎨 Дизайн</option>
+            <option value="writing">✍️ Тексты</option>
+            <option value="marketing">📣 Маркетинг</option>
+            <option value="video">🎬 Видео</option>
+            <option value="music">🎵 Музыка</option>
+            <option value="other">🔧 Другое</option>
+          </select>
+        </div>
+        <div class="admin-section">
+          <div style="overflow-x:auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Название</th><th>Фрилансер</th><th>Категория</th><th>Цена</th><th>Срок</th><th>Статус</th><th>Дата</th><th>Действия</th>
+                </tr>
+              </thead>
+              <tbody id="servicesTableBody">
+                <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text3);">Загрузка...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="servicesPagination"></div>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -217,15 +253,16 @@
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    let currentRoleUserId = null, usersPage = 1, tasksPage = 1;
+    let currentRoleUserId = null, usersPage = 1, tasksPage = 1, servicesPage = 1;
 
     function switchTab(name, el) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
       document.getElementById(`tab-${name}`).classList.add('active');
       if (el) el.classList.add('active');
-      if (name === 'users') loadUsers(1);
-      if (name === 'tasks') loadAdminTasks(1);
+      if (name === 'users')    loadUsers(1);
+      if (name === 'tasks')    loadAdminTasks(1);
+      if (name === 'services') loadAdminServices(1);
     }
 
     async function loadStats() {
@@ -250,7 +287,7 @@
           <div class="stat-card" style="border-color:rgba(236,72,153,.18);">
             <div class="stat-card-num" style="color:var(--pink);">${s.reviews.total}</div>
             <div class="stat-card-label">Отзывов</div>
-            <div class="stat-card-sub">${s.users.freelancers} фрилансеров</div>
+            <div class="stat-card-sub">${s.services ? s.services.total + ' услуг' : s.users.freelancers + ' фрилансеров'}</div>
           </div>`;
 
         const total = s.tasks.total || 1;
@@ -357,6 +394,54 @@
       }
     }
 
+    // НОВАЯ ФУНКЦИЯ — загрузка услуг
+    async function loadAdminServices(page = 1) {
+      servicesPage = page;
+      const category = document.getElementById('serviceCategoryFilter')?.value || '';
+      const tbody = document.getElementById('servicesTableBody');
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text3);">Загрузка...</td></tr>`;
+      try {
+        const params = new URLSearchParams({ page, limit: 15 });
+        if (category) params.set('category', category);
+        const data = await apiAuth(`/admin/services?${params}`);
+        if (!data.services.length) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text3);">Услуг не найдено</td></tr>`;
+          return;
+        }
+        const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
+        tbody.innerHTML = data.services.map(s => `
+          <tr>
+            <td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${s.title}">${s.title}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <div class="avatar" style="width:28px;height:28px;font-size:.75rem;flex-shrink:0;">
+                  ${s.freelancer?.avatar ? `<img src="${s.freelancer.avatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">` : (s.freelancer?.name||'?').charAt(0)}
+                </div>
+                <span style="font-size:.82rem;color:var(--text2);">${s.freelancer?.name || '—'}</span>
+              </div>
+            </td>
+            <td>${catEmojis[s.category]||'🔧'} ${s.category}</td>
+            <td style="color:var(--green);font-weight:700;">₽${s.price.toLocaleString()}</td>
+            <td style="color:var(--text2);">${s.deliveryDays} д.</td>
+            <td>
+              <span style="
+                display:inline-flex;align-items:center;padding:.18rem .6rem;border-radius:99px;font-size:.7rem;font-weight:700;
+                ${s.isActive
+                  ? 'background:rgba(16,217,138,.1);color:var(--green);border:1px solid rgba(16,217,138,.2);'
+                  : 'background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);'}
+              ">${s.isActive ? 'Активна' : 'Скрыта'}</span>
+            </td>
+            <td style="color:var(--text3);font-size:.78rem;">${new Date(s.createdAt).toLocaleDateString('ru-RU')}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="deleteService('${s._id}','${s.title.replace(/'/g,"\\'")}')">Удалить</button>
+            </td>
+          </tr>`).join('');
+        renderPagination('servicesPagination', data.pages, page, loadAdminServices);
+      } catch(e) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--red);">Ошибка загрузки</td></tr>`;
+      }
+    }
+
     function openRoleModal(id, name, currentRole) {
       currentRoleUserId = id;
       document.getElementById('roleModalName').textContent = name;
@@ -389,6 +474,16 @@
         await apiAuth(`/admin/tasks/${id}`, { method: 'DELETE' });
         showToast('Задание удалено', 'success');
         loadAdminTasks(tasksPage);
+      } catch(e) { showToast(e.message || 'Ошибка', 'error'); }
+    }
+
+    // НОВАЯ ФУНКЦИЯ — удаление услуги
+    async function deleteService(id, title) {
+      if (!confirm(`Удалить услугу "${title}"? Это действие нельзя отменить.`)) return;
+      try {
+        await apiAuth(`/admin/services/${id}`, { method: 'DELETE' });
+        showToast('Услуга удалена ✅', 'success');
+        loadAdminServices(servicesPage);
       } catch(e) { showToast(e.message || 'Ошибка', 'error'); }
     }
 
