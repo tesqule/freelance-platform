@@ -165,7 +165,7 @@ function updateNavForAuth() {
         ">0</span>
       </a>
       ${user.role === 'admin' ? `<a href="admin.html" class="btn btn-ghost btn-sm">⚙️</a>` : ''}
-      <a href="profile.html" class="btn btn-ghost btn-sm">
+      <a href="dashboard.html" class="btn btn-ghost btn-sm">
         <span class="avatar" style="width:28px;height:28px;font-size:0.8rem;background:linear-gradient(135deg,var(--blue),var(--purple));">
           ${user.avatar ? `<img src="${user.avatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">` : user.name.charAt(0)}
         </span>
@@ -182,15 +182,15 @@ function updateNavForAuth() {
     setInterval(loadNotifCount, 30000);
     setInterval(loadChatUnreadBadge, 30000);
 
-    // Обновляем мобильное меню на всех страницах
+    // Мобильное меню — везде dashboard.html вместо profile.html
     const mobileInner = document.querySelector('.mobile-menu-inner');
     if (mobileInner) {
       mobileInner.innerHTML = `
         <a href="tasks.html" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">Задания</a>
-        <a href="profile.html" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">Профиль</a>
+        <a href="dashboard.html" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">Профиль</a>
         <a href="chat.html" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">Сообщения</a>
         <div class="mobile-menu-btns">
-          <a href="profile.html" class="btn btn-glass" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">
+          <a href="dashboard.html" class="btn btn-glass" onclick="typeof closeMobileMenu!=='undefined'&&closeMobileMenu()">
             ${user.avatar ? `<img src="${user.avatar}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : '👤'}
             ${user.name.split(' ')[0]}
           </a>

@@ -11,7 +11,7 @@ async function handleLogin() {
     });
     setCurrentUser(data.user, data.token);
     showToast(`Добро пожаловать, ${data.user.name}! 👋`, 'success');
-    setTimeout(() => window.location.href = 'dashboard.html', 800);
+    setTimeout(() => window.location.href = 'index.html', 800);
   } catch(e) {
     showToast(e.message || 'Ошибка входа', 'error');
   }
@@ -33,7 +33,7 @@ async function handleRegister() {
     });
     setCurrentUser(data.user, data.token);
     showToast(`Аккаунт создан! Добро пожаловать 🎉`, 'success');
-    setTimeout(() => window.location.href = 'dashboard.html', 800);
+    setTimeout(() => window.location.href = 'index.html', 800);
   } catch(e) {
     showToast(e.message || 'Ошибка регистрации', 'error');
   }

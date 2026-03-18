@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Дашборд — FreeLanceHub</title>
+  <title>Профиль — FreeLanceHub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="tasks.html" class="nav-link">Задания</a></li>
-      <li><a href="dashboard.html" class="nav-link active">Дашборд</a></li>
+      <li><a href="dashboard.html" class="nav-link active">Профиль</a></li>
       <li><a href="chat.html" class="nav-link">Сообщения</a></li>
     </ul>
     <div class="nav-actions" id="navActions"></div>
@@ -39,7 +39,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
-      <a href="dashboard.html" onclick="closeMobileMenu()">Дашборд</a>
+      <a href="dashboard.html" onclick="closeMobileMenu()">Профиль</a>
       <a href="chat.html" onclick="closeMobileMenu()">Сообщения</a>
     </div>
   </div>
@@ -65,9 +65,10 @@
             <ul class="sidebar-nav">
               <li><a href="#overview" class="active" onclick="showTab('overview',this)"><span class="icon">🏠</span>Обзор</a></li>
               <li><a href="#tasks" onclick="showTab('tasks',this)"><span class="icon">📋</span>Мои задания</a></li>
+              <li><a href="#edit" onclick="showTab('edit',this)"><span class="icon">✏️</span>Редактировать профиль</a></li>
               <li><a href="chat.html"><span class="icon">💬</span>Сообщения</a></li>
-              <li><a href="profile.html"><span class="icon">👤</span>Профиль</a></li>
               <li><a href="tasks.html"><span class="icon">🔍</span>Найти задания</a></li>
+              <li><a href="index.html"><span class="icon">🏠</span>На главную</a></li>
               <li style="border-top:1px solid var(--border);padding-top:.5rem;margin-top:.5rem;">
                 <a href="#" onclick="logout()" style="color:var(--red)!important;"><span class="icon">🚪</span>Выйти</a>
               </li>
@@ -77,9 +78,10 @@
 
         <!-- MAIN -->
         <main>
+          <!-- TAB: OVERVIEW -->
           <div id="tab-overview">
             <div style="margin-bottom:2rem;">
-              <div class="section-eyebrow">Дашборд</div>
+              <div class="section-eyebrow">Профиль</div>
               <h2 style="font-size:1.6rem;letter-spacing:-.035em;" id="welcomeTitle">Добро пожаловать 👋</h2>
             </div>
             <div class="grid-3 mb-3" id="statsCards" style="gap:.85rem;"></div>
@@ -89,12 +91,50 @@
             <div id="recentActivity"></div>
           </div>
 
+          <!-- TAB: MY TASKS -->
           <div id="tab-tasks" class="hidden">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
               <h3 style="font-size:1.3rem;letter-spacing:-.03em;" id="tasksTabTitle">Мои задания</h3>
               <button class="btn btn-primary btn-sm" id="addTaskBtn" onclick="window.location.href='tasks.html?action=create'" style="display:none;">+ Разместить</button>
             </div>
             <div id="myTasksList"></div>
+          </div>
+
+          <!-- TAB: EDIT PROFILE -->
+          <div id="tab-edit" class="hidden">
+            <div style="margin-bottom:1.5rem;">
+              <div class="section-eyebrow">Аккаунт</div>
+              <h3 style="font-size:1.3rem;letter-spacing:-.03em;">Редактировать профиль</h3>
+            </div>
+            <div class="card" style="border-radius:var(--radius-lg);padding:1.75rem;">
+              <div class="grid-2" style="gap:1rem;">
+                <div class="form-group" style="margin-bottom:0;"><label>Имя</label><input type="text" class="form-control" id="editName" /></div>
+                <div class="form-group" style="margin-bottom:0;"><label>URL аватара</label><input type="text" class="form-control" id="editAvatar" placeholder="https://example.com/photo.jpg" /></div>
+              </div>
+              <div class="form-group mt-2"><label>О себе</label><textarea class="form-control" id="editBio" placeholder="Расскажите о себе..." style="min-height:115px;"></textarea></div>
+              <div class="form-group">
+                <label>Навыки (через запятую)</label>
+                <input type="text" class="form-control" id="editSkills" placeholder="React, Node.js, Figma..." oninput="updateSkillsPreview()" />
+                <div style="font-size:.75rem;color:var(--text3);margin-top:.4rem;">Укажи навыки чтобы заказчики могли тебя найти</div>
+              </div>
+              <div id="skillsPreview" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.25rem;min-height:24px;"></div>
+              <button class="btn btn-primary" onclick="saveProfile()">Сохранить изменения</button>
+            </div>
+
+            <!-- Портфолио и Услуги — только для фрилансеров -->
+            <div id="freelancerSections" style="display:none;">
+              <div style="margin-top:2rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="font-size:1.1rem;letter-spacing:-.02em;">🖼 Портфолио</h3>
+                <button class="btn btn-primary btn-sm" onclick="openModal('portfolioModal')">+ Добавить работу</button>
+              </div>
+              <div id="portfolioGrid" class="portfolio-grid"><div class="spinner"></div></div>
+
+              <div style="margin-top:2rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="font-size:1.1rem;letter-spacing:-.02em;">🛠 Услуги</h3>
+                <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Добавить услугу</button>
+              </div>
+              <div id="servicesGrid" class="services-grid-profile"><div class="spinner"></div></div>
+            </div>
           </div>
         </main>
       </div>
@@ -103,9 +143,53 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- PORTFOLIO MODAL -->
+  <div class="modal-overlay" id="portfolioModal">
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-header">
+        <h3 id="portfolioModalTitle">Добавить работу</h3>
+        <button class="modal-close" onclick="closePortfolioModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <input type="hidden" id="portfolioEditId" />
+      <div class="form-group"><label>Название *</label><input type="text" class="form-control" id="pTitle" placeholder="Лендинг для стартапа" /></div>
+      <div class="form-group"><label>Описание</label><textarea class="form-control" id="pDesc" style="min-height:85px;" placeholder="Расскажите о проекте..."></textarea></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Категория</label><select class="form-control" id="pCategory"><option value="development">💻 Разработка</option><option value="design">🎨 Дизайн</option><option value="writing">✍️ Тексты</option><option value="marketing">📣 Маркетинг</option><option value="video">🎬 Видео</option><option value="other">🔧 Другое</option></select></div>
+        <div class="form-group"><label>Навыки</label><input type="text" class="form-control" id="pSkills" placeholder="React, Figma..." /></div>
+      </div>
+      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="pImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <div class="form-group" style="margin-bottom:0;"><label>Ссылка на проект</label><input type="text" class="form-control" id="pProjectUrl" placeholder="https://myproject.com" /></div>
+      <button class="btn btn-primary w-full mt-3" onclick="savePortfolioItem()">Сохранить</button>
+    </div>
+  </div>
+
+  <!-- SERVICE MODAL -->
+  <div class="modal-overlay" id="serviceModal">
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-header">
+        <h3 id="serviceModalTitle">Добавить услугу</h3>
+        <button class="modal-close" onclick="closeServiceModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <input type="hidden" id="serviceEditId" />
+      <div class="form-group"><label>Название услуги *</label><input type="text" class="form-control" id="sTitle" placeholder="Создам сайт под ключ на React" /></div>
+      <div class="form-group"><label>Описание *</label><textarea class="form-control" id="sDesc" style="min-height:100px;" placeholder="Подробно опишите что входит..."></textarea></div>
+      <div class="form-group"><label>Категория</label><select class="form-control" id="sCategory"><option value="development">💻 Разработка</option><option value="design">🎨 Дизайн</option><option value="writing">✍️ Тексты</option><option value="marketing">📣 Маркетинг</option><option value="video">🎬 Видео</option><option value="other">🔧 Другое</option></select></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Цена (₽) *</label><input type="number" class="form-control" id="sPrice" placeholder="3000" min="1" /></div>
+        <div class="form-group"><label>Срок (дней) *</label><input type="number" class="form-control" id="sDeliveryDays" placeholder="7" min="1" /></div>
+      </div>
+      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="sImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <div class="form-group" style="margin-bottom:0;"><label>Навыки (через запятую)</label><input type="text" class="form-control" id="sSkills" placeholder="React, Node.js..." /></div>
+      <button class="btn btn-primary w-full mt-3" id="serviceSubmitBtn" onclick="saveService()">Сохранить услугу</button>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/profile.js"></script>
   <script>
+    const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
+
     function toggleMobileMenu() {
       document.getElementById('mobileMenu').classList.toggle('open');
       document.getElementById('burger').classList.toggle('open');
@@ -118,11 +202,226 @@
     function showTab(tab, el) {
       document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
       if (el) el.classList.add('active');
-      document.getElementById('tab-overview').classList.toggle('hidden', tab !== 'overview');
-      document.getElementById('tab-tasks').classList.toggle('hidden', tab !== 'tasks');
+      ['overview','tasks','edit'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+      });
       if (tab === 'tasks') loadMyTasks();
+      if (tab === 'edit')  initEditTab();
     }
 
+    // ── РЕДАКТИРОВАНИЕ ПРОФИЛЯ ──────────────────────
+    function initEditTab() {
+      const user = getCurrentUser();
+      if (!user) return;
+      document.getElementById('editName').value    = user.name || '';
+      document.getElementById('editAvatar').value  = user.avatar || '';
+      document.getElementById('editBio').value     = user.bio || '';
+      document.getElementById('editSkills').value  = (user.skills || []).join(', ');
+      updateSkillsPreview();
+
+      if (user.role === 'freelancer') {
+        document.getElementById('freelancerSections').style.display = 'block';
+        loadPortfolio();
+        loadServices();
+      }
+    }
+
+    function updateSkillsPreview() {
+      const skills = document.getElementById('editSkills').value.split(',').map(s => s.trim()).filter(Boolean);
+      document.getElementById('skillsPreview').innerHTML = skills.map(s => `<span class="skill-tag">${s}</span>`).join('');
+    }
+
+    async function saveProfile() {
+      const name   = document.getElementById('editName').value.trim();
+      const avatar = document.getElementById('editAvatar').value.trim();
+      const bio    = document.getElementById('editBio').value.trim();
+      const skills = document.getElementById('editSkills').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (!name) { showToast('Введите имя', 'error'); return; }
+      try {
+        const updated = await apiAuth('/users/profile/update', {
+          method: 'PUT',
+          body: JSON.stringify({ name, avatar, bio, skills })
+        });
+        const stored = getCurrentUser();
+        setCurrentUser({ ...stored, name: updated.name, avatar: updated.avatar, bio: updated.bio, skills: updated.skills }, localStorage.getItem('token'));
+        showToast('Профиль обновлён ✅', 'success');
+        loadDashboard();
+      } catch(e) { showToast(e.message || 'Ошибка', 'error'); }
+    }
+
+    // ── ПОРТФОЛИО ───────────────────────────────────
+    async function loadPortfolio() {
+      const user = getCurrentUser();
+      const grid = document.getElementById('portfolioGrid');
+      grid.innerHTML = '<div class="spinner"></div>';
+      try {
+        const items = await apiAuth(`/portfolio/${user.id}`);
+        if (!items.length) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">🖼</div><h3>Портфолио пусто</h3>
+            <p>Добавьте работы чтобы заказчики видели ваш опыт</p>
+          </div>`;
+          return;
+        }
+        grid.innerHTML = items.map(item => `
+          <div class="portfolio-card">
+            <div class="portfolio-img">
+              ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.title}" onerror="this.parentElement.innerHTML='${catEmojis[item.category]||'🔧'}';">` : catEmojis[item.category]||'🔧'}
+            </div>
+            <div class="portfolio-body">
+              <div style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">${item.title}</div>
+              ${item.description ? `<div style="font-size:.8rem;color:var(--text2);line-height:1.6;">${item.description}</div>` : ''}
+              <div style="display:flex;gap:.4rem;margin-top:.75rem;">
+                ${item.projectUrl ? `<a href="${item.projectUrl}" target="_blank" class="btn btn-glass btn-sm">🔗</a>` : ''}
+                <button class="btn btn-glass btn-sm" onclick="editPortfolioItem('${item._id}')">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="deletePortfolioItem('${item._id}')">🗑</button>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch(e) { grid.innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
+    }
+
+    function closePortfolioModal() {
+      closeModal('portfolioModal');
+      document.getElementById('portfolioEditId').value = '';
+      document.getElementById('portfolioModalTitle').textContent = 'Добавить работу';
+      ['pTitle','pDesc','pImageUrl','pProjectUrl','pSkills'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
+    }
+
+    async function savePortfolioItem() {
+      const editId = document.getElementById('portfolioEditId').value;
+      const data = {
+        title: document.getElementById('pTitle').value.trim(),
+        description: document.getElementById('pDesc').value.trim(),
+        category: document.getElementById('pCategory').value,
+        imageUrl: document.getElementById('pImageUrl').value.trim(),
+        projectUrl: document.getElementById('pProjectUrl').value.trim(),
+        skills: document.getElementById('pSkills').value.split(',').map(s=>s.trim()).filter(Boolean)
+      };
+      if (!data.title) { showToast('Введите название', 'error'); return; }
+      try {
+        if (editId) { await apiAuth(`/portfolio/${editId}`, { method:'PUT', body:JSON.stringify(data) }); showToast('Обновлено ✅','success'); }
+        else { await apiAuth('/portfolio', { method:'POST', body:JSON.stringify(data) }); showToast('Работа добавлена! 🎉','success'); }
+        closePortfolioModal();
+        loadPortfolio();
+      } catch(e) { showToast(e.message||'Ошибка','error'); }
+    }
+
+    async function editPortfolioItem(id) {
+      try {
+        const user = getCurrentUser();
+        const items = await apiAuth(`/portfolio/${user.id}`);
+        const item = items.find(i => i._id === id);
+        if (!item) return;
+        document.getElementById('portfolioEditId').value = id;
+        document.getElementById('portfolioModalTitle').textContent = 'Редактировать работу';
+        document.getElementById('pTitle').value = item.title||'';
+        document.getElementById('pDesc').value = item.description||'';
+        document.getElementById('pCategory').value = item.category||'other';
+        document.getElementById('pImageUrl').value = item.imageUrl||'';
+        document.getElementById('pProjectUrl').value = item.projectUrl||'';
+        document.getElementById('pSkills').value = (item.skills||[]).join(', ');
+        openModal('portfolioModal');
+      } catch(e) {}
+    }
+
+    async function deletePortfolioItem(id) {
+      if (!confirm('Удалить эту работу?')) return;
+      try { await apiAuth(`/portfolio/${id}`, { method:'DELETE' }); showToast('Удалено','success'); loadPortfolio(); }
+      catch(e) { showToast(e.message||'Ошибка','error'); }
+    }
+
+    // ── УСЛУГИ ──────────────────────────────────────
+    async function loadServices() {
+      const grid = document.getElementById('servicesGrid');
+      grid.innerHTML = '<div class="spinner"></div>';
+      try {
+        const services = await apiAuth('/services/my');
+        if (!services.length) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">🛠</div><h3>Услуг пока нет</h3>
+            <p>Добавьте услуги чтобы заказчики могли вас нанять напрямую</p>
+          </div>`;
+          return;
+        }
+        grid.innerHTML = services.map(s => `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+            <div style="width:100%;height:130px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;">
+              ${s.imageUrl ? `<img src="${s.imageUrl}" style="width:100%;height:130px;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem>${catEmojis[s.category]||'🔧'}</span>';">` : `<span>${catEmojis[s.category]||'🔧'}</span>`}
+            </div>
+            <div style="padding:1rem;">
+              <div style="font-weight:700;font-size:.9rem;">${s.title}</div>
+              <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:var(--green);margin:.35rem 0;">₽${s.price.toLocaleString()}</div>
+              <div style="font-size:.75rem;color:var(--text3);">⏱ ${s.deliveryDays} дн.</div>
+              <div style="display:flex;gap:.4rem;margin-top:.75rem;">
+                <button class="btn btn-glass btn-sm" onclick="editService('${s._id}')">✏️ Редактировать</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteService('${s._id}')">🗑</button>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch(e) { grid.innerHTML = '<p style="color:var(--text2);">Ошибка загрузки</p>'; }
+    }
+
+    function openServiceModal(service) {
+      document.getElementById('serviceEditId').value = '';
+      document.getElementById('serviceModalTitle').textContent = 'Добавить услугу';
+      ['sTitle','sDesc','sPrice','sDeliveryDays','sImageUrl','sSkills'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('sCategory').value = 'development';
+      if (service) {
+        document.getElementById('serviceEditId').value = service._id;
+        document.getElementById('serviceModalTitle').textContent = 'Редактировать услугу';
+        document.getElementById('sTitle').value = service.title||'';
+        document.getElementById('sDesc').value = service.description||'';
+        document.getElementById('sCategory').value = service.category||'development';
+        document.getElementById('sPrice').value = service.price||'';
+        document.getElementById('sDeliveryDays').value = service.deliveryDays||'';
+        document.getElementById('sImageUrl').value = service.imageUrl||'';
+        document.getElementById('sSkills').value = (service.skills||[]).join(', ');
+      }
+      document.getElementById('serviceModal').classList.add('open');
+    }
+
+    function closeServiceModal() {
+      document.getElementById('serviceModal').classList.remove('open');
+      const btn = document.getElementById('serviceSubmitBtn');
+      btn.disabled = false; btn.textContent = 'Сохранить услугу';
+    }
+
+    async function saveService() {
+      const editId = document.getElementById('serviceEditId').value;
+      const data = {
+        title: document.getElementById('sTitle').value.trim(),
+        description: document.getElementById('sDesc').value.trim(),
+        category: document.getElementById('sCategory').value,
+        price: Number(document.getElementById('sPrice').value),
+        deliveryDays: Number(document.getElementById('sDeliveryDays').value),
+        imageUrl: document.getElementById('sImageUrl').value.trim(),
+        skills: document.getElementById('sSkills').value.split(',').map(s=>s.trim()).filter(Boolean)
+      };
+      if (!data.title) { showToast('Введите название','error'); return; }
+      if (!data.description) { showToast('Введите описание','error'); return; }
+      if (!data.price || data.price < 1) { showToast('Введите корректную цену','error'); return; }
+      if (!data.deliveryDays || data.deliveryDays < 1) { showToast('Введите срок','error'); return; }
+      const btn = document.getElementById('serviceSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Сохраняем...';
+      try {
+        if (editId) { await apiAuth(`/services/${editId}`, { method:'PUT', body:JSON.stringify(data) }); showToast('Услуга обновлена ✅','success'); }
+        else { await apiAuth('/services', { method:'POST', body:JSON.stringify(data) }); showToast('Услуга добавлена! 🎉','success'); }
+        closeServiceModal(); loadServices();
+      } catch(e) { showToast(e.message||'Ошибка','error'); btn.disabled=false; btn.textContent='Сохранить услугу'; }
+    }
+
+    async function editService(id) {
+      try { const services = await apiAuth('/services/my'); const s = services.find(s=>s._id===id); if(s) openServiceModal(s); } catch(e) {}
+    }
+
+    async function deleteService(id) {
+      if (!confirm('Удалить эту услугу?')) return;
+      try { await apiAuth(`/services/${id}`, { method:'DELETE' }); showToast('Услуга удалена','success'); loadServices(); }
+      catch(e) { showToast(e.message||'Ошибка','error'); }
+    }
+
+    // ── ДАШБОРД ─────────────────────────────────────
     async function loadDashboard() {
       const user = getCurrentUser();
       if (!user) { window.location.href = 'index.html'; return; }
@@ -133,7 +432,7 @@
       av.innerHTML = user.avatar
         ? `<img src="${user.avatar}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;">`
         : user.name.charAt(0);
-      document.getElementById('sidebarName').textContent = user.name;
+      document.getElementById('sidebarName').textContent  = user.name;
       document.getElementById('sidebarEmail').textContent = user.email || '';
       document.getElementById('sidebarBalance').textContent = `₽${(user.balance||0).toLocaleString()}`;
       document.getElementById('sidebarRole').innerHTML =
@@ -182,7 +481,6 @@
       listEl.innerHTML = '<div class="spinner"></div>';
       try {
         const tasks = await apiAuth('/tasks/my/tasks');
-        const user = getCurrentUser();
         listEl.innerHTML = tasks.length
           ? tasks.map(t => `
             <div class="task-card mb-2" onclick="window.location.href='task-detail.html?id=${t._id}'">
@@ -208,6 +506,19 @@
     }
 
     function openAuthModal() { window.location.href = 'index.html'; }
+
+    // Портфолио css классы для dashboard
+    const style = document.createElement('style');
+    style.textContent = `
+      .portfolio-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; }
+      .portfolio-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; transition:all .22s; }
+      .portfolio-card:hover { border-color:var(--border2); transform:translateY(-2px); }
+      .portfolio-img { width:100%; height:130px; background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:2rem; overflow:hidden; }
+      .portfolio-img img { width:100%; height:130px; object-fit:cover; }
+      .portfolio-body { padding:.9rem; }
+      .services-grid-profile { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; }
+    `;
+    document.head.appendChild(style);
 
     document.addEventListener('DOMContentLoaded', () => {
       updateNavForAuth();
