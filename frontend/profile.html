@@ -9,8 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=20260306" />
   <style>
-    .profile-tabs { display:flex; gap:.3rem; margin-bottom:1.75rem; border-bottom:1px solid var(--border); }
-    .profile-tab { padding:.6rem 1.1rem; font-size:.875rem; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .16s; background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-body); }
+    .profile-tabs { display:flex; gap:.3rem; margin-bottom:1.75rem; border-bottom:1px solid var(--border); overflow-x:auto; white-space:nowrap; }
+    .profile-tab { padding:.6rem 1.1rem; font-size:.875rem; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .16s; background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-body); flex-shrink:0; }
     .profile-tab:hover { color:var(--text); }
     .profile-tab.active { color:var(--blue-light); border-bottom-color:var(--blue); }
     .portfolio-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:1rem; }
@@ -38,28 +38,60 @@
     .star-picker { display:flex; gap:.3rem; font-size:1.6rem; cursor:pointer; margin:.5rem 0; }
     .star-picker span { color:var(--text3); transition:color .12s; user-select:none; }
     .star-picker span.active { color:var(--amber); }
-
-    /* Бейдж верификации */
-    .verified-badge {
-      display:inline-flex; align-items:center; gap:.3rem;
-      background:rgba(16,217,138,.1); border:1px solid rgba(16,217,138,.25);
-      color:var(--green); border-radius:99px;
-      padding:.2rem .65rem; font-size:.72rem; font-weight:700;
-      letter-spacing:.04em;
-    }
+    .verified-badge { display:inline-flex; align-items:center; gap:.3rem; background:rgba(16,217,138,.1); border:1px solid rgba(16,217,138,.25); color:var(--green); border-radius:99px; padding:.2rem .65rem; font-size:.72rem; font-weight:700; letter-spacing:.04em; }
     .verified-badge svg { flex-shrink:0; }
+    .verify-block { display:flex; justify-content:space-between; align-items:center; padding:.9rem 0; border-bottom:1px solid var(--border); }
 
-    /* Блок верификации в настройках */
-    .verify-block {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:.9rem 0; border-bottom:1px solid var(--border);
-    }
-
+    /* ── FIX 1: Мобильный заголовок профиля ── */
     @media (max-width:600px) {
+      .profile-header-mobile {
+        display: flex;
+        align-items: flex-start;
+        gap: .85rem;
+      }
+      .profile-header-mobile .avatar {
+        flex-shrink: 0;
+      }
+      .profile-header-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .profile-header-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: .75rem;
+        padding-top: .75rem;
+        border-top: 1px solid var(--border);
+      }
       .portfolio-grid, .services-grid-profile { grid-template-columns:1fr; }
-      .profile-tabs { overflow-x:auto; white-space:nowrap; }
       .verify-block { flex-direction:column; align-items:flex-start; gap:.75rem; }
     }
+
+    /* ── FIX 5: иконка сообщения в светлой теме ── */
+    [data-theme="light"] .notif-btn,
+    [data-theme="light"] .theme-toggle {
+      background: rgba(0,0,0,0.06);
+      border-color: rgba(0,0,0,0.12);
+      color: #0d0d22;
+    }
+    [data-theme="light"] .btn-ghost {
+      color: #0d0d22 !important;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    [data-theme="light"] .btn-ghost:hover {
+      background: rgba(0,0,0,0.08);
+    }
+
+    /* ── Загрузка изображений ── */
+    .img-upload-wrap { display:flex; flex-direction:column; gap:.5rem; }
+    .img-upload-row { display:flex; gap:.5rem; align-items:flex-start; }
+    .img-upload-row input[type="text"] { flex:1; }
+    .img-preview { width:64px; height:64px; border-radius:var(--radius-sm); background:var(--surface2); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; overflow:hidden; font-size:1.5rem; flex-shrink:0; }
+    .img-preview img { width:64px; height:64px; object-fit:cover; }
+    .img-upload-btn { display:inline-flex; align-items:center; gap:.4rem; padding:.45rem .85rem; border-radius:var(--radius-sm); background:var(--surface); border:1px solid var(--border2); color:var(--text2); font-size:.78rem; font-weight:600; cursor:pointer; transition:all .16s; white-space:nowrap; }
+    .img-upload-btn:hover { background:var(--surface2); color:var(--text); border-color:var(--border3); }
+    .img-upload-label { font-size:.72rem; color:var(--text3); }
   </style>
 </head>
 <body>
@@ -77,7 +109,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="tasks.html" class="nav-link">Задания</a></li>
-      <li><a href="profile.html" class="nav-link">Профиль</a></li>
+      <li><a href="dashboard.html" class="nav-link active">Профиль</a></li>
       <li><a href="chat.html" class="nav-link">Сообщения</a></li>
     </ul>
     <div class="nav-actions" id="navActions"></div>
@@ -87,7 +119,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
-      <a href="profile.html" onclick="closeMobileMenu()">Профиль</a>
+      <a href="dashboard.html" onclick="closeMobileMenu()">Профиль</a>
       <a href="chat.html" onclick="closeMobileMenu()">Сообщения</a>
     </div>
   </div>
@@ -111,10 +143,29 @@
 
       <!-- TAB: EDIT -->
       <div id="tab-edit">
-        <div class="card" style="border-radius:var(--radius-lg);padding:2rem;">
+        <div class="card" style="border-radius:var(--radius-lg);padding:1.75rem;">
           <div class="grid-2" style="gap:1rem;">
-            <div class="form-group" style="margin-bottom:0;"><label>Имя</label><input type="text" class="form-control" id="editName" /></div>
-            <div class="form-group" style="margin-bottom:0;"><label>URL аватара</label><input type="text" class="form-control" id="editAvatar" placeholder="https://example.com/photo.jpg" /></div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Имя</label>
+              <input type="text" class="form-control" id="editName" />
+            </div>
+            <!-- FIX 7: загрузка аватара -->
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Аватар</label>
+              <div class="img-upload-wrap">
+                <div class="img-upload-row">
+                  <div class="img-preview" id="avatarPreview">👤</div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:.4rem;">
+                    <input type="text" class="form-control" id="editAvatar" placeholder="https://example.com/photo.jpg" oninput="previewImage('editAvatar','avatarPreview')" style="font-size:.82rem;" />
+                    <label class="img-upload-btn">
+                      📁 Загрузить файл
+                      <input type="file" accept="image/*" style="display:none;" onchange="handleImageFile(this,'editAvatar','avatarPreview')" />
+                    </label>
+                  </div>
+                </div>
+                <div class="img-upload-label">PNG, JPG, WEBP до 2MB</div>
+              </div>
+            </div>
           </div>
           <div class="form-group mt-2"><label>О себе</label><textarea class="form-control" id="editBio" placeholder="Расскажите о себе..." style="min-height:115px;"></textarea></div>
           <div class="form-group">
@@ -134,7 +185,8 @@
             <h3 style="font-size:1.05rem;letter-spacing:-.02em;">Портфолио</h3>
             <p style="font-size:.8rem;color:var(--text3);margin-top:.2rem;" id="portfolioSubtitle">Работы пользователя</p>
           </div>
-          <button class="btn btn-primary btn-sm" id="addPortfolioBtn" onclick="openModal('portfolioModal')" style="display:none;">+ Добавить работу</button>
+          <!-- FIX 2: просто "Добавить" -->
+          <button class="btn btn-primary btn-sm" id="addPortfolioBtn" onclick="openModal('portfolioModal')" style="display:none;">+ Добавить</button>
         </div>
         <div class="portfolio-grid" id="portfolioGrid"><div class="spinner"></div></div>
       </div>
@@ -146,7 +198,8 @@
             <h3 style="font-size:1.05rem;letter-spacing:-.02em;">Услуги</h3>
             <p style="font-size:.8rem;color:var(--text3);margin-top:.2rem;" id="servicesSubtitle">Что предлагает фрилансер</p>
           </div>
-          <button class="btn btn-primary btn-sm" id="addServiceBtn" onclick="openServiceModal()" style="display:none;">+ Добавить услугу</button>
+          <!-- FIX 2: просто "Добавить" -->
+          <button class="btn btn-primary btn-sm" id="addServiceBtn" onclick="openServiceModal()" style="display:none;">+ Добавить</button>
         </div>
         <div class="services-grid-profile" id="servicesGrid"><div class="spinner"></div></div>
       </div>
@@ -157,7 +210,8 @@
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;">
             <div style="display:flex;align-items:center;gap:1.5rem;">
               <div style="text-align:center;">
-                <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--amber);" id="reviewAvgRating">—</div>
+                <!-- FIX 4: одинаковый размер цифры рейтинга через tabular-nums -->
+                <div style="font-family:var(--font-display);font-size:3rem;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--amber);font-variant-numeric:tabular-nums;" id="reviewAvgRating">—</div>
                 <div style="font-size:1rem;color:var(--amber);margin:.2rem 0;" id="reviewStars">☆☆☆☆☆</div>
                 <div style="font-size:.75rem;color:var(--text3);" id="reviewCount">нет отзывов</div>
               </div>
@@ -172,8 +226,6 @@
       <div id="tab-notifications" style="display:none;">
         <div class="card" style="border-radius:var(--radius-lg);padding:2rem;">
           <h3 style="font-size:1.05rem;letter-spacing:-.02em;margin-bottom:1.5rem;">Настройки уведомлений</h3>
-
-          <!-- ВЕРИФИКАЦИЯ EMAIL -->
           <div class="verify-block">
             <div>
               <div style="font-weight:600;font-size:.9rem;">✅ Верификация email</div>
@@ -183,7 +235,6 @@
               <button class="btn btn-success btn-sm" onclick="sendVerifyEmail()" id="verifyBtn">Подтвердить почту</button>
             </div>
           </div>
-
           <div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 0;border-bottom:1px solid var(--border);">
             <div>
               <div style="font-weight:600;font-size:.9rem;">📧 Email уведомления</div>
@@ -233,7 +284,22 @@
         <div class="form-group"><label>Категория</label><select class="form-control" id="pCategory"><option value="development">💻 Разработка</option><option value="design">🎨 Дизайн</option><option value="writing">✍️ Тексты</option><option value="marketing">📣 Маркетинг</option><option value="video">🎬 Видео</option><option value="other">🔧 Другое</option></select></div>
         <div class="form-group"><label>Навыки</label><input type="text" class="form-control" id="pSkills" placeholder="React, Figma..." /></div>
       </div>
-      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="pImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <!-- FIX 7: загрузка картинки портфолио -->
+      <div class="form-group">
+        <label>Картинка</label>
+        <div class="img-upload-wrap">
+          <div class="img-upload-row">
+            <div class="img-preview" id="pImagePreview">🖼</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:.4rem;">
+              <input type="text" class="form-control" id="pImageUrl" placeholder="https://i.imgur.com/..." oninput="previewImage('pImageUrl','pImagePreview')" style="font-size:.82rem;" />
+              <label class="img-upload-btn">
+                📁 Загрузить файл
+                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFile(this,'pImageUrl','pImagePreview')" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="form-group" style="margin-bottom:0;"><label>Ссылка на проект</label><input type="text" class="form-control" id="pProjectUrl" placeholder="https://myproject.com" /></div>
       <button class="btn btn-primary w-full mt-3" onclick="savePortfolioItem()">Сохранить</button>
     </div>
@@ -254,7 +320,22 @@
         <div class="form-group"><label>Цена (₽) *</label><input type="number" class="form-control" id="sPrice" placeholder="3000" min="1" /></div>
         <div class="form-group"><label>Срок (дней) *</label><input type="number" class="form-control" id="sDeliveryDays" placeholder="7" min="1" /></div>
       </div>
-      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="sImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <!-- FIX 8: загрузка картинки услуги -->
+      <div class="form-group">
+        <label>Картинка услуги</label>
+        <div class="img-upload-wrap">
+          <div class="img-upload-row">
+            <div class="img-preview" id="sImagePreview">🛠</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:.4rem;">
+              <input type="text" class="form-control" id="sImageUrl" placeholder="https://i.imgur.com/..." oninput="previewImage('sImageUrl','sImagePreview')" style="font-size:.82rem;" />
+              <label class="img-upload-btn">
+                📁 Загрузить файл
+                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFile(this,'sImageUrl','sImagePreview')" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="form-group" style="margin-bottom:0;"><label>Навыки (через запятую)</label><input type="text" class="form-control" id="sSkills" placeholder="React, Node.js..." /></div>
       <button class="btn btn-primary w-full mt-3" id="serviceSubmitBtn" onclick="saveService()">Сохранить услугу</button>
     </div>
@@ -299,14 +380,55 @@
     function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
     function closeMobileMenu()  { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
 
+    // ── FIX 7&8: Загрузка изображений ─────────────
+    function previewImage(inputId, previewId) {
+      const url = document.getElementById(inputId).value.trim();
+      const preview = document.getElementById(previewId);
+      if (url) {
+        preview.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='❌'">`;
+      } else {
+        preview.innerHTML = previewId === 'avatarPreview' ? '👤' : previewId === 'pImagePreview' ? '🖼' : '🛠';
+      }
+    }
+
+    function handleImageFile(input, inputId, previewId) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Файл слишком большой. Максимум 2MB', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target.result;
+        // Показываем превью
+        document.getElementById(previewId).innerHTML = `<img src="${base64}">`;
+        // Загружаем на сервер
+        try {
+          showToast('Загружаем изображение...', 'info');
+          const res = await apiAuth('/users/upload-image', {
+            method: 'POST',
+            body: JSON.stringify({ image: base64, filename: file.name })
+          });
+          if (res.url) {
+            document.getElementById(inputId).value = res.url;
+            showToast('Изображение загружено ✅', 'success');
+          }
+        } catch(e) {
+          // Если нет эндпоинта — используем base64 напрямую
+          document.getElementById(inputId).value = base64;
+          showToast('Изображение готово ✅', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
     // ── ВЕРИФИКАЦИЯ ────────────────────────────────
     async function handleVerifyToken(token) {
       try {
-        const res = await api(`/users/verify/${token}`);
+        await api(`/users/verify/${token}`);
         showToast('Email подтверждён! 🎉', 'success');
-        // Убираем токен из URL
         window.history.replaceState({}, '', '/profile.html');
-        // Обновляем отображение
         loadNotifSettings();
       } catch(e) {
         showToast(e.message || 'Ссылка недействительна', 'error');
@@ -315,27 +437,21 @@
 
     async function sendVerifyEmail() {
       const btn = document.getElementById('verifyBtn');
-      btn.disabled = true;
-      btn.textContent = 'Отправляем...';
+      btn.disabled = true; btn.textContent = 'Отправляем...';
       try {
         const res = await apiAuth('/users/verify/send', { method: 'POST' });
         showToast(res.message || 'Письмо отправлено! Проверь почту 📧', 'success');
         btn.textContent = 'Письмо отправлено';
       } catch(e) {
         showToast(e.message || 'Ошибка отправки', 'error');
-        btn.disabled = false;
-        btn.textContent = 'Подтвердить почту';
+        btn.disabled = false; btn.textContent = 'Подтвердить почту';
       }
     }
 
     // ── ИНИЦИАЛИЗАЦИЯ ──────────────────────────────
     async function initProfile() {
       const me = getCurrentUser();
-
-      // Если в URL есть токен верификации — обрабатываем
-      if (verifyToken) {
-        await handleVerifyToken(verifyToken);
-      }
+      if (verifyToken) await handleVerifyToken(verifyToken);
 
       if (viewUserId && (!me || viewUserId !== me.id)) {
         await loadPublicProfile(viewUserId, me);
@@ -367,7 +483,6 @@
 
       document.getElementById('tabEditBtn').style.display  = 'none';
       document.getElementById('notifTabBtn').style.display = 'none';
-
       document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
 
       try {
@@ -377,37 +492,35 @@
         document.getElementById('publicProfileTitle').textContent = user.name;
 
         const verifiedBadge = user.isVerified
-          ? `<span class="verified-badge">
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-               Верифицирован
-             </span>`
+          ? `<span class="verified-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Верифицирован</span>`
           : '';
 
+        // FIX 1: мобильный заголовок — имя и звание рядом с аватаром, цифры снизу
         document.getElementById('profileHeader').innerHTML = `
-          <div class="card" style="padding:1.75rem;">
-            <div style="display:flex;align-items:flex-start;gap:1.5rem;flex-wrap:wrap;">
-              <div class="avatar" style="width:72px;height:72px;font-size:1.8rem;flex-shrink:0;">
-                ${user.avatar ? `<img src="${user.avatar}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;">` : user.name.charAt(0)}
+          <div class="card" style="padding:1.25rem 1.5rem;">
+            <div class="profile-header-mobile">
+              <div class="avatar" style="width:64px;height:64px;font-size:1.6rem;flex-shrink:0;">
+                ${user.avatar ? `<img src="${user.avatar}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">` : user.name.charAt(0)}
               </div>
-              <div style="flex:1;min-width:0;">
-                <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.4rem;">
-                  <h2 style="font-size:1.4rem;letter-spacing:-.03em;margin:0;">${user.name}</h2>
-                  <span class="badge badge-${user.role === 'freelancer' ? 'open' : 'in_progress'}">${user.role === 'freelancer' ? '🎨 Фрилансер' : '💼 Заказчик'}</span>
+              <div class="profile-header-info">
+                <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.25rem;">
+                  <h2 style="font-size:1.25rem;letter-spacing:-.03em;margin:0;">${user.name}</h2>
                   ${verifiedBadge}
                 </div>
-                ${user.bio ? `<p style="font-size:.9rem;color:var(--text2);line-height:1.7;margin-bottom:.75rem;">${user.bio}</p>` : ''}
-                ${user.skills?.length ? `<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.75rem;">${user.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
-                <div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.82rem;color:var(--text3);">
-                  <span style="color:var(--amber);">★ ${(user.rating||0).toFixed(1)}</span>
-                  <span>✅ Выполнено: ${user.completedTasks||0}</span>
-                  <span>📝 Отзывов: ${user.reviewCount||0}</span>
-                </div>
+                <span class="badge badge-${user.role === 'freelancer' ? 'open' : 'in_progress'}">${user.role === 'freelancer' ? '🎨 Фрилансер' : '💼 Заказчик'}</span>
+                ${user.bio ? `<p style="font-size:.85rem;color:var(--text2);line-height:1.6;margin-top:.5rem;">${user.bio}</p>` : ''}
+                ${user.skills?.length ? `<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem;">${user.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>` : ''}
               </div>
               ${me && me.id !== userId ? `
-              <div style="display:flex;flex-direction:column;gap:.5rem;">
+              <div style="display:flex;flex-direction:column;gap:.5rem;flex-shrink:0;">
                 <a href="chat.html?user=${userId}" class="btn btn-primary btn-sm">💬 Написать</a>
-                <button class="btn btn-outline btn-sm" onclick="openSelfReviewModal()">⭐ Оставить отзыв</button>
+                <button class="btn btn-outline btn-sm" onclick="openSelfReviewModal()">⭐ Отзыв</button>
               </div>` : ''}
+            </div>
+            <div class="profile-header-stats">
+              <div><div style="font-size:1.1rem;font-weight:800;color:var(--amber);font-family:var(--font-display);">★ ${(user.rating||0).toFixed(1)}</div><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Рейтинг</div></div>
+              <div><div style="font-size:1.1rem;font-weight:800;color:var(--green);font-family:var(--font-display);">${user.completedTasks||0}</div><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Выполнено</div></div>
+              <div><div style="font-size:1.1rem;font-weight:800;color:var(--blue-light);font-family:var(--font-display);">${user.reviewCount||0}</div><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Отзывов</div></div>
             </div>
           </div>`;
 
@@ -418,17 +531,13 @@
 
         switchProfileTab('reviews', document.getElementById('reviewsTabBtn'));
         document.getElementById('reviewsTabBtn').classList.add('active');
-
-        if (me && me.id !== userId) {
-          document.getElementById('leaveReviewBtn').style.display = 'inline-flex';
-        }
+        if (me && me.id !== userId) document.getElementById('leaveReviewBtn').style.display = 'inline-flex';
 
       } catch(e) {
         document.getElementById('profileHeader').innerHTML = '<div class="empty-state"><div class="empty-icon">😕</div><h3>Профиль не найден</h3></div>';
       }
     }
 
-    // ── ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ───────────────────────
     function switchProfileTab(name, btn) {
       document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
       if (btn) btn.classList.add('active');
@@ -461,10 +570,9 @@
         const items = isOwn ? await apiAuth(`/portfolio/${userId}`) : await api(`/portfolio/${userId}`);
         if (!items.length) {
           grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-            <div class="empty-icon">🖼</div>
-            <h3>Портфолио пусто</h3>
+            <div class="empty-icon">🖼</div><h3>Портфолио пусто</h3>
             <p>${isOwn ? 'Добавьте работы чтобы заказчики видели ваш опыт' : 'Пользователь ещё не добавил работы'}</p>
-            ${isOwn ? `<button class="btn btn-primary mt-2" onclick="openModal('portfolioModal')">+ Добавить первую</button>` : ''}
+            ${isOwn ? `<button class="btn btn-primary mt-2" onclick="openModal('portfolioModal')">+ Добавить</button>` : ''}
           </div>`;
           return;
         }
@@ -494,6 +602,7 @@
       document.getElementById('portfolioEditId').value = '';
       document.getElementById('portfolioModalTitle').textContent = 'Добавить работу';
       ['pTitle','pDesc','pImageUrl','pProjectUrl','pSkills'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
+      document.getElementById('pImagePreview').innerHTML = '🖼';
     }
 
     async function savePortfolioItem() {
@@ -510,8 +619,7 @@
       try {
         if (editId) { await apiAuth(`/portfolio/${editId}`, { method:'PUT', body:JSON.stringify(data) }); showToast('Обновлено ✅','success'); }
         else { await apiAuth('/portfolio', { method:'POST', body:JSON.stringify(data) }); showToast('Работа добавлена! 🎉','success'); }
-        closePortfolioModal();
-        loadPortfolio();
+        closePortfolioModal(); loadPortfolio();
       } catch(e) { showToast(e.message||'Ошибка','error'); }
     }
 
@@ -528,6 +636,7 @@
         document.getElementById('pImageUrl').value = item.imageUrl||'';
         document.getElementById('pProjectUrl').value = item.projectUrl||'';
         document.getElementById('pSkills').value = (item.skills||[]).join(', ');
+        if (item.imageUrl) document.getElementById('pImagePreview').innerHTML = `<img src="${item.imageUrl}">`;
         openModal('portfolioModal');
       } catch(e) {}
     }
@@ -551,7 +660,7 @@
           grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
             <div class="empty-icon">🛠</div><h3>Услуг пока нет</h3>
             <p>${isOwn ? 'Добавьте услуги чтобы заказчики могли вас нанять напрямую' : 'Пользователь не добавил услуги'}</p>
-            ${isOwn ? `<button class="btn btn-primary mt-2" onclick="openServiceModal()">+ Добавить первую</button>` : ''}
+            ${isOwn ? `<button class="btn btn-primary mt-2" onclick="openServiceModal()">+ Добавить</button>` : ''}
           </div>`;
           return;
         }
@@ -582,6 +691,7 @@
       document.getElementById('serviceModalTitle').textContent = 'Добавить услугу';
       ['sTitle','sDesc','sPrice','sDeliveryDays','sImageUrl','sSkills'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('sCategory').value = 'development';
+      document.getElementById('sImagePreview').innerHTML = '🛠';
       if (service) {
         document.getElementById('serviceEditId').value = service._id;
         document.getElementById('serviceModalTitle').textContent = 'Редактировать услугу';
@@ -592,6 +702,7 @@
         document.getElementById('sDeliveryDays').value = service.deliveryDays||'';
         document.getElementById('sImageUrl').value = service.imageUrl||'';
         document.getElementById('sSkills').value = (service.skills||[]).join(', ');
+        if (service.imageUrl) document.getElementById('sImagePreview').innerHTML = `<img src="${service.imageUrl}">`;
       }
       document.getElementById('serviceModal').classList.add('open');
     }
@@ -644,8 +755,7 @@
           document.getElementById('reviewAvgRating').textContent = '—';
           document.getElementById('reviewStars').textContent = '☆☆☆☆☆';
           document.getElementById('reviewCount').textContent = 'нет отзывов';
-          document.getElementById('reviewsList').innerHTML = `<div class="empty-state" style="padding:2rem 0;">
-            <div class="empty-icon">⭐</div><p>Отзывов пока нет</p></div>`;
+          document.getElementById('reviewsList').innerHTML = `<div class="empty-state" style="padding:2rem 0;"><div class="empty-icon">⭐</div><p>Отзывов пока нет</p></div>`;
           return;
         }
         const avg = reviews.reduce((s,r) => s+r.rating, 0) / reviews.length;
@@ -676,7 +786,6 @@
 
     function loadReviews() { loadReviewsForUser(getCurrentUser()?.id); }
 
-    // ── ОТЗЫВ НА ЧУЖОЙ ПРОФИЛЬ ─────────────────────
     function openSelfReviewModal() {
       selfReviewRating = 0;
       document.getElementById('selfReviewComment').value = '';
@@ -718,7 +827,6 @@
           document.getElementById('telegramChatId').value = res.telegramChatId;
           document.getElementById('telegramInputWrap').style.display = 'block';
         }
-        // Статус верификации
         if (res.isVerified) {
           document.getElementById('verifyStatusText').textContent = 'Email подтверждён ✅';
           document.getElementById('verifyAction').innerHTML = `

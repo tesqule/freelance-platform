@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ru" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -19,6 +20,19 @@
     .task-card { position:relative; }
     .view-btn { padding:.4rem .9rem; border-radius:99px; font-size:.8rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text2); transition:all .16s; font-family:var(--font-body); }
     .view-btn.active { background:rgba(79,110,247,.12); border-color:rgba(79,110,247,.3); color:var(--blue-light); }
+
+    /* FIX 5: иконка сообщения в светлой теме */
+    [data-theme="light"] .notif-btn,
+    [data-theme="light"] .theme-toggle {
+      background: rgba(0,0,0,0.06);
+      border-color: rgba(0,0,0,0.12);
+      color: #0d0d22;
+    }
+    [data-theme="light"] .btn-ghost {
+      color: #0d0d22 !important;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
@@ -38,7 +52,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="tasks.html" class="nav-link active">Задания</a></li>
-      <li><a href="dashboard.html" class="nav-link">Дашборд</a></li>
+      <li><a href="dashboard.html" class="nav-link">Профиль</a></li>
       <li><a href="chat.html" class="nav-link">Сообщения</a></li>
     </ul>
     <div class="nav-actions" id="navActions"></div>
@@ -47,7 +61,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-inner">
       <a href="tasks.html" onclick="closeMobileMenu()">Задания</a>
-      <a href="dashboard.html" onclick="closeMobileMenu()">Дашборд</a>
+      <a href="dashboard.html" onclick="closeMobileMenu()">Профиль</a>
       <a href="chat.html" onclick="closeMobileMenu()">Сообщения</a>
     </div>
   </div>
@@ -63,7 +77,8 @@
               <button class="view-btn active" onclick="setView('all',this)">Все</button>
               <button class="view-btn" onclick="setView('favorites',this)">❤️ Избранные</button>
             </div>
-            <button class="btn btn-primary" id="createTaskBtn" onclick="openCreateTask()" style="display:none;">+ Разместить</button>
+            <!-- FIX 6: кнопка меняется в зависимости от роли -->
+            <button class="btn btn-primary" id="actionBtn" style="display:none;"></button>
           </div>
         </div>
       </div>
@@ -90,8 +105,10 @@
           <span style="color:var(--text3);">—</span>
           <input type="number" class="form-control" id="maxBudget" placeholder="До ₽" style="width:88px;padding:.45rem .75rem;font-size:.82rem;" oninput="filterTasks()" />
         </div>
-        <select class="form-control" id="sortSelect" style="width:190px;padding:.45rem .75rem;font-size:.82rem;" onchange="filterTasks()">
+        <!-- FIX 3: добавлен фильтр "Сначала старые" -->
+        <select class="form-control" id="sortSelect" style="width:210px;padding:.45rem .75rem;font-size:.82rem;" onchange="filterTasks()">
           <option value="newest">Сначала новые</option>
+          <option value="oldest">Сначала старые</option>
           <option value="budget_high">Бюджет: высокий → низкий</option>
           <option value="budget_low">Бюджет: низкий → высокий</option>
         </select>
@@ -205,8 +222,10 @@
         (!search || t.title.toLowerCase().includes(search) || t.description.toLowerCase().includes(search)) &&
         t.budget >= minB && t.budget <= maxB
       );
+      // FIX 3: добавлена сортировка "oldest"
       if (sort === 'budget_high') filtered.sort((a,b) => b.budget - a.budget);
       else if (sort === 'budget_low') filtered.sort((a,b) => a.budget - b.budget);
+      else if (sort === 'oldest') filtered.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
       else filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
       document.getElementById('resultsCount').textContent = `Найдено: ${filtered.length}`;
       renderTasks(filtered);
@@ -219,7 +238,7 @@
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
           <div class="empty-icon">${isFav ? '❤️' : '🔍'}</div>
           <h3>${isFav ? 'Избранных нет' : 'Заданий не найдено'}</h3>
-          <p>${isFav ? 'Нажми 🤍 на карточке задания чтобы сохранить' : 'Попробуйте изменить фильтры '}</p>
+          <p>${isFav ? 'Нажми 🤍 на карточке задания чтобы сохранить' : 'Попробуйте изменить фильтры'}</p>
         </div>`;
         return;
       }
@@ -265,8 +284,7 @@
       const desc     = document.getElementById('taskDesc').value.trim();
       const budget   = Number(document.getElementById('taskBudget').value);
       const deadline = document.getElementById('taskDeadline').value;
-      const skills   = document.getElementById('taskSkills').value
-                         .split(',').map(s => s.trim()).filter(Boolean);
+      const skills   = document.getElementById('taskSkills').value.split(',').map(s => s.trim()).filter(Boolean);
 
       if (!title)    { showToast('Введите название задания', 'error'); return; }
       if (!category) { showToast('Выберите категорию', 'error'); return; }
@@ -275,8 +293,7 @@
       if (!deadline) { showToast('Укажите дедлайн', 'error'); return; }
 
       const btn = document.getElementById('createTaskSubmitBtn');
-      btn.disabled = true;
-      btn.textContent = 'Размещаем...';
+      btn.disabled = true; btn.textContent = 'Размещаем...';
 
       try {
         const task = await apiAuth('/tasks', {
@@ -302,7 +319,6 @@
         const params = new URLSearchParams(window.location.search);
         if (params.get('category')) {
           currentCategory = params.get('category');
-          // Активируем нужную кнопку фильтра
           document.querySelectorAll('.filter-btn').forEach(b => {
             b.classList.toggle('active', b.textContent.toLowerCase().includes(currentCategory));
           });
@@ -310,13 +326,12 @@
         if (params.get('search')) document.getElementById('searchInput').value = params.get('search');
         filterTasks();
 
-        // НОВОЕ: если action=create — открываем модалку создания задания
         if (params.get('action') === 'create') {
           const user = getCurrentUser();
           if (user && user.role === 'client') {
             setTimeout(() => openCreateTask(), 400);
-          } else if (user && user.role !== 'client') {
-            showToast('Только заказчики могут размещать задания', 'info');
+          } else if (user && user.role === 'freelancer') {
+            showToast('Фрилансеры не могут размещать задания', 'info');
           } else {
             window.location.href = 'index.html';
           }
@@ -334,7 +349,20 @@
       const user = getCurrentUser();
       if (user) {
         document.getElementById('viewToggle').style.display = 'flex';
-        if (user.role === 'client') document.getElementById('createTaskBtn').style.display = 'flex';
+        const actionBtn = document.getElementById('actionBtn');
+        // FIX 6: разные кнопки для клиента и фрилансера
+        if (user.role === 'client') {
+          actionBtn.style.display = 'flex';
+          actionBtn.textContent = '+ Разместить заказ';
+          actionBtn.onclick = openCreateTask;
+        } else if (user.role === 'freelancer') {
+          actionBtn.style.display = 'flex';
+          actionBtn.textContent = '+ Добавить услугу';
+          actionBtn.onclick = () => {
+            sessionStorage.setItem('pendingAction', 'addService');
+            window.location.href = 'profile.html';
+          };
+        }
       }
       document.getElementById('taskDeadline').min = new Date().toISOString().split('T')[0];
       window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20));
