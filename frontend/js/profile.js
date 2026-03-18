@@ -7,7 +7,7 @@ async function handleLogin() {
     const data = await api('/auth/login', { method:'POST', body:JSON.stringify({ email, password }) });
     setCurrentUser(data.user, data.token);
     showToast(`Добро пожаловать, ${data.user.name}! 👋`, 'success');
-    setTimeout(() => window.location.href = 'dashboard.html', 800);
+    setTimeout(() => window.location.href = 'index.html', 800);
   } catch(e) { showToast(e.message || 'Ошибка входа', 'error'); }
 }
 
@@ -22,7 +22,7 @@ async function handleRegister() {
     const data = await api('/auth/register', { method:'POST', body:JSON.stringify({ name, email, password, role }) });
     setCurrentUser(data.user, data.token);
     showToast('Аккаунт создан! 🎉', 'success');
-    setTimeout(() => window.location.href = 'dashboard.html', 800);
+    setTimeout(() => window.location.href = 'index.html', 800);
   } catch(e) { showToast(e.message || 'Ошибка регистрации', 'error'); }
 }
 
@@ -57,28 +57,76 @@ async function loadProfile() {
           </div>
         </div>`;
     }
+
+    // Заполняем поля формы редактирования
     if (document.getElementById('editName'))   document.getElementById('editName').value   = profile.name || '';
     if (document.getElementById('editBio'))    document.getElementById('editBio').value    = profile.bio || '';
     if (document.getElementById('editSkills')) document.getElementById('editSkills').value = (profile.skills||[]).join(', ');
-    if (document.getElementById('editAvatar')) document.getElementById('editAvatar').value = profile.avatar || '';
+
+    // Аватар — обновляем поле И превью
+    const avatarInput = document.getElementById('editAvatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+    if (avatarInput) avatarInput.value = profile.avatar || '';
+    if (avatarPreview) {
+      if (profile.avatar) {
+        avatarPreview.innerHTML = `<img src="${profile.avatar}" onerror="this.parentElement.innerHTML='👤'">`;
+      } else {
+        avatarPreview.innerHTML = '👤';
+      }
+    }
+
     if (typeof updateSkillsPreview === 'function') updateSkillsPreview();
   } catch(e) { showToast('Ошибка загрузки профиля', 'error'); }
 }
 
 async function saveProfile() {
-  const name = document.getElementById('editName')?.value?.trim();
-  const bio = document.getElementById('editBio')?.value?.trim();
-  const skillsRaw = document.getElementById('editSkills')?.value || '';
+  const name   = document.getElementById('editName')?.value?.trim();
+  const bio    = document.getElementById('editBio')?.value?.trim();
+  const skills = (document.getElementById('editSkills')?.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+  // Берём актуальный аватар из поля (туда уже записан URL от Cloudinary/base64)
   const avatar = document.getElementById('editAvatar')?.value?.trim();
-  const skills = skillsRaw ? skillsRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
   if (!name) { showToast('Имя обязательно', 'error'); return; }
   try {
-    const updated = await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ name, bio, skills, avatar }) });
+    const updated = await apiAuth('/users/profile/update', {
+      method: 'PUT',
+      body: JSON.stringify({ name, bio, skills, avatar })
+    });
+
+    // Обновляем localStorage полностью
     const cur = getCurrentUser();
-    setCurrentUser({ ...cur, name: updated.name, avatar: updated.avatar }, localStorage.getItem('token'));
+    setCurrentUser(
+      { ...cur, name: updated.name, avatar: updated.avatar, bio: updated.bio, skills: updated.skills },
+      localStorage.getItem('token')
+    );
+
     showToast('Профиль обновлён ✅', 'success');
-    loadProfile();
+
+    // Обновляем превью аватара после сохранения
+    const avatarPreview = document.getElementById('avatarPreview');
+    if (avatarPreview && updated.avatar) {
+      avatarPreview.innerHTML = `<img src="${updated.avatar}" onerror="this.parentElement.innerHTML='👤'">`;
+    }
+
+    // Обновляем аватар в сайдбаре если есть
+    const sidebarAvatar = document.getElementById('sidebarAvatar');
+    if (sidebarAvatar) {
+      sidebarAvatar.innerHTML = updated.avatar
+        ? `<img src="${updated.avatar}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;">`
+        : (updated.name || '?').charAt(0);
+    }
+
+    // Обновляем навбар
     updateNavForAuth();
+
+    // Перезагружаем шапку профиля если есть
+    if (typeof loadProfile === 'function' && document.getElementById('profileHeader')) {
+      loadProfile();
+    }
+    // Перезагружаем дашборд если есть
+    if (typeof loadDashboard === 'function') {
+      loadDashboard();
+    }
   } catch(e) { showToast(e.message || 'Ошибка сохранения', 'error'); }
 }
 
@@ -146,6 +194,9 @@ function closePortfolioModal() {
   const t = document.getElementById('portfolioModalTitle');
   if (t) t.textContent = 'Добавить работу';
   ['pTitle','pDesc','pImageUrl','pProjectUrl','pSkills'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  // Сбрасываем превью картинки
+  const preview = document.getElementById('pImagePreview');
+  if (preview) preview.innerHTML = '🖼';
 }
 
 async function savePortfolioItem() {
@@ -187,6 +238,13 @@ async function editPortfolioItem(id) {
     document.getElementById('pImageUrl').value   = item.imageUrl || '';
     document.getElementById('pProjectUrl').value = item.projectUrl || '';
     document.getElementById('pSkills').value     = (item.skills||[]).join(', ');
+    // Показываем текущую картинку в превью
+    const preview = document.getElementById('pImagePreview');
+    if (preview) {
+      preview.innerHTML = item.imageUrl
+        ? `<img src="${item.imageUrl}" onerror="this.parentElement.innerHTML='🖼'">`
+        : '🖼';
+    }
     openModal('portfolioModal');
   } catch(e) { showToast('Ошибка загрузки', 'error'); }
 }
