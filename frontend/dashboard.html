@@ -8,23 +8,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=20260305" />
+  <style>
+    .img-upload-wrap { display:flex; flex-direction:column; gap:.5rem; }
+    .img-upload-row  { display:flex; gap:.6rem; align-items:flex-start; }
+    .img-preview { width:64px; height:64px; border-radius:var(--radius-sm); background:var(--surface2); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; overflow:hidden; font-size:1.5rem; flex-shrink:0; }
+    .img-preview img { width:64px; height:64px; object-fit:cover; }
+    .img-upload-fields { flex:1; display:flex; flex-direction:column; gap:.4rem; }
+    .img-upload-btn { display:inline-flex; align-items:center; gap:.4rem; padding:.45rem .85rem; border-radius:var(--radius-sm); background:var(--surface); border:1px solid var(--border2); color:var(--text2); font-size:.78rem; font-weight:600; cursor:pointer; transition:all .16s; white-space:nowrap; font-family:var(--font-body); }
+    .img-upload-btn:hover { background:var(--surface2); color:var(--text); border-color:var(--border3); }
+    .img-upload-btn.loading { opacity:.6; pointer-events:none; }
+    .img-upload-hint { font-size:.7rem; color:var(--text3); }
+  </style>
 </head>
 <body>
 
   <div class="noise-overlay"></div>
   <div class="bg-canvas">
-    <div class="bg-blob b1"></div>
-    <div class="bg-blob b2"></div>
-    <div class="bg-blob b3"></div>
-    <div class="bg-blob b4"></div>
+    <div class="bg-blob b1"></div><div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div><div class="bg-blob b4"></div>
     <div class="bg-grid"></div>
   </div>
 
   <nav class="navbar" id="navbar">
     <a href="index.html" class="logo">
-      <div class="logo-mark">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg>
-      </div>
+      <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L17 6V14L10 18L3 14V6L10 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 2V18M3 6L17 14M17 6L3 14" stroke="white" stroke-width="1" opacity="0.5"/></svg></div>
       <span class="logo-text">FreeLanceHub</span>
     </a>
     <ul class="nav-links">
@@ -50,8 +57,8 @@
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
-          <div class="card mb-2" id="sidebarProfile" style="text-align:center; padding:1.75rem 1.25rem;">
-            <div class="avatar" id="sidebarAvatar" style="width:76px;height:76px;font-size:1.9rem;margin:0 auto 0.9rem; box-shadow:0 4px 20px rgba(79,110,247,0.35);"></div>
+          <div class="card mb-2" id="sidebarProfile" style="text-align:center;padding:1.75rem 1.25rem;">
+            <div class="avatar" id="sidebarAvatar" style="width:76px;height:76px;font-size:1.9rem;margin:0 auto 0.9rem;box-shadow:0 4px 20px rgba(79,110,247,0.35);"></div>
             <div style="font-family:var(--font-display);font-weight:700;font-size:1.05rem;" id="sidebarName">Загрузка...</div>
             <div class="text-sm" style="color:var(--text3);margin-top:.25rem;" id="sidebarEmail"></div>
             <div id="sidebarRole" style="margin-top:.6rem;"></div>
@@ -60,7 +67,6 @@
               <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--green);" id="sidebarBalance">₽0</div>
             </div>
           </div>
-
           <nav class="card" style="padding:.5rem;">
             <ul class="sidebar-nav">
               <li><a href="#overview" class="active" onclick="showTab('overview',this)"><span class="icon">🏠</span>Обзор</a></li>
@@ -94,7 +100,7 @@
           <!-- TAB: MY TASKS -->
           <div id="tab-tasks" class="hidden">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-              <h3 style="font-size:1.3rem;letter-spacing:-.03em;" id="tasksTabTitle">Мои задания</h3>
+              <h3 style="font-size:1.3rem;letter-spacing:-.03em;">Мои задания</h3>
               <button class="btn btn-primary btn-sm" id="addTaskBtn" onclick="window.location.href='tasks.html?action=create'" style="display:none;">+ Разместить</button>
             </div>
             <div id="myTasksList"></div>
@@ -107,11 +113,36 @@
               <h3 style="font-size:1.3rem;letter-spacing:-.03em;">Редактировать профиль</h3>
             </div>
             <div class="card" style="border-radius:var(--radius-lg);padding:1.75rem;">
-              <div class="grid-2" style="gap:1rem;">
-                <div class="form-group" style="margin-bottom:0;"><label>Имя</label><input type="text" class="form-control" id="editName" /></div>
-                <div class="form-group" style="margin-bottom:0;"><label>URL аватара</label><input type="text" class="form-control" id="editAvatar" placeholder="https://example.com/photo.jpg" /></div>
+              <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Имя</label>
+                  <input type="text" class="form-control" id="editName" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Аватар</label>
+                  <div class="img-upload-wrap">
+                    <div class="img-upload-row">
+                      <div class="img-preview" id="avatarPreview">👤</div>
+                      <div class="img-upload-fields">
+                        <input type="text" class="form-control" id="editAvatar"
+                          placeholder="https://example.com/photo.jpg"
+                          oninput="syncPreview('editAvatar','avatarPreview')"
+                          style="font-size:.82rem;" />
+                        <label class="img-upload-btn" id="avatarUploadBtn">
+                          📁 Загрузить фото
+                          <input type="file" accept="image/*" style="display:none;"
+                            onchange="uploadImage(this,'editAvatar','avatarPreview','avatarUploadBtn')" />
+                        </label>
+                        <span class="img-upload-hint">JPG, PNG, WEBP · до 5MB</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="form-group mt-2"><label>О себе</label><textarea class="form-control" id="editBio" placeholder="Расскажите о себе..." style="min-height:115px;"></textarea></div>
+              <div class="form-group mt-2">
+                <label>О себе</label>
+                <textarea class="form-control" id="editBio" placeholder="Расскажите о себе..." style="min-height:115px;"></textarea>
+              </div>
               <div class="form-group">
                 <label>Навыки (через запятую)</label>
                 <input type="text" class="form-control" id="editSkills" placeholder="React, Node.js, Figma..." oninput="updateSkillsPreview()" />
@@ -121,17 +152,16 @@
               <button class="btn btn-primary" onclick="saveProfile()">Сохранить изменения</button>
             </div>
 
-            <!-- Портфолио и Услуги — только для фрилансеров -->
             <div id="freelancerSections" style="display:none;">
               <div style="margin-top:2rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
                 <h3 style="font-size:1.1rem;letter-spacing:-.02em;">🖼 Портфолио</h3>
-                <button class="btn btn-primary btn-sm" onclick="openModal('portfolioModal')">+ Добавить работу</button>
+                <button class="btn btn-primary btn-sm" onclick="openModal('portfolioModal')">+ Добавить</button>
               </div>
               <div id="portfolioGrid" class="portfolio-grid"><div class="spinner"></div></div>
 
               <div style="margin-top:2rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
                 <h3 style="font-size:1.1rem;letter-spacing:-.02em;">🛠 Услуги</h3>
-                <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Добавить услугу</button>
+                <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Добавить</button>
               </div>
               <div id="servicesGrid" class="services-grid-profile"><div class="spinner"></div></div>
             </div>
@@ -157,7 +187,25 @@
         <div class="form-group"><label>Категория</label><select class="form-control" id="pCategory"><option value="development">💻 Разработка</option><option value="design">🎨 Дизайн</option><option value="writing">✍️ Тексты</option><option value="marketing">📣 Маркетинг</option><option value="video">🎬 Видео</option><option value="other">🔧 Другое</option></select></div>
         <div class="form-group"><label>Навыки</label><input type="text" class="form-control" id="pSkills" placeholder="React, Figma..." /></div>
       </div>
-      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="pImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <div class="form-group">
+        <label>Картинка</label>
+        <div class="img-upload-wrap">
+          <div class="img-upload-row">
+            <div class="img-preview" id="pImagePreview">🖼</div>
+            <div class="img-upload-fields">
+              <input type="text" class="form-control" id="pImageUrl"
+                placeholder="https://i.imgur.com/..."
+                oninput="syncPreview('pImageUrl','pImagePreview')"
+                style="font-size:.82rem;" />
+              <label class="img-upload-btn" id="pImageUploadBtn">
+                📁 Загрузить файл
+                <input type="file" accept="image/*" style="display:none;"
+                  onchange="uploadImage(this,'pImageUrl','pImagePreview','pImageUploadBtn')" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="form-group" style="margin-bottom:0;"><label>Ссылка на проект</label><input type="text" class="form-control" id="pProjectUrl" placeholder="https://myproject.com" /></div>
       <button class="btn btn-primary w-full mt-3" onclick="savePortfolioItem()">Сохранить</button>
     </div>
@@ -178,7 +226,25 @@
         <div class="form-group"><label>Цена (₽) *</label><input type="number" class="form-control" id="sPrice" placeholder="3000" min="1" /></div>
         <div class="form-group"><label>Срок (дней) *</label><input type="number" class="form-control" id="sDeliveryDays" placeholder="7" min="1" /></div>
       </div>
-      <div class="form-group"><label>URL картинки</label><input type="text" class="form-control" id="sImageUrl" placeholder="https://i.imgur.com/..." /></div>
+      <div class="form-group">
+        <label>Картинка услуги</label>
+        <div class="img-upload-wrap">
+          <div class="img-upload-row">
+            <div class="img-preview" id="sImagePreview">🛠</div>
+            <div class="img-upload-fields">
+              <input type="text" class="form-control" id="sImageUrl"
+                placeholder="https://i.imgur.com/..."
+                oninput="syncPreview('sImageUrl','sImagePreview')"
+                style="font-size:.82rem;" />
+              <label class="img-upload-btn" id="sImageUploadBtn">
+                📁 Загрузить файл
+                <input type="file" accept="image/*" style="display:none;"
+                  onchange="uploadImage(this,'sImageUrl','sImagePreview','sImageUploadBtn')" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="form-group" style="margin-bottom:0;"><label>Навыки (через запятую)</label><input type="text" class="form-control" id="sSkills" placeholder="React, Node.js..." /></div>
       <button class="btn btn-primary w-full mt-3" id="serviceSubmitBtn" onclick="saveService()">Сохранить услугу</button>
     </div>
@@ -190,35 +256,104 @@
   <script>
     const catEmojis = { development:'💻', design:'🎨', writing:'✍️', marketing:'📣', video:'🎬', music:'🎵', other:'🔧' };
 
-    function toggleMobileMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
-      document.getElementById('burger').classList.toggle('open');
+    // ══════════════════════════════════════════════
+    // ЗАГРУЗКА ИЗОБРАЖЕНИЙ
+    // Использует Cloudinary (бесплатный хостинг).
+    // Если не настроен — fallback на base64.
+    // Как настроить Cloudinary:
+    //   1. Зарегистрируйся на cloudinary.com (бесплатно)
+    //   2. В Dashboard скопируй "Cloud name"
+    //   3. Settings → Upload → Add upload preset (Unsigned)
+    //   4. Вставь cloud name и preset name ниже
+    // ══════════════════════════════════════════════
+    const CLOUDINARY_CLOUD  = 'dttvzxrvg';   // ← сюда свой cloud name
+    const CLOUDINARY_PRESET = 'freelancehub_unsigned'; // ← сюда свой preset
+
+    function syncPreview(inputId, previewId) {
+      const url = document.getElementById(inputId)?.value?.trim();
+      const preview = document.getElementById(previewId);
+      if (!preview) return;
+      if (url) {
+        preview.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='❌'">`;
+      } else {
+        const fb = { avatarPreview:'👤', pImagePreview:'🖼', sImagePreview:'🛠' };
+        preview.innerHTML = fb[previewId] || '🖼';
+      }
     }
-    function closeMobileMenu() {
-      document.getElementById('mobileMenu').classList.remove('open');
-      document.getElementById('burger').classList.remove('open');
+
+    async function uploadImage(input, inputId, previewId, btnId) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Файл слишком большой. Максимум 5MB', 'error');
+        input.value = ''; return;
+      }
+      const btn = document.getElementById(btnId);
+      const btnText = btn?.querySelector('input') ? btn : btn;
+      if (btn) btn.classList.add('loading');
+
+      // Локальное превью пока идёт загрузка
+      const localUrl = URL.createObjectURL(file);
+      const preview = document.getElementById(previewId);
+      if (preview) preview.innerHTML = `<img src="${localUrl}">`;
+
+      try {
+        if (CLOUDINARY_CLOUD !== 'YOUR_CLOUD_NAME') {
+          // Загрузка на Cloudinary
+          const fd = new FormData();
+          fd.append('file', file);
+          fd.append('upload_preset', CLOUDINARY_PRESET);
+          fd.append('folder', 'freelancehub');
+          const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method:'POST', body:fd });
+          if (!res.ok) throw new Error('upload failed');
+          const data = await res.json();
+          const urlInput = document.getElementById(inputId);
+          if (urlInput) urlInput.value = data.secure_url;
+          if (preview) preview.innerHTML = `<img src="${data.secure_url}">`;
+          showToast('Фото загружено ✅', 'success');
+        } else {
+          // Fallback: base64 (работает без настройки)
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const b64 = ev.target.result;
+            const urlInput = document.getElementById(inputId);
+            if (urlInput) urlInput.value = b64;
+            if (preview) preview.innerHTML = `<img src="${b64}">`;
+            showToast('Фото готово ✅', 'success');
+          };
+          reader.readAsDataURL(file);
+        }
+      } catch(e) {
+        showToast('Ошибка загрузки, попробуй ещё раз', 'error');
+        if (preview) { const fb = { avatarPreview:'👤', pImagePreview:'🖼', sImagePreview:'🛠' }; preview.innerHTML = fb[previewId] || '🖼'; }
+      } finally {
+        URL.revokeObjectURL(localUrl);
+        if (btn) btn.classList.remove('loading');
+        input.value = '';
+      }
     }
+
+    function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); document.getElementById('burger').classList.toggle('open'); }
+    function closeMobileMenu()  { document.getElementById('mobileMenu').classList.remove('open'); document.getElementById('burger').classList.remove('open'); }
 
     function showTab(tab, el) {
       document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
       if (el) el.classList.add('active');
-      ['overview','tasks','edit'].forEach(t => {
-        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
-      });
+      ['overview','tasks','edit'].forEach(t => document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab));
       if (tab === 'tasks') loadMyTasks();
       if (tab === 'edit')  initEditTab();
     }
 
-    // ── РЕДАКТИРОВАНИЕ ПРОФИЛЯ ──────────────────────
     function initEditTab() {
       const user = getCurrentUser();
       if (!user) return;
-      document.getElementById('editName').value    = user.name || '';
-      document.getElementById('editAvatar').value  = user.avatar || '';
-      document.getElementById('editBio').value     = user.bio || '';
-      document.getElementById('editSkills').value  = (user.skills || []).join(', ');
+      document.getElementById('editName').value   = user.name || '';
+      document.getElementById('editAvatar').value = user.avatar || '';
+      document.getElementById('editBio').value    = user.bio || '';
+      document.getElementById('editSkills').value = (user.skills || []).join(', ');
       updateSkillsPreview();
-
+      const preview = document.getElementById('avatarPreview');
+      if (preview) preview.innerHTML = user.avatar ? `<img src="${user.avatar}" onerror="this.parentElement.innerHTML='👤'">` : '👤';
       if (user.role === 'freelancer') {
         document.getElementById('freelancerSections').style.display = 'block';
         loadPortfolio();
@@ -227,29 +362,24 @@
     }
 
     function updateSkillsPreview() {
-      const skills = document.getElementById('editSkills').value.split(',').map(s => s.trim()).filter(Boolean);
-      document.getElementById('skillsPreview').innerHTML = skills.map(s => `<span class="skill-tag">${s}</span>`).join('');
+      const skills = document.getElementById('editSkills').value.split(',').map(s=>s.trim()).filter(Boolean);
+      document.getElementById('skillsPreview').innerHTML = skills.map(s=>`<span class="skill-tag">${s}</span>`).join('');
     }
 
     async function saveProfile() {
       const name   = document.getElementById('editName').value.trim();
       const avatar = document.getElementById('editAvatar').value.trim();
       const bio    = document.getElementById('editBio').value.trim();
-      const skills = document.getElementById('editSkills').value.split(',').map(s => s.trim()).filter(Boolean);
+      const skills = document.getElementById('editSkills').value.split(',').map(s=>s.trim()).filter(Boolean);
       if (!name) { showToast('Введите имя', 'error'); return; }
       try {
-        const updated = await apiAuth('/users/profile/update', {
-          method: 'PUT',
-          body: JSON.stringify({ name, avatar, bio, skills })
-        });
-        const stored = getCurrentUser();
-        setCurrentUser({ ...stored, name: updated.name, avatar: updated.avatar, bio: updated.bio, skills: updated.skills }, localStorage.getItem('token'));
+        const updated = await apiAuth('/users/profile/update', { method:'PUT', body:JSON.stringify({ name, avatar, bio, skills }) });
+        setCurrentUser({ ...getCurrentUser(), name:updated.name, avatar:updated.avatar, bio:updated.bio, skills:updated.skills }, localStorage.getItem('token'));
         showToast('Профиль обновлён ✅', 'success');
         loadDashboard();
-      } catch(e) { showToast(e.message || 'Ошибка', 'error'); }
+      } catch(e) { showToast(e.message||'Ошибка','error'); }
     }
 
-    // ── ПОРТФОЛИО ───────────────────────────────────
     async function loadPortfolio() {
       const user = getCurrentUser();
       const grid = document.getElementById('portfolioGrid');
@@ -257,22 +387,17 @@
       try {
         const items = await apiAuth(`/portfolio/${user.id}`);
         if (!items.length) {
-          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-            <div class="empty-icon">🖼</div><h3>Портфолио пусто</h3>
-            <p>Добавьте работы чтобы заказчики видели ваш опыт</p>
-          </div>`;
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🖼</div><h3>Портфолио пусто</h3><p>Добавьте работы чтобы заказчики видели ваш опыт</p></div>`;
           return;
         }
         grid.innerHTML = items.map(item => `
           <div class="portfolio-card">
-            <div class="portfolio-img">
-              ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.title}" onerror="this.parentElement.innerHTML='${catEmojis[item.category]||'🔧'}';">` : catEmojis[item.category]||'🔧'}
-            </div>
+            <div class="portfolio-img">${item.imageUrl?`<img src="${item.imageUrl}" alt="${item.title}" onerror="this.parentElement.innerHTML='${catEmojis[item.category]||'🔧'}';">`:catEmojis[item.category]||'🔧'}</div>
             <div class="portfolio-body">
               <div style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">${item.title}</div>
-              ${item.description ? `<div style="font-size:.8rem;color:var(--text2);line-height:1.6;">${item.description}</div>` : ''}
+              ${item.description?`<div style="font-size:.8rem;color:var(--text2);line-height:1.6;">${item.description}</div>`:''}
               <div style="display:flex;gap:.4rem;margin-top:.75rem;">
-                ${item.projectUrl ? `<a href="${item.projectUrl}" target="_blank" class="btn btn-glass btn-sm">🔗</a>` : ''}
+                ${item.projectUrl?`<a href="${item.projectUrl}" target="_blank" class="btn btn-glass btn-sm">🔗</a>`:''}
                 <button class="btn btn-glass btn-sm" onclick="editPortfolioItem('${item._id}')">✏️</button>
                 <button class="btn btn-danger btn-sm" onclick="deletePortfolioItem('${item._id}')">🗑</button>
               </div>
@@ -286,32 +411,24 @@
       document.getElementById('portfolioEditId').value = '';
       document.getElementById('portfolioModalTitle').textContent = 'Добавить работу';
       ['pTitle','pDesc','pImageUrl','pProjectUrl','pSkills'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
+      document.getElementById('pImagePreview').innerHTML = '🖼';
     }
 
     async function savePortfolioItem() {
       const editId = document.getElementById('portfolioEditId').value;
-      const data = {
-        title: document.getElementById('pTitle').value.trim(),
-        description: document.getElementById('pDesc').value.trim(),
-        category: document.getElementById('pCategory').value,
-        imageUrl: document.getElementById('pImageUrl').value.trim(),
-        projectUrl: document.getElementById('pProjectUrl').value.trim(),
-        skills: document.getElementById('pSkills').value.split(',').map(s=>s.trim()).filter(Boolean)
-      };
-      if (!data.title) { showToast('Введите название', 'error'); return; }
+      const data = { title:document.getElementById('pTitle').value.trim(), description:document.getElementById('pDesc').value.trim(), category:document.getElementById('pCategory').value, imageUrl:document.getElementById('pImageUrl').value.trim(), projectUrl:document.getElementById('pProjectUrl').value.trim(), skills:document.getElementById('pSkills').value.split(',').map(s=>s.trim()).filter(Boolean) };
+      if (!data.title) { showToast('Введите название','error'); return; }
       try {
-        if (editId) { await apiAuth(`/portfolio/${editId}`, { method:'PUT', body:JSON.stringify(data) }); showToast('Обновлено ✅','success'); }
-        else { await apiAuth('/portfolio', { method:'POST', body:JSON.stringify(data) }); showToast('Работа добавлена! 🎉','success'); }
-        closePortfolioModal();
-        loadPortfolio();
+        if (editId) { await apiAuth(`/portfolio/${editId}`,{method:'PUT',body:JSON.stringify(data)}); showToast('Обновлено ✅','success'); }
+        else { await apiAuth('/portfolio',{method:'POST',body:JSON.stringify(data)}); showToast('Работа добавлена! 🎉','success'); }
+        closePortfolioModal(); loadPortfolio();
       } catch(e) { showToast(e.message||'Ошибка','error'); }
     }
 
     async function editPortfolioItem(id) {
       try {
-        const user = getCurrentUser();
-        const items = await apiAuth(`/portfolio/${user.id}`);
-        const item = items.find(i => i._id === id);
+        const items = await apiAuth(`/portfolio/${getCurrentUser().id}`);
+        const item = items.find(i=>i._id===id);
         if (!item) return;
         document.getElementById('portfolioEditId').value = id;
         document.getElementById('portfolioModalTitle').textContent = 'Редактировать работу';
@@ -321,33 +438,30 @@
         document.getElementById('pImageUrl').value = item.imageUrl||'';
         document.getElementById('pProjectUrl').value = item.projectUrl||'';
         document.getElementById('pSkills').value = (item.skills||[]).join(', ');
+        if (item.imageUrl) document.getElementById('pImagePreview').innerHTML = `<img src="${item.imageUrl}">`;
         openModal('portfolioModal');
       } catch(e) {}
     }
 
     async function deletePortfolioItem(id) {
       if (!confirm('Удалить эту работу?')) return;
-      try { await apiAuth(`/portfolio/${id}`, { method:'DELETE' }); showToast('Удалено','success'); loadPortfolio(); }
+      try { await apiAuth(`/portfolio/${id}`,{method:'DELETE'}); showToast('Удалено','success'); loadPortfolio(); }
       catch(e) { showToast(e.message||'Ошибка','error'); }
     }
 
-    // ── УСЛУГИ ──────────────────────────────────────
     async function loadServices() {
       const grid = document.getElementById('servicesGrid');
       grid.innerHTML = '<div class="spinner"></div>';
       try {
         const services = await apiAuth('/services/my');
         if (!services.length) {
-          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-            <div class="empty-icon">🛠</div><h3>Услуг пока нет</h3>
-            <p>Добавьте услуги чтобы заказчики могли вас нанять напрямую</p>
-          </div>`;
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛠</div><h3>Услуг пока нет</h3><p>Добавьте услуги чтобы заказчики могли вас нанять напрямую</p></div>`;
           return;
         }
-        grid.innerHTML = services.map(s => `
+        grid.innerHTML = services.map(s=>`
           <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
             <div style="width:100%;height:130px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;">
-              ${s.imageUrl ? `<img src="${s.imageUrl}" style="width:100%;height:130px;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem>${catEmojis[s.category]||'🔧'}</span>';">` : `<span>${catEmojis[s.category]||'🔧'}</span>`}
+              ${s.imageUrl?`<img src="${s.imageUrl}" style="width:100%;height:130px;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=font-size:2.5rem>${catEmojis[s.category]||'🔧'}</span>';">`:catEmojis[s.category]||'🔧'}
             </div>
             <div style="padding:1rem;">
               <div style="font-weight:700;font-size:.9rem;">${s.title}</div>
@@ -365,8 +479,9 @@
     function openServiceModal(service) {
       document.getElementById('serviceEditId').value = '';
       document.getElementById('serviceModalTitle').textContent = 'Добавить услугу';
-      ['sTitle','sDesc','sPrice','sDeliveryDays','sImageUrl','sSkills'].forEach(id => document.getElementById(id).value = '');
+      ['sTitle','sDesc','sPrice','sDeliveryDays','sImageUrl','sSkills'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('sCategory').value = 'development';
+      document.getElementById('sImagePreview').innerHTML = '🛠';
       if (service) {
         document.getElementById('serviceEditId').value = service._id;
         document.getElementById('serviceModalTitle').textContent = 'Редактировать услугу';
@@ -377,6 +492,7 @@
         document.getElementById('sDeliveryDays').value = service.deliveryDays||'';
         document.getElementById('sImageUrl').value = service.imageUrl||'';
         document.getElementById('sSkills').value = (service.skills||[]).join(', ');
+        if (service.imageUrl) document.getElementById('sImagePreview').innerHTML = `<img src="${service.imageUrl}">`;
       }
       document.getElementById('serviceModal').classList.add('open');
     }
@@ -389,143 +505,92 @@
 
     async function saveService() {
       const editId = document.getElementById('serviceEditId').value;
-      const data = {
-        title: document.getElementById('sTitle').value.trim(),
-        description: document.getElementById('sDesc').value.trim(),
-        category: document.getElementById('sCategory').value,
-        price: Number(document.getElementById('sPrice').value),
-        deliveryDays: Number(document.getElementById('sDeliveryDays').value),
-        imageUrl: document.getElementById('sImageUrl').value.trim(),
-        skills: document.getElementById('sSkills').value.split(',').map(s=>s.trim()).filter(Boolean)
-      };
+      const data = { title:document.getElementById('sTitle').value.trim(), description:document.getElementById('sDesc').value.trim(), category:document.getElementById('sCategory').value, price:Number(document.getElementById('sPrice').value), deliveryDays:Number(document.getElementById('sDeliveryDays').value), imageUrl:document.getElementById('sImageUrl').value.trim(), skills:document.getElementById('sSkills').value.split(',').map(s=>s.trim()).filter(Boolean) };
       if (!data.title) { showToast('Введите название','error'); return; }
       if (!data.description) { showToast('Введите описание','error'); return; }
-      if (!data.price || data.price < 1) { showToast('Введите корректную цену','error'); return; }
-      if (!data.deliveryDays || data.deliveryDays < 1) { showToast('Введите срок','error'); return; }
+      if (!data.price||data.price<1) { showToast('Введите корректную цену','error'); return; }
+      if (!data.deliveryDays||data.deliveryDays<1) { showToast('Введите срок','error'); return; }
       const btn = document.getElementById('serviceSubmitBtn');
-      btn.disabled = true; btn.textContent = 'Сохраняем...';
+      btn.disabled=true; btn.textContent='Сохраняем...';
       try {
-        if (editId) { await apiAuth(`/services/${editId}`, { method:'PUT', body:JSON.stringify(data) }); showToast('Услуга обновлена ✅','success'); }
-        else { await apiAuth('/services', { method:'POST', body:JSON.stringify(data) }); showToast('Услуга добавлена! 🎉','success'); }
+        if (editId) { await apiAuth(`/services/${editId}`,{method:'PUT',body:JSON.stringify(data)}); showToast('Услуга обновлена ✅','success'); }
+        else { await apiAuth('/services',{method:'POST',body:JSON.stringify(data)}); showToast('Услуга добавлена! 🎉','success'); }
         closeServiceModal(); loadServices();
       } catch(e) { showToast(e.message||'Ошибка','error'); btn.disabled=false; btn.textContent='Сохранить услугу'; }
     }
 
     async function editService(id) {
-      try { const services = await apiAuth('/services/my'); const s = services.find(s=>s._id===id); if(s) openServiceModal(s); } catch(e) {}
+      try { const s=(await apiAuth('/services/my')).find(s=>s._id===id); if(s) openServiceModal(s); } catch(e) {}
     }
 
     async function deleteService(id) {
       if (!confirm('Удалить эту услугу?')) return;
-      try { await apiAuth(`/services/${id}`, { method:'DELETE' }); showToast('Услуга удалена','success'); loadServices(); }
+      try { await apiAuth(`/services/${id}`,{method:'DELETE'}); showToast('Услуга удалена','success'); loadServices(); }
       catch(e) { showToast(e.message||'Ошибка','error'); }
     }
 
-    // ── ДАШБОРД ─────────────────────────────────────
     async function loadDashboard() {
       const user = getCurrentUser();
-      if (!user) { window.location.href = 'index.html'; return; }
-
+      if (!user) { window.location.href='index.html'; return; }
       document.getElementById('welcomeTitle').textContent = `Привет, ${user.name.split(' ')[0]} 👋`;
-
       const av = document.getElementById('sidebarAvatar');
-      av.innerHTML = user.avatar
-        ? `<img src="${user.avatar}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;">`
-        : user.name.charAt(0);
+      av.innerHTML = user.avatar ? `<img src="${user.avatar}" style="width:76px;height:76px;border-radius:50%;object-fit:cover;">` : user.name.charAt(0);
       document.getElementById('sidebarName').textContent  = user.name;
-      document.getElementById('sidebarEmail').textContent = user.email || '';
+      document.getElementById('sidebarEmail').textContent = user.email||'';
       document.getElementById('sidebarBalance').textContent = `₽${(user.balance||0).toLocaleString()}`;
-      document.getElementById('sidebarRole').innerHTML =
-        `<span class="profile-role">${user.role === 'client' ? '📋 Заказчик' : '💼 Фрилансер'}</span>`;
-
-      if (user.role === 'client') document.getElementById('addTaskBtn').style.display = 'flex';
-
+      document.getElementById('sidebarRole').innerHTML = `<span class="profile-role">${user.role==='client'?'📋 Заказчик':'💼 Фрилансер'}</span>`;
+      if (user.role==='client') document.getElementById('addTaskBtn').style.display='flex';
       try {
         const tasks = await apiAuth('/tasks/my/tasks');
-        const open = tasks.filter(t => t.status === 'open').length;
-        const inProgress = tasks.filter(t => t.status === 'in_progress').length;
-        const completed = tasks.filter(t => t.status === 'completed').length;
-
+        const open=tasks.filter(t=>t.status==='open').length, inProgress=tasks.filter(t=>t.status==='in_progress').length, completed=tasks.filter(t=>t.status==='completed').length;
         document.getElementById('statsCards').innerHTML = `
-          <div class="card" style="text-align:center;padding:1.5rem 1rem;border-color:rgba(16,217,138,.15);">
-            <div style="font-size:2.2rem;font-weight:800;font-family:var(--font-display);color:var(--green);letter-spacing:-.04em;">${open}</div>
-            <div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem;">${user.role === 'client' ? 'Открытых' : 'Доступных'}</div>
-          </div>
-          <div class="card" style="text-align:center;padding:1.5rem 1rem;border-color:rgba(245,158,11,.15);">
-            <div style="font-size:2.2rem;font-weight:800;font-family:var(--font-display);color:var(--amber);letter-spacing:-.04em;">${inProgress}</div>
-            <div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem;">В работе</div>
-          </div>
-          <div class="card" style="text-align:center;padding:1.5rem 1rem;border-color:rgba(79,110,247,.15);">
-            <div style="font-size:2.2rem;font-weight:800;font-family:var(--font-display);color:var(--blue-light);letter-spacing:-.04em;">${completed}</div>
-            <div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem;">Выполнено</div>
-          </div>`;
-
-        const recent = [...tasks].sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)).slice(0,5);
-        document.getElementById('recentActivity').innerHTML = recent.length
-          ? recent.map(t => `
-            <div class="card mb-1" style="padding:1rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:all .2s;" onclick="window.location.href='task-detail.html?id=${t._id}'"
-              onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor=''">
-              <div>
-                <div style="font-weight:600;font-size:.9rem;">${t.title}</div>
-                <div style="font-size:.78rem;color:var(--text3);margin-top:.2rem;">₽${t.budget.toLocaleString()}</div>
-              </div>
-              <span class="badge badge-${t.status}">${statusLabel(t.status)}</span>
-            </div>`).join('')
-          : `<div class="empty-state"><div class="empty-icon">📭</div><h3>Заданий пока нет</h3>
-             <a href="tasks.html" class="btn btn-primary mt-2">Найти задание</a></div>`;
-      } catch(e) {}
+          <div class="card" style="text-align:center;padding:1.5rem 1rem;border-color:rgba(16,217,138,.15);"><div style="font-size:2.2rem;font-weight:800;font-family:var(--font-display);color:var(--green);letter-spacing:-.04em;">${open}</div><div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem;">${user.role==='client'?'Открытых':'Доступных'}</div></div>
+          <div class="card" style="text-align:center;padding:1.5rem 1rem;border-color:rgba(245,158,11,.15);"><div style="font-size:2.2rem;font-weight:800;font-family:var(--font-display);color:var(--amber);letter-spacing:-.04em;">${inProgress}</div><div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem;">В работе</div></div>
+          <div class="card" style="text-align:center;padding:1.5rem 1rem;border-color:rgba(79,110,247,.15);"><div style="font-size:2.2rem;font-weight:800;font-family:var(--font-display);color:var(--blue-light);letter-spacing:-.04em;">${completed}</div><div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem;">Выполнено</div></div>`;
+        const recent=[...tasks].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,5);
+        document.getElementById('recentActivity').innerHTML=recent.length?recent.map(t=>`
+          <div class="card mb-1" style="padding:1rem 1.25rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:all .2s;" onclick="window.location.href='task-detail.html?id=${t._id}'" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor=''">
+            <div><div style="font-weight:600;font-size:.9rem;">${t.title}</div><div style="font-size:.78rem;color:var(--text3);margin-top:.2rem;">₽${t.budget.toLocaleString()}</div></div>
+            <span class="badge badge-${t.status}">${statusLabel(t.status)}</span>
+          </div>`).join(''):`<div class="empty-state"><div class="empty-icon">📭</div><h3>Заданий пока нет</h3><a href="tasks.html" class="btn btn-primary mt-2">Найти задание</a></div>`;
+      } catch(e){}
     }
 
     async function loadMyTasks() {
-      const listEl = document.getElementById('myTasksList');
-      listEl.innerHTML = '<div class="spinner"></div>';
+      const listEl=document.getElementById('myTasksList');
+      listEl.innerHTML='<div class="spinner"></div>';
       try {
-        const tasks = await apiAuth('/tasks/my/tasks');
-        listEl.innerHTML = tasks.length
-          ? tasks.map(t => `
-            <div class="task-card mb-2" onclick="window.location.href='task-detail.html?id=${t._id}'">
-              <div class="task-card-header">
-                <h3>${t.title}</h3>
-                <span class="task-budget">₽${t.budget.toLocaleString()}</span>
-              </div>
-              <p class="task-desc">${t.description}</p>
-              <div class="flex gap-1 mt-2" style="flex-wrap:wrap;">
-                <span class="badge badge-${t.status}">${statusLabel(t.status)}</span>
-                <span class="badge badge-${t.category}">${t.category}</span>
-              </div>
-              ${t.assignedTo ? `<div class="text-sm" style="color:var(--text3);margin-top:.6rem;">👤 Исполнитель: ${t.assignedTo.name}</div>` : ''}
-              ${t.client ? `<div class="text-sm" style="color:var(--text3);margin-top:.6rem;">📋 Заказчик: ${t.client.name}</div>` : ''}
-            </div>`).join('')
-          : `<div class="empty-state"><div class="empty-icon">📋</div><h3>Заданий пока нет</h3>
-             <a href="tasks.html" class="btn btn-primary mt-2">Найти задание</a></div>`;
-      } catch(e) {}
+        const tasks=await apiAuth('/tasks/my/tasks');
+        listEl.innerHTML=tasks.length?tasks.map(t=>`
+          <div class="task-card mb-2" onclick="window.location.href='task-detail.html?id=${t._id}'">
+            <div class="task-card-header"><h3>${t.title}</h3><span class="task-budget">₽${t.budget.toLocaleString()}</span></div>
+            <p class="task-desc">${t.description}</p>
+            <div class="flex gap-1 mt-2" style="flex-wrap:wrap;"><span class="badge badge-${t.status}">${statusLabel(t.status)}</span><span class="badge badge-${t.category}">${t.category}</span></div>
+            ${t.assignedTo?`<div class="text-sm" style="color:var(--text3);margin-top:.6rem;">👤 Исполнитель: ${t.assignedTo.name}</div>`:''}
+            ${t.client?`<div class="text-sm" style="color:var(--text3);margin-top:.6rem;">📋 Заказчик: ${t.client.name}</div>`:''}
+          </div>`).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><h3>Заданий пока нет</h3><a href="tasks.html" class="btn btn-primary mt-2">Найти задание</a></div>`;
+      } catch(e){}
     }
 
-    function statusLabel(s) {
-      return { open:'Открыто', in_progress:'В работе', completed:'Выполнено', cancelled:'Отменено' }[s] || s;
-    }
+    function statusLabel(s){return{open:'Открыто',in_progress:'В работе',completed:'Выполнено',cancelled:'Отменено'}[s]||s;}
+    function openAuthModal(){window.location.href='index.html';}
 
-    function openAuthModal() { window.location.href = 'index.html'; }
-
-    // Портфолио css классы для dashboard
-    const style = document.createElement('style');
-    style.textContent = `
-      .portfolio-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; }
-      .portfolio-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; transition:all .22s; }
-      .portfolio-card:hover { border-color:var(--border2); transform:translateY(-2px); }
-      .portfolio-img { width:100%; height:130px; background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:2rem; overflow:hidden; }
-      .portfolio-img img { width:100%; height:130px; object-fit:cover; }
-      .portfolio-body { padding:.9rem; }
-      .services-grid-profile { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; }
+    const style=document.createElement('style');
+    style.textContent=`
+      .portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;}
+      .portfolio-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .22s;}
+      .portfolio-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+      .portfolio-img{width:100%;height:130px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;}
+      .portfolio-img img{width:100%;height:130px;object-fit:cover;}
+      .portfolio-body{padding:.9rem;}
+      .services-grid-profile{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;}
     `;
     document.head.appendChild(style);
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded',()=>{
       updateNavForAuth();
       loadDashboard();
-      window.addEventListener('scroll', () => {
-        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
-      });
+      window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>20));
     });
   </script>
 </body>
