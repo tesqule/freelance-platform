@@ -30,15 +30,15 @@ export default function ProfilePage() {
         API.get(`/portfolio/${id}`),
         API.get(`/reviews/${id}`),
       ]);
-      if (portRes.status === 'fulfilled') setPortfolio(portRes.value.data);
+      if (portRes.status === 'fulfilled') setPortfolio(Array.isArray(portRes.value.data) ? portRes.value.data : []);
       if (revRes.status === 'fulfilled') {
   const revData = revRes.value.data;
   setReviews(Array.isArray(revData) ? revData : revData.reviews || []);
 }
       if (data.role === 'freelancer') {
         try {
-          const { data: svcs } = await API.get(`/services/user/${id}`);
-          setServices(svcs);
+          const { data: svcs } = await API.get(`/services?freelancer=${id}`);
+          setServices(Array.isArray(svcs) ? svcs : []);
         } catch {}
       }
     } catch { navigate('/tasks'); }
