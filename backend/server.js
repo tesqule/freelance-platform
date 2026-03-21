@@ -35,7 +35,8 @@ app.use(cors({
   origin: [
     process.env.SITE_URL || 'https://freelance-platform-production-2360.up.railway.app',
     'http://localhost:3000',
-    'http://localhost:8080'
+    'http://localhost:8080',
+    'http://localhost:5173'
   ],
   credentials: true
 }));
