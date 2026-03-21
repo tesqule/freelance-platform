@@ -130,10 +130,15 @@ export default function HomePage({ onAuthOpen }) {
 
           <div className="hero-cta">
             <Link to="/tasks" className="btn btn-primary btn-xl">Найти задание</Link>
-            {user
-              ? <Link to="/tasks" className="btn btn-glass btn-xl">Разместить заказ</Link>
-              : <button className="btn btn-glass btn-xl" onClick={() => onAuthOpen('register')}>Разместить заказ</button>
-            }
+            {!user && (
+              <button className="btn btn-glass btn-xl" onClick={() => onAuthOpen('register')}>Разместить заказ</button>
+            )}
+            {user?.role === 'client' && (
+              <Link to="/tasks" className="btn btn-glass btn-xl">Разместить заказ</Link>
+            )}
+            {user?.role === 'freelancer' && (
+              <Link to="/services" className="btn btn-glass btn-xl">Разместить услугу</Link>
+            )}
           </div>
 
           {/* Stats */}
@@ -293,10 +298,15 @@ export default function HomePage({ onAuthOpen }) {
                 Тысячи заданий уже ждут тебя.
               </p>
               <div className="cta-btns">
-                {user
-                  ? <Link to="/tasks" className="btn btn-primary btn-xl">Найти задание →</Link>
-                  : <button className="btn btn-primary btn-xl" onClick={() => onAuthOpen('register')}>Создать аккаунт →</button>
-                }
+                {!user && (
+                  <button className="btn btn-primary btn-xl" onClick={() => onAuthOpen('register')}>Создать аккаунт →</button>
+                )}
+                {user?.role === 'client' && (
+                  <Link to="/tasks" className="btn btn-primary btn-xl">Разместить заказ →</Link>
+                )}
+                {user?.role === 'freelancer' && (
+                  <Link to="/services" className="btn btn-primary btn-xl">Разместить услугу →</Link>
+                )}
                 <Link to="/tasks" className="btn btn-glass btn-xl">Смотреть задания</Link>
               </div>
             </div>

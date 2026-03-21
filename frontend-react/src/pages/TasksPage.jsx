@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import API from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -203,6 +203,9 @@ export default function TasksPage({ onAuthOpen }) {
             </select>
             {user?.role === 'client' && (
               <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}>+ Разместить задание</button>
+            )}
+            {user?.role === 'freelancer' && (
+              <Link to="/services" className="btn btn-primary btn-sm">+ Разместить услугу</Link>
             )}
           </div>
         </div>
