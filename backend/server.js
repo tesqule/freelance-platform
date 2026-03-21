@@ -26,7 +26,7 @@ const io = new Server(server, {
 
 // ── HELMET — защитные HTTP-заголовки ─────────────
 app.use(helmet({
-  contentSecurityPolicy: false, // отключаем чтобы не ломать фронт
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
 
@@ -41,7 +41,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json({ limit: '10kb' })); // защита от огромных payload
+app.use(express.json({ limit: '10kb' }));
 
 // ── NoSQL Injection защита ────────────────────────
 app.use(mongoSanitize());
@@ -53,20 +53,17 @@ app.use(xss());
 app.use(hpp());
 
 // ── Rate Limiting ─────────────────────────────────
-
-// Жёсткий лимит для авторизации (защита от брутфорса)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 минут
-  max: 20,                   // 20 попыток
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: { message: 'Слишком много запросов. Попробуйте через 15 минут.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Общий лимит для API
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 минут
-  max: 300,                  // 300 запросов
+  windowMs: 15 * 60 * 1000,
+  max: 300,
   message: { message: 'Слишком много запросов.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -93,13 +90,14 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/services',      require('./routes/services'));
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-app.use(express.static(path.join(__dirname, '../frontend')));
+
+// ── Статика React (собранный билд) ────────────────
+app.use(express.static(path.join(__dirname, '../frontend-react/dist')));
 
 // ── Socket.IO — чат ───────────────────────────────
 const Message = require('./models/Message');
 io.on('connection', (socket) => {
   socket.on('join_room', (roomId) => {
-    // Базовая валидация roomId
     if (typeof roomId === 'string' && roomId.length < 200) {
       socket.join(roomId);
     }
@@ -107,7 +105,6 @@ io.on('connection', (socket) => {
 
   socket.on('send_message', async (data) => {
     try {
-      // Валидация данных перед сохранением
       if (!data.room || !data.senderId || !data.text) return;
       if (typeof data.text !== 'string' || data.text.length > 5000) return;
 
@@ -140,7 +137,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../frontend/index.html')));
+// ── Все остальные запросы → React ─────────────────
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../frontend-react/dist/index.html')));
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
