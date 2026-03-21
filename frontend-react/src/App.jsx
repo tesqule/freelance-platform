@@ -7,6 +7,7 @@ import TasksPage from './pages/TasksPage';
 import TaskDetailPage from './pages/TaskDetailPage';
 import ChatPage from './pages/ChatPage';
 import DashboardPage from './pages/DashboardPage';
+import ProfilePage from './pages/ProfilePage';
 
 function HomePage({ onAuthOpen }) {
   const { user } = useAuth();
@@ -48,19 +49,6 @@ function HomePage({ onAuthOpen }) {
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function ProfilePage() {
-  return (
-    <div className="page">
-      <div className="container" style={{ paddingTop: '2rem' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2rem', marginBottom: '1rem' }}>
-          Профиль
-        </h1>
-        <p style={{ color: 'var(--text2)' }}>Страница в разработке 🔧</p>
       </div>
     </div>
   );
