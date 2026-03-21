@@ -46,16 +46,12 @@ export default function HomePage({ onAuthOpen }) {
 
   async function loadStats() {
     try {
-      const [tasksRes, usersRes] = await Promise.allSettled([
-        API.get('/tasks'),
-        API.get('/users'),
-      ]);
-      const tasks = tasksRes.status === 'fulfilled' ? tasksRes.value.data : [];
-      const users = usersRes.status === 'fulfilled' ? usersRes.value.data : [];
+      const { data: tasks } = await API.get('/tasks');
+      const arr = Array.isArray(tasks) ? tasks : [];
       setStats({
-        tasks: tasks.length,
-        freelancers: Array.isArray(users) ? users.filter(u => u.role === 'freelancer').length : '—',
-        completed: Array.isArray(tasks) ? tasks.filter(t => t.status === 'completed').length : '—',
+        tasks: arr.filter(t => t.status === 'open').length,
+        freelancers: '—',
+        completed: arr.filter(t => t.status === 'completed').length,
       });
     } catch {}
   }
@@ -78,8 +74,8 @@ export default function HomePage({ onAuthOpen }) {
 
   async function loadFreelancers() {
     try {
-      const { data } = await API.get('/users');
-      const fls = Array.isArray(data) ? data.filter(u => u.role === 'freelancer').slice(0, 8) : [];
+      const { data } = await API.get('/users?role=freelancer&limit=8');
+      const fls = Array.isArray(data) ? data.slice(0, 8) : [];
       setFreelancers(fls);
     } catch {}
   }
@@ -175,7 +171,7 @@ export default function HomePage({ onAuthOpen }) {
           </div>
           <div className="cats-grid">
             {CATEGORIES.map(cat => (
-              <div key={cat.id} className="cat-card" onClick={() => navigate('/tasks')}>
+              <div key={cat.id} className="cat-card" onClick={() => navigate(`/tasks?cat=${cat.id}`)}>
                 <div className="cat-icon">{cat.icon}</div>
                 <div className="cat-name">{cat.name}</div>
                 <div className="cat-hint">{cat.hint}</div>

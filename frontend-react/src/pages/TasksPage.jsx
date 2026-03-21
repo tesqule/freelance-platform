@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -23,10 +23,11 @@ const EMPTY_FORM = { title: '', description: '', budget: '', deadline: '', categ
 
 export default function TasksPage({ onAuthOpen }) {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [tasks, setTasks]             = useState([]);
   const [loading, setLoading]         = useState(true);
-  const [search, setSearch]           = useState('');
-  const [category, setCategory]       = useState('all');
+  const [search, setSearch]           = useState(searchParams.get('q') || '');
+  const [category, setCategory]       = useState(searchParams.get('cat') || 'all');
   const [sort, setSort]               = useState('newest');
   const [budgetMin, setBudgetMin]     = useState('');
   const [budgetMax, setBudgetMax]     = useState('');
