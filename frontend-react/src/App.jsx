@@ -11,14 +11,20 @@ const ChatPage       = lazy(() => import('./pages/ChatPage'));
 const DashboardPage  = lazy(() => import('./pages/DashboardPage'));
 const ProfilePage    = lazy(() => import('./pages/ProfilePage'));
 const ServicesPage   = lazy(() => import('./pages/ServicesPage'));
+const AdminPage      = lazy(() => import('./pages/AdminPage'));
 
-// Защищённый роут — редиректит незалогиненных на главную
 function PrivateRoute({ children }) {
   const { user } = useAuth();
   return user ? children : <Navigate to="/" replace />;
 }
 
-// Заглушка пока страница грузится
+function AdminRoute({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/" replace />;
+  if (user.role !== 'admin') return <Navigate to="/" replace />;
+  return children;
+}
+
 function PageLoader() {
   return (
     <div style={{
@@ -41,13 +47,14 @@ function AppInner() {
       )}
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/"           element={<HomePage onAuthOpen={mode => setAuthModal(mode)} />} />
-          <Route path="/tasks"      element={<TasksPage onAuthOpen={mode => setAuthModal(mode)} />} />
-          <Route path="/tasks/:id"  element={<TaskDetailPage onAuthOpen={mode => setAuthModal(mode)} />} />
-          <Route path="/services"   element={<ServicesPage onAuthOpen={mode => setAuthModal(mode)} />} />
+          {/* Публичные */}
+          <Route path="/"            element={<HomePage onAuthOpen={mode => setAuthModal(mode)} />} />
+          <Route path="/tasks"       element={<TasksPage onAuthOpen={mode => setAuthModal(mode)} />} />
+          <Route path="/tasks/:id"   element={<TaskDetailPage onAuthOpen={mode => setAuthModal(mode)} />} />
+          <Route path="/services"    element={<ServicesPage onAuthOpen={mode => setAuthModal(mode)} />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
 
-          {/* Защищённые роуты */}
+          {/* Только для залогиненных */}
           <Route path="/chat" element={
             <PrivateRoute><ChatPage /></PrivateRoute>
           } />
@@ -55,7 +62,13 @@ function AppInner() {
             <PrivateRoute><DashboardPage /></PrivateRoute>
           } />
 
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* Только для админа */}
+          <Route path="/admin" element={
+            <AdminRoute><AdminPage /></AdminRoute>
+          } />
+
+          {/* Всё остальное → главная */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
