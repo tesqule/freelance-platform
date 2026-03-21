@@ -43,6 +43,8 @@ export default function TaskDetailPage({ onAuthOpen }) {
       await API.post(`/tasks/${id}/proposals`, { coverLetter, price: Number(price), deliveryDays: Number(days) });
       setProposalOpen(false);
       loadTask();
+      // Открываем чат с заказчиком с контекстом задания
+      navigate(`/chat?user=${task.client._id}&task=${id}`);
     } catch (err) {
       alert(err.response?.data?.message || 'Ошибка');
     }
@@ -174,7 +176,7 @@ export default function TaskDetailPage({ onAuthOpen }) {
                         </>
                       )}
                       {user && user.id !== fr._id && (
-                        <Link to={`/chat?user=${fr._id}`} className="btn btn-glass btn-sm">💬 Написать</Link>
+                        <Link to={`/chat?user=${fr._id}&task=${id}`} className="btn btn-glass btn-sm">💬 Написать</Link>
                       )}
                       {user && user.id !== fr._id && (
                         <button className="btn btn-outline btn-sm" onClick={() => { setReviewTarget({ id: fr._id, name: fr.name || 'Фрилансер' }); setReviewOpen(true); }}>⭐ Отзыв</button>
@@ -242,7 +244,7 @@ export default function TaskDetailPage({ onAuthOpen }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                   <Link to={`/profile/${task.client._id}`} className="btn btn-glass w-full btn-sm">👤 Перейти в профиль</Link>
                   {user && user.id !== task.client._id && (
-                    <Link to={`/chat?user=${task.client._id}`} className="btn btn-glass w-full btn-sm">💬 Написать</Link>
+                    <Link to={`/chat?user=${task.client._id}&task=${id}`} className="btn btn-glass w-full btn-sm">💬 Написать</Link>
                   )}
                   {user && user.id !== task.client._id && (
                     <button className="btn btn-outline w-full btn-sm" onClick={() => { setReviewTarget({ id: task.client._id, name: task.client.name }); setReviewOpen(true); }}>⭐ Оставить отзыв</button>

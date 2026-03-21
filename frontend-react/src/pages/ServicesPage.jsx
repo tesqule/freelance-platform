@@ -296,7 +296,7 @@ function ServiceCard({ service, index, user, onAuthOpen }) {
     e.stopPropagation();
     if (!user) { onAuthOpen('login'); return; }
     // Открываем чат с фрилансером
-    navigate(`/chat?userId=${fl._id}`);
+    navigate(`/chat?user=${fl._id}&service=${service._id}`);
   }
 
   return (

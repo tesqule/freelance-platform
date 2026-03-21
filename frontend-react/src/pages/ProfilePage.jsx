@@ -402,7 +402,7 @@ function ServiceCard({ service, userId }) {
             <div style={{ fontSize: '.72rem', color: 'var(--text3)' }}>⏱ {service.deliveryDays} дн.</div>
           </div>
           <button className="btn btn-primary btn-sm"
-            onClick={() => navigate(`/chat?user=${userId}`)}>
+            onClick={() => navigate(`/chat?user=${userId}&service=${service._id}`)}>
             Заказать
           </button>
         </div>
