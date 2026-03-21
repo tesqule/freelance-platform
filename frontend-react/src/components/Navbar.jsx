@@ -87,6 +87,7 @@ export default function Navbar({ onAuthOpen }) {
 
         <ul className="nav-links">
           <li><Link to="/tasks" className={`nav-link${isActive('/tasks') ? ' active' : ''}`}>Задания</Link></li>
+          <li><Link to="/services" className={`nav-link${isActive('/services') ? ' active' : ''}`}>Услуги</Link></li>
           {user && <li><Link to="/dashboard" className={`nav-link${isActive('/dashboard') ? ' active' : ''}`}>Дашборд</Link></li>}
           {user && <li><Link to="/chat" className={`nav-link${isActive('/chat') ? ' active' : ''}`}>Сообщения</Link></li>}
         </ul>
@@ -172,6 +173,7 @@ export default function Navbar({ onAuthOpen }) {
       <div className={`mobile-menu${menuOpen ? ' open' : ''}`}>
         <div className="mobile-menu-inner">
           <Link to="/tasks" onClick={() => setMenuOpen(false)}>Задания</Link>
+          <Link to="/services" onClick={() => setMenuOpen(false)}>Услуги</Link>
           {user && <Link to="/dashboard" onClick={() => setMenuOpen(false)}>Профиль</Link>}
           {user && <Link to="/chat" onClick={() => setMenuOpen(false)}>Сообщения</Link>}
           <div className="mobile-menu-btns">
