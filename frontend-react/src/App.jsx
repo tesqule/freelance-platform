@@ -6,8 +6,8 @@ import AuthModal from './components/AuthModal';
 import TasksPage from './pages/TasksPage';
 import TaskDetailPage from './pages/TaskDetailPage';
 import ChatPage from './pages/ChatPage';
+import DashboardPage from './pages/DashboardPage';
 
-// Placeholder pages — заменим на нормальные позже
 function HomePage({ onAuthOpen }) {
   const { user } = useAuth();
   return (
@@ -53,21 +53,6 @@ function HomePage({ onAuthOpen }) {
   );
 }
 
-function DashboardPage() {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/" />;
-  return (
-    <div className="page">
-      <div className="container" style={{ paddingTop: '2rem' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2rem', marginBottom: '1rem' }}>
-          Дашборд
-        </h1>
-        <p style={{ color: 'var(--text2)' }}>Привет, {user.name}! Страница в разработке 🔧</p>
-      </div>
-    </div>
-  );
-}
-
 function ProfilePage() {
   return (
     <div className="page">
@@ -82,7 +67,7 @@ function ProfilePage() {
 }
 
 function AppInner() {
-  const [authModal, setAuthModal] = useState(null); // 'login' | 'register' | null
+  const [authModal, setAuthModal] = useState(null);
 
   return (
     <BrowserRouter>
