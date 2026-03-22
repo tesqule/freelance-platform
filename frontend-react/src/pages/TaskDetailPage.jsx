@@ -30,6 +30,11 @@ export default function TaskDetailPage({ onAuthOpen }) {
     setLoading(true);
     try {
       const { data } = await API.get(`/tasks/${id}`);
+      // Защита массивов
+      if (data) {
+        data.proposals = Array.isArray(data.proposals) ? data.proposals : [];
+        data.skills    = Array.isArray(data.skills)    ? data.skills    : [];
+      }
       setTask(data);
     } catch { navigate('/tasks'); }
     setLoading(false);

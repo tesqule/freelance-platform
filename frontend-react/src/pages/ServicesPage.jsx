@@ -37,7 +37,7 @@ export default function ServicesPage({ onAuthOpen }) {
     setLoading(true);
     try {
       const { data } = await API.get('/services');
-      setServices(data);
+      setServices(Array.isArray(data) ? data : []);
     } catch {}
     setLoading(false);
   }
