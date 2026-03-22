@@ -11,6 +11,7 @@ const ChatPage       = lazy(() => import('./pages/ChatPage'));
 const DashboardPage  = lazy(() => import('./pages/DashboardPage'));
 const ProfilePage    = lazy(() => import('./pages/ProfilePage'));
 const ServicesPage   = lazy(() => import('./pages/ServicesPage'));
+const FreelancersPage = lazy(() => import('./pages/FreelancersPage'));
 const AdminPage      = lazy(() => import('./pages/AdminPage'));
 
 function PrivateRoute({ children }) {
@@ -52,6 +53,7 @@ function AppInner() {
           <Route path="/tasks"       element={<TasksPage onAuthOpen={mode => setAuthModal(mode)} />} />
           <Route path="/tasks/:id"   element={<TaskDetailPage onAuthOpen={mode => setAuthModal(mode)} />} />
           <Route path="/services"    element={<ServicesPage onAuthOpen={mode => setAuthModal(mode)} />} />
+          <Route path="/freelancers" element={<FreelancersPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
 
           {/* Только для залогиненных */}
