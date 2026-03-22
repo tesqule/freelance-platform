@@ -546,3 +546,116 @@ textarea.form-control{resize:vertical;min-height:110px;}
   .role-hint{font-size:.78rem;}
   .auth-switch{font-size:.9rem;margin-top:1.1rem;}
 }
+/* ═══════════════════════════════════════════
+   NAVBAR PATCH — добавь в конец index.css
+═══════════════════════════════════════════ */
+
+/* Переключатель темы */
+.theme-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
+  transition: background .18s, border-color .18s, transform .18s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  background: var(--surface2);
+  border-color: var(--border3);
+  transform: rotate(20deg) scale(1.1);
+}
+
+/* Кнопка уведомлений */
+.notif-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
+  position: relative;
+  transition: background .18s, border-color .18s;
+  flex-shrink: 0;
+  color: var(--text);
+  text-decoration: none;
+}
+.notif-btn:hover {
+  background: var(--surface2);
+  border-color: var(--border3);
+}
+
+/* Пользователь в навбаре */
+.nav-user-btn {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .25rem .65rem .25rem .3rem;
+  border-radius: 99px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+  transition: background .18s, border-color .18s;
+  flex-shrink: 0;
+}
+.nav-user-btn:hover {
+  background: var(--surface2);
+  border-color: var(--border3);
+}
+.nav-username {
+  font-size: .825rem;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Фикс nav-actions — не переполняться */
+.nav-actions {
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Фикс nav-links — центрировать абсолютно */
+.nav-links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* На средних экранах скрываем лишние ссылки */
+@media (max-width: 1100px) {
+  .nav-username { display: none; }
+}
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-actions { display: none; }
+  .burger { display: flex; }
+}
+
+/* Светлая тема - мобильное меню */
+[data-theme="light"] .mobile-menu {
+  background: rgba(240,240,250,0.97);
+}
+[data-theme="light"] .mobile-menu-inner a {
+  color: var(--text2);
+}
+[data-theme="light"] .mobile-menu-inner a:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
