@@ -29,7 +29,7 @@ export default function ProfilePage() {
       setProfile(data);
       const [portRes, revRes] = await Promise.allSettled([
         API.get(`/portfolio/${id}`),
-        API.get(`/reviews/${id}`),
+        API.get(`/reviews/user/${id}`),
       ]);
       if (portRes.status === 'fulfilled') setPortfolio(Array.isArray(portRes.value.data) ? portRes.value.data : []);
       if (revRes.status === 'fulfilled') {
@@ -50,7 +50,7 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!rating) { alert('Выберите оценку'); return; }
     try {
-      await API.post('/reviews', { reviewee: id, rating, comment });
+      await API.post('/reviews', { revieweeId: id, rating, comment });
       setReviewOpen(false); setRating(0); setComment('');
       loadProfile();
     } catch (err) { alert(err.response?.data?.message || 'Ошибка'); }

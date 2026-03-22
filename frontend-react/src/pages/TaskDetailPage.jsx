@@ -72,7 +72,7 @@ export default function TaskDetailPage({ onAuthOpen }) {
     e.preventDefault();
     if (!selectedRating) { alert('Выберите оценку'); return; }
     try {
-      await API.post('/reviews', { reviewee: reviewTarget.id, rating: selectedRating, comment: reviewComment, taskId: id });
+      await API.post('/reviews', { revieweeId: reviewTarget.id, rating: selectedRating, comment: reviewComment, taskId: id });
       setReviewOpen(false);
       setSelectedRating(0);
       setReviewComment('');
