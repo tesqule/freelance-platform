@@ -4,65 +4,81 @@ import API from '../api';
 
 export default function AuthModal({ mode, onClose }) {
   const { login } = useAuth();
-  const [tab,  setTab]  = useState(mode || 'login');
+  const [tab, setTab] = useState(mode || 'login');
   const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState('');
-  const [role,    setRole]    = useState('freelancer');
-  const [lEmail, setLEmail] = useState('');
-  const [lPass,  setLPass]  = useState('');
-  const [rName,  setRName]  = useState('');
-  const [rEmail, setREmail] = useState('');
-  const [rPass,  setRPass]  = useState('');
+  const [error, setError] = useState('');
+  const [role, setRole] = useState('freelancer');
+
+  // Login fields
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPass, setLoginPass] = useState('');
+
+  // Register fields
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPass, setRegPass] = useState('');
 
   async function handleLogin(e) {
     e.preventDefault();
-    if (!lEmail || !lPass) { setError('Заполните все поля'); return; }
+    if (!loginEmail || !loginPass) { setError('Заполните все поля'); return; }
     setLoading(true); setError('');
-    try { const { data } = await API.post('/auth/login', { email:lEmail, password:lPass }); login(data.user, data.token); onClose(); }
-    catch (err) { setError(err.response?.data?.message || 'Неверный email или пароль'); }
-    setLoading(false);
+    try {
+      const { data } = await API.post('/auth/login', { email: loginEmail, password: loginPass });
+      login(data.user, data.token);
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Ошибка входа');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleRegister(e) {
     e.preventDefault();
-    if (!rName || !rEmail || !rPass) { setError('Заполните все поля'); return; }
-    if (rPass.length < 6) { setError('Пароль минимум 6 символов'); return; }
+    if (!regName || !regEmail || !regPass) { setError('Заполните все поля'); return; }
+    if (regPass.length < 6) { setError('Пароль минимум 6 символов'); return; }
     setLoading(true); setError('');
-    try { const { data } = await API.post('/auth/register', { name:rName, email:rEmail, password:rPass, role }); login(data.user, data.token); onClose(); }
-    catch (err) { setError(err.response?.data?.message || 'Ошибка при регистрации'); }
-    setLoading(false);
+    try {
+      const { data } = await API.post('/auth/register', { name: regName, email: regEmail, password: regPass, role });
+      login(data.user, data.token);
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Ошибка регистрации');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="modal-overlay open" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal" style={{ maxWidth: 400 }}>
+      <div className="modal" style={{ maxWidth: 420 }}>
         <div className="modal-header">
-          <h3 style={{ fontSize: '.97rem' }}>{tab === 'login' ? 'Вход' : 'Регистрация'}</h3>
+          <h3>{tab === 'login' ? 'Войти в аккаунт' : 'Создать аккаунт'}</h3>
           <button className="modal-close" onClick={onClose}>
-            <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M15 5 5 15M5 5l10 10"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
 
-        {/* Tab switcher */}
-        <div style={{ display:'flex', gap:0, marginBottom:'1.35rem', borderBottom:'1px solid var(--b1)' }}>
-          {[['login','Войти'],['register','Регистрация']].map(([t,l]) => (
+        {/* Табы */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: '1.5rem', background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 4 }}>
+          {['login', 'register'].map(t => (
             <button key={t} onClick={() => { setTab(t); setError(''); }}
               style={{
-                flex:1, padding:'.45rem .75rem',
-                background:'none', border:'none', borderBottom:`2px solid ${tab===t ? 'var(--t1)' : 'transparent'}`,
-                color: tab===t ? 'var(--t1)' : 'var(--t3)',
-                cursor:'pointer', fontFamily:'var(--font)', fontSize:'.8rem',
-                fontWeight: tab===t ? 600 : 400,
-                transition:'all .12s', marginBottom:'-1px',
-              }}>{l}</button>
+                flex: 1, padding: '8px', borderRadius: 'calc(var(--radius) - 2px)',
+                background: tab === t ? 'var(--blue)' : 'transparent',
+                color: tab === t ? '#fff' : 'var(--text2)',
+                border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)',
+                fontSize: '.875rem', fontWeight: 600, transition: 'all .2s'
+              }}>
+              {t === 'login' ? 'Войти' : 'Регистрация'}
+            </button>
           ))}
         </div>
 
-        {/* Error */}
         {error && (
-          <div style={{ background:'var(--red-dim)', border:'1px solid rgba(239,68,68,.2)', color:'#f87171', borderRadius:'var(--r)', padding:'9px 12px', fontSize:'.78rem', marginBottom:'.9rem', lineHeight:1.4 }}>
+          <div style={{ background: 'rgba(239,68,68,.1)', border: '1px solid rgba(239,68,68,.3)', color: '#f87171', borderRadius: 8, padding: '10px 14px', fontSize: '.875rem', marginBottom: '1rem' }}>
             {error}
           </div>
         )}
@@ -71,62 +87,69 @@ export default function AuthModal({ mode, onClose }) {
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <label>Email</label>
-              <input className="form-control" type="email" placeholder="you@example.com" value={lEmail} onChange={e => setLEmail(e.target.value)} autoFocus/>
+              <input className="form-control" type="email" placeholder="you@example.com"
+                value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
             </div>
             <div className="form-group">
               <label>Пароль</label>
-              <input className="form-control" type="password" placeholder="••••••••" value={lPass} onChange={e => setLPass(e.target.value)}/>
+              <input className="form-control" type="password" placeholder="••••••••"
+                value={loginPass} onChange={e => setLoginPass(e.target.value)} />
             </div>
-            <button className="btn btn-primary w-full" type="submit" disabled={loading} style={{ marginTop:'.3rem' }}>
-              {loading ? 'Входим...' : 'Войти'}
+            <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+              {loading ? 'Входим...' : 'Войти 👋'}
             </button>
-            <p style={{ textAlign:'center', marginTop:'.9rem', fontSize:'.77rem', color:'var(--t3)' }}>
+            <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '.875rem', color: 'var(--text3)' }}>
               Нет аккаунта?{' '}
-              <span style={{ color:'var(--t2)', cursor:'pointer', fontWeight:600, textDecoration:'underline' }}
-                onClick={() => { setTab('register'); setError(''); }}>Зарегистрироваться</span>
+              <span style={{ color: 'var(--blue)', cursor: 'pointer' }} onClick={() => { setTab('register'); setError(''); }}>
+                Зарегистрироваться
+              </span>
             </p>
           </form>
         ) : (
           <form onSubmit={handleRegister}>
             <div className="form-group">
               <label>Имя</label>
-              <input className="form-control" placeholder="Иван Иванов" value={rName} onChange={e => setRName(e.target.value)} autoFocus/>
+              <input className="form-control" placeholder="Иван Иванов"
+                value={regName} onChange={e => setRegName(e.target.value)} />
             </div>
             <div className="form-group">
               <label>Email</label>
-              <input className="form-control" type="email" placeholder="you@example.com" value={rEmail} onChange={e => setREmail(e.target.value)}/>
+              <input className="form-control" type="email" placeholder="you@example.com"
+                value={regEmail} onChange={e => setRegEmail(e.target.value)} />
             </div>
             <div className="form-group">
               <label>Пароль</label>
-              <input className="form-control" type="password" placeholder="Минимум 6 символов" value={rPass} onChange={e => setRPass(e.target.value)}/>
+              <input className="form-control" type="password" placeholder="Минимум 6 символов"
+                value={regPass} onChange={e => setRegPass(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Роль</label>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+              <label>Я хочу...</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {[
-                  { v:'freelancer', title:'Фрилансер', sub:'Выполняю заказы' },
-                  { v:'client',     title:'Заказчик',  sub:'Размещаю задания' },
+                  { value: 'freelancer', label: '💼 Выполнять заказы', sub: 'Фрилансер' },
+                  { value: 'client', label: '📋 Размещать задания', sub: 'Заказчик' }
                 ].map(r => (
-                  <div key={r.v} onClick={() => setRole(r.v)}
+                  <div key={r.value} onClick={() => setRole(r.value)}
                     style={{
-                      padding:'11px 12px', borderRadius:'var(--r)', cursor:'pointer',
-                      border:`1px solid ${role===r.v ? 'var(--b4)' : 'var(--b1)'}`,
-                      background: role===r.v ? 'var(--s2)' : 'transparent',
-                      transition:'all .12s',
+                      padding: '12px', borderRadius: 10, cursor: 'pointer', transition: 'all .2s',
+                      border: `2px solid ${role === r.value ? 'var(--blue)' : 'var(--border)'}`,
+                      background: role === r.value ? 'rgba(79,110,247,.08)' : 'transparent',
+                      textAlign: 'center'
                     }}>
-                    <div style={{ fontWeight:600, fontSize:'.8rem', color:'var(--t1)', marginBottom:'.18rem' }}>{r.title}</div>
-                    <div style={{ fontSize:'.68rem', color:'var(--t3)' }}>{r.sub}</div>
+                    <div style={{ fontSize: '1.25rem', marginBottom: 4 }}>{r.label.split(' ')[0]}</div>
+                    <div style={{ fontSize: '.8rem', fontWeight: 600, color: role === r.value ? 'var(--blue)' : 'var(--text2)' }}>{r.sub}</div>
                   </div>
                 ))}
               </div>
             </div>
             <button className="btn btn-primary w-full" type="submit" disabled={loading}>
-              {loading ? 'Создаём...' : 'Создать аккаунт'}
+              {loading ? 'Создаём...' : 'Создать аккаунт 🎉'}
             </button>
-            <p style={{ textAlign:'center', marginTop:'.9rem', fontSize:'.77rem', color:'var(--t3)' }}>
+            <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '.875rem', color: 'var(--text3)' }}>
               Уже есть аккаунт?{' '}
-              <span style={{ color:'var(--t2)', cursor:'pointer', fontWeight:600, textDecoration:'underline' }}
-                onClick={() => { setTab('login'); setError(''); }}>Войти</span>
+              <span style={{ color: 'var(--blue)', cursor: 'pointer' }} onClick={() => { setTab('login'); setError(''); }}>
+                Войти
+              </span>
             </p>
           </form>
         )}
